@@ -170,7 +170,9 @@ namespace Content.Server.MagicBarrier
         private void OnExamine(EntityUid uid, MagicBarrierComponent component, ExaminedEvent args)
         {
             args.PushMarkup("[color=red]Текущая стабильность барьера " + Math.Round(component.Stability, 2) + " из " + component.MaxStability + "[/color]", 1);
-            args.PushMarkup("[color=cyan]Текущий расход " + Math.Round(component.Lose, 2) + " стабильности в минуту[/color]", 0);
+            var riftCount = EntityManager.EntityQuery<MagicBarrierRiftComponent>().Count();
+            var riftLoss = component.ElementalRiftStabilityLossPerMinute * riftCount;
+            args.PushMarkup("[color=cyan]Текущий расход " + Math.Round(component.Lose + riftLoss, 2) + " стабильности в минуту[/color]", 0);
             int sector1 = 0;
             int sector2 = 0;
             int sector3 = 0;
@@ -460,6 +462,7 @@ namespace Content.Server.MagicBarrier
             foreach (var barrier in EntityManager.EntityQuery<MagicBarrierComponent>())
             {
                 barrier.Stability += 4f;
+                barrier.Lose *= 0.72f;
             }
             _chat.DispatchGlobalAnnouncement("Элементальный разлом уничтожен, стабильность барьера восстановлена.", playSound: false, colorOverride: Color.LimeGreen, sender: "Барьер");
         }
