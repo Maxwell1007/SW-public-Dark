@@ -24,8 +24,6 @@ public sealed class MagicBarrierRiftSystem : EntitySystem
         if (!TryComp<RiftKeyComponent>(args.Used, out var keyComponent))
             return;
 
-        QueueDel(args.Used);
-
         if (component.GuardiansSpawned)
             return;
 
@@ -34,6 +32,8 @@ public sealed class MagicBarrierRiftSystem : EntitySystem
 
         component.GuardiansSpawned = true;
         component.Guardians.Clear();
+
+        QueueDel(args.Used);
 
         var coords = Transform(uid).Coordinates;
         SpawnGuardian(uid, component, coords.Offset(new Vector2(1f, 1f)));
