@@ -21,10 +21,12 @@ public sealed class MagicBarrierRiftSystem : EntitySystem
         if (args.Handled || args.Target == null)
             return;
 
-        if (component.GuardiansSpawned)
+        if (!TryComp<RiftKeyComponent>(args.Used, out var keyComponent))
             return;
 
-        if (!TryComp<RiftKeyComponent>(args.Used, out var keyComponent))
+        QueueDel(args.Used);
+
+        if (component.GuardiansSpawned)
             return;
 
         if (!string.Equals(keyComponent.Element, component.Element, StringComparison.OrdinalIgnoreCase))
@@ -32,8 +34,6 @@ public sealed class MagicBarrierRiftSystem : EntitySystem
 
         component.GuardiansSpawned = true;
         component.Guardians.Clear();
-
-        QueueDel(args.Used);
 
         var coords = Transform(uid).Coordinates;
         SpawnGuardian(uid, component, coords.Offset(new Vector2(1f, 1f)));
