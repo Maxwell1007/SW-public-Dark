@@ -438,17 +438,29 @@ namespace Content.Server.MagicBarrier
 
         private void SpawnRandomElementalRift()
         {
-            var riftSpawners = EntityManager.EntityQuery<MagicBarrierRiftSpawnComponent>().ToArray();
-            if (riftSpawners.Length == 0)
-                return;
+            var riftSpawners = EntityManager.EntityQuery<MagicBarrierRiftSpawnComponent>().ToList();
+            while (riftSpawners.Count > 0)
+            {
+                var chosenSpawner = _random.Pick(riftSpawners);
+                if (chosenSpawner.Occupied)
+                {
+                    riftSpawners.Remove(chosenSpawner);
+                    continue;
+                }
 
-            var chosenSpawner = _random.Pick(riftSpawners);
-            var riftTransform = Transform(chosenSpawner.Owner);
-            var riftCoords = riftTransform.Coordinates;
-            var riftPrototype = _random.Pick(ElementalRiftPrototypes);
-            Spawn(riftPrototype, riftCoords);
-            _chat.DispatchGlobalAnnouncement("Элементальный разлом открылся!", playSound: false, colorOverride: Color.DeepSkyBlue, sender: "Барьер");
-            Spawn("ShockWaveEffect", riftCoords);
+                var riftTransform = Transform(chosenSpawner.Owner);
+                var riftCoords = riftTransform.Coordinates;
+                var riftPrototype = _random.Pick(ElementalRiftPrototypes);
+                var rift = Spawn(riftPrototype, riftCoords);
+                if (TryComp<MagicBarrierRiftComponent>(rift, out var riftComponent))
+                    riftComponent.Spawner = chosenSpawner.Owner;
+                chosenSpawner.Occupied = true;
+                _chat.DispatchGlobalAnnouncement("Элементальный разлом пробудился в землях барьера.", playSound: false, colorOverride: Color.DeepSkyBlue, sender: "Барьер");
+                Spawn("ShockWaveEffect", riftCoords);
+                return;
+            }
+
+            return;
         }
 
         private TimeSpan GetNextRiftSpawnDelay(MagicBarrierComponent component)
@@ -464,6 +476,9 @@ namespace Content.Server.MagicBarrier
                 barrier.Stability += 4f;
                 barrier.Lose *= 0.72f;
             }
+
+            if (component.Spawner.HasValue && TryComp<MagicBarrierRiftSpawnComponent>(component.Spawner.Value, out var spawner))
+                spawner.Occupied = false;
             _chat.DispatchGlobalAnnouncement("Элементальный разлом уничтожен, стабильность барьера восстановлена.", playSound: false, colorOverride: Color.LimeGreen, sender: "Барьер");
         }
     }

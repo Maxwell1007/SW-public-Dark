@@ -13,5 +13,8 @@ namespace Content.Server.MagicBarrier.Components
 
         [DataField]
         public List<EntityUid> Guardians = new();
+
+        [DataField]
+        public EntityUid? Spawner;
     }
 }
