@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 08/31/2025 05:06:28
-  entityCount: 3156
+  entityCount: 3161
 maps:
 - 23
 grids:
@@ -20680,6 +20680,35 @@ entities:
     - type: Transform
       rot: 1.5707963267948966 rad
       pos: 76.33309,11.478778
+      parent: 1
+- proto: MedievalBarrierMagic
+  entities:
+  - uid: 3158
+    components:
+    - type: Transform
+      pos: 90.5,90.5
+      parent: 1
+- proto: MedievalBarrierRiftSpawner
+  entities:
+  - uid: 3159
+    components:
+    - type: Transform
+      pos: 92.5,90.5
+      parent: 1
+  - uid: 3160
+    components:
+    - type: Transform
+      pos: 90.5,92.5
+      parent: 1
+  - uid: 3161
+    components:
+    - type: Transform
+      pos: 92.5,92.5
+      parent: 1
+  - uid: 3162
+    components:
+    - type: Transform
+      pos: 94.5,90.5
       parent: 1
 - proto: Wrench
   entities:
