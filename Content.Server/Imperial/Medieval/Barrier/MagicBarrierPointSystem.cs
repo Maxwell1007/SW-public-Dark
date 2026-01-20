@@ -455,7 +455,7 @@ namespace Content.Server.MagicBarrier
                 if (TryComp<MagicBarrierRiftComponent>(rift, out var riftComponent))
                     riftComponent.Spawner = chosenSpawner.Owner;
                 chosenSpawner.Occupied = true;
-                _chat.DispatchGlobalAnnouncement("Элементальный разлом пробудился в землях барьера.", playSound: false, colorOverride: Color.DeepSkyBlue, sender: "Барьер");
+                _chat.DispatchGlobalAnnouncement("Элементальный разлом открылся!", playSound: false, colorOverride: Color.DeepSkyBlue, sender: "Барьер");
                 Spawn("ShockWaveEffect", riftCoords);
                 return;
             }
