@@ -292,16 +292,16 @@ namespace Content.Server.MagicBarrier
                 }
             }
 
-            args.PushMarkup(riftSector1 + " элементальных разломов в секторе 1 (Некрополь)", -11);
-            args.PushMarkup(riftSector2 + " элементальных разломов в секторе 2 (Мятеж)", -12);
-            args.PushMarkup(riftSector3 + " элементальных разломов в секторе 3 (Церковь)", -13);
-            args.PushMarkup(riftSector4 + " элементальных разломов в секторе 4 (Пустыня)", -14);
-            args.PushMarkup(riftSector5 + " элементальных разломов в секторе 5 (Коллегия)", -15);
-            args.PushMarkup(riftSector6 + " элементальных разломов в секторе 6 (Шахта)", -16);
-            args.PushMarkup(riftSector7 + " элементальных разломов в секторе 7 (Гоблины)", -17);
-            args.PushMarkup(riftSector8 + " элементальных разломов в секторе 8 (Легион)", -18);
-            args.PushMarkup(riftSector9 + " элементальных разломов в секторе 9 (Племя)", -19);
-            args.PushMarkup(riftSector0 + " элементальных разломов скрыты в неизвестном месте под землей", -20);
+            args.PushMarkup(riftSector1 + "  разломов в секторе 1 (Некрополь)", -11);
+            args.PushMarkup(riftSector2 + "  разломов в секторе 2 (Мятеж)", -12);
+            args.PushMarkup(riftSector3 + "  разломов в секторе 3 (Церковь)", -13);
+            args.PushMarkup(riftSector4 + "  разломов в секторе 4 (Пустыня)", -14);
+            args.PushMarkup(riftSector5 + "  разломов в секторе 5 (Коллегия)", -15);
+            args.PushMarkup(riftSector6 + "  разломов в секторе 6 (Шахта)", -16);
+            args.PushMarkup(riftSector7 + "  разломов в секторе 7 (Гоблины)", -17);
+            args.PushMarkup(riftSector8 + "  разломов в секторе 8 (Легион)", -18);
+            args.PushMarkup(riftSector9 + "  разломов в секторе 9 (Племя)", -19);
+            args.PushMarkup(riftSector0 + "  разломов скрыты в неизвестном месте под землей", -20);
         }
         public override void Update(float frameTime)
         {
@@ -447,7 +447,7 @@ namespace Content.Server.MagicBarrier
             var riftCoords = riftTransform.Coordinates;
             var riftPrototype = _random.Pick(ElementalRiftPrototypes);
             Spawn(riftPrototype, riftCoords);
-            _chat.DispatchGlobalAnnouncement("Элементальный разлом пробудился в землях барьера.", playSound: false, colorOverride: Color.DeepSkyBlue, sender: "Барьер");
+            _chat.DispatchGlobalAnnouncement("Элементальный разлом открылся!", playSound: false, colorOverride: Color.DeepSkyBlue, sender: "Барьер");
             Spawn("ShockWaveEffect", riftCoords);
         }
 
