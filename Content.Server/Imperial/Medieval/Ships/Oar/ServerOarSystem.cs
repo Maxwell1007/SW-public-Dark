@@ -53,7 +53,7 @@ public sealed class OarSystem : EntitySystem
     private void Push(EntityUid item, Angle direction, float power, EntityUid player)
     {
         // Учитываем силу гребца
-        power += power * (10 - _skills.GetSkillLevel(player, "Strength")) * 0.1f;
+        power += power * (_skills.GetSkillLevel(player, "Strength") - 10) * 0.1f;
 
         // Получаем лодку
         var boat = _transform.GetParentUid(player);
