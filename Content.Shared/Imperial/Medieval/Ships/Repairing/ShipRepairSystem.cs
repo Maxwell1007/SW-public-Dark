@@ -91,7 +91,7 @@ public sealed class ShipRepairSystem : EntitySystem
         _stack.Use(uid, 1);
     }
 
-    private bool IsRepairableTile(ushort tileId)
+    private bool IsRepairableTile(int tileId)
     {
         var ids = new[]
         {

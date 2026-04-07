@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using Content.Shared.Imperial.Medieval.Additions;
 using Content.Shared.Imperial.Medieval.Administration.Ships;
+using Content.Shared.Maps;
 using Content.Shared.Tag;
 using Content.Shared.Tiles;
 using Robust.Server.GameObjects;
@@ -92,10 +93,8 @@ public sealed class WaveSystem : EntitySystem
                 if (tile.Tile.IsEmpty)
                     continue;
 
-                var wallcheck = new HashSet<EntityUid>();
-                _lookup.GetEntitiesInTile(tile, wallcheck);
                 var stop = false;
-                foreach (var wall in wallcheck)
+                foreach (var wall in _lookup.GetEntitiesInTile(tile, flags: LookupFlags.Static | LookupFlags.Approximate))
                 {
                     if (!_tags.HasTag(wall, "Wall"))
                         continue;
