@@ -29,11 +29,11 @@ public sealed class SeasGenerationSystem : EntitySystem
     private const int MapMin = -75;
     private const int MapMax = 75;
 
-    // Используем прототипы вместо строк
+    // РСЃРїРѕР»СЊР·СѓРµРј РїСЂРѕС‚РѕС‚РёРїС‹ РІРјРµСЃС‚Рѕ СЃС‚СЂРѕРє
     private static readonly (string PrototypeId, int Count)[] IslandConfig = {
-        ("PirateIsland", 1),   // 1 большой
-        ("FrendlyIslands", 2),   // 2 средних
-        ("VolcanicIsland", 10)    // 10 мелких
+        ("PirateIslands", 1),   // 1 Р±РѕР»СЊС€РѕР№
+        ("FrendlyIslands", 2),   // 2 СЃСЂРµРґРЅРёС…
+        ("VolcanicIsland", 10)    // 10 РјРµР»РєРёС…
     };
 
     public override void Initialize()
@@ -56,7 +56,7 @@ public sealed class SeasGenerationSystem : EntitySystem
 
         var seaMatrix = component.SeaMatrix;
 
-        // Создаем 25 карт моря (5x5)
+        // РЎРѕР·РґР°РµРј 25 РєР°СЂС‚ РјРѕСЂСЏ (5x5)
         for (int x = 0; x < 5; x++)
         {
             for (int y = 0; y < 5; y++)
@@ -65,39 +65,39 @@ public sealed class SeasGenerationSystem : EntitySystem
                     continue;
 
                 var mapUid = _map.CreateMap();
-                _metaData.SetEntityName(mapUid, $"Море {x} {y}");
+                _metaData.SetEntityName(mapUid, $"РњРѕСЂРµ {x} {y}");
                 var parallax = AddComp<ParallaxComponent>(mapUid);
                 parallax.Parallax = "OceanMedieval";
                 var mapId = _transform.GetMapId(mapUid);
                 AddComp<SeaComponent>(mapUid);
                 seaMatrix.SetSeaId(x, y, mapId);
-                seaMatrix.SetGenerated(x, y, true);
+                seaMatrix.SetGenerated(x, y, false);
             }
         }
 
-        // ✅ ГЕНЕРИРУЕМ ОСТРОВА С ИСПОЛЬЗОВАНИЕМ IPrototypeManager
+        // вњ… Р“Р•РќР•Р РР РЈР•Рњ РћРЎРўР РћР’Рђ РЎ РРЎРџРћР›Р¬Р—РћР’РђРќРР•Рњ IPrototypeManager
         GenerateIslandsOnSeaMaps(seaMatrix);
 
         component.SeaInitalazed = true;
     }
 
     /// <summary>
-    /// Генерирует острова, используя IPrototypeManager и конфигурацию по ID.
-    /// Все острова размещаются в общем пространстве [-75, 75], без пересечений.
+    /// Р“РµРЅРµСЂРёСЂСѓРµС‚ РѕСЃС‚СЂРѕРІР°, РёСЃРїРѕР»СЊР·СѓСЏ IPrototypeManager Рё РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РїРѕ ID.
+    /// Р’СЃРµ РѕСЃС‚СЂРѕРІР° СЂР°Р·РјРµС‰Р°СЋС‚СЃСЏ РІ РѕР±С‰РµРј РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ [-75, 75], Р±РµР· РїРµСЂРµСЃРµС‡РµРЅРёР№.
     /// </summary>
     private void GenerateIslandsOnSeaMaps(SeaMatrix seaMatrix)
     {
         var generatedObjects = new List<EntityUid>();
         var occupiedTiles = new HashSet<(int X, int Y)>();
 
-        // Собираем все MapId карт моря
+        // РЎРѕР±РёСЂР°РµРј РІСЃРµ MapId РєР°СЂС‚ РјРѕСЂСЏ
         var seaMapIds = new List<MapId>();
         for (int x = 0; x < 5; x++)
         {
             for (int y = 0; y < 5; y++)
             {
                 var cell = seaMatrix.GetCell(x, y);
-                if (cell.NeedGenerate && !(cell.SeaId == new MapId(-1)))
+                if (!cell.NeedGenerate && !(cell.SeaId == new MapId(-1)))
                     seaMapIds.Add(cell.SeaId);
             }
         }
@@ -108,10 +108,10 @@ public sealed class SeasGenerationSystem : EntitySystem
             return;
         }
 
-        // Проходим по конфигурации островов
+        // РџСЂРѕС…РѕРґРёРј РїРѕ РєРѕРЅС„РёРіСѓСЂР°С†РёРё РѕСЃС‚СЂРѕРІРѕРІ
         foreach (var (prototypeId, count) in IslandConfig)
         {
-            // Проверяем, существует ли прототип
+            // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РїСЂРѕС‚РѕС‚РёРї
             if (!_prototypeManager.TryIndex<IslandPrototype>(prototypeId, out var prototype) || prototype.Path == null)
             {
                 Logger.Warning($"Island prototype '{prototypeId}' not found! Skipping.");
@@ -125,14 +125,14 @@ public sealed class SeasGenerationSystem : EntitySystem
 
                 while (++attempts <= maxAttempts)
                 {
-                    // Выбираем случайную карту моря
+                    // Р’С‹Р±РёСЂР°РµРј СЃР»СѓС‡Р°Р№РЅСѓСЋ РєР°СЂС‚Сѓ РјРѕСЂСЏ
                     var targetMapId = seaMapIds[_random.Next(seaMapIds.Count)];
 
-                    // Случайная позиция на карте
+                    // РЎР»СѓС‡Р°Р№РЅР°СЏ РїРѕР·РёС†РёСЏ РЅР° РєР°СЂС‚Рµ
                     int x = _random.Next(MapMin, MapMax - prototype.Size + 1);
                     int y = _random.Next(MapMin, MapMax - prototype.Size + 1);
 
-                    // Проверяем пересечения
+                    // РџСЂРѕРІРµСЂСЏРµРј РїРµСЂРµСЃРµС‡РµРЅРёСЏ
                     bool overlaps = false;
                     var newTiles = new List<(int X, int Y)>();
 
@@ -160,7 +160,7 @@ public sealed class SeasGenerationSystem : EntitySystem
                             generatedObjects.Add(newObj.Value);
                             foreach (var tile in newTiles)
                                 occupiedTiles.Add(tile);
-                            break; // Успешно
+                            break; // РЈСЃРїРµС€РЅРѕ
                         }
                     }
                 }
@@ -184,6 +184,7 @@ public sealed class SeasGenerationSystem : EntitySystem
 
     private void OnSeasGeneration(SeasGenerationEvent ev)
     {
-        // Оставлено для будущего расширения
+        // РћСЃС‚Р°РІР»РµРЅРѕ РґР»СЏ Р±СѓРґСѓС‰РµРіРѕ СЂР°СЃС€РёСЂРµРЅРёСЏ
     }
 }
+

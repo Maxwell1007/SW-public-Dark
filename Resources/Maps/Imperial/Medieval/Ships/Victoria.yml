@@ -1146,7 +1146,7 @@ entities:
     - type: RDWeightExamine
       current: 'Вес: [color=#7DFF66]легкий[/color]'
     - type: Sail
-      Helm: True
+    - type: Helm
     - type: Rotatable
       Increment: 0.5235987755982988 rad
       RotateWhileAnchored: True

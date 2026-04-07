@@ -1,9 +1,8 @@
-using Content.Shared.Imperial.Medieval.Ships.Sail;
+using System;
 using Content.Shared.Interaction;
 using Content.Shared.Construction.Components;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.Skills;
-using Content.Shared.Popups;
 
 
 namespace Content.Shared.Imperial.Medieval.Ships.Anchor;
@@ -15,7 +14,6 @@ public sealed class MedievalAnchorSystem : EntitySystem
 {
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedSkillsSystem  _skills = default!;
-    [Dependency] private readonly SharedPopupSystem _popup = default!;
     /// <inheritdoc/>
     public override void Initialize()
     {
@@ -38,12 +36,13 @@ public sealed class MedievalAnchorSystem : EntitySystem
 
 
          var time = 7 -_skills.GetSkillLevel(playerEntity, "Strength") * 0.3f;
+         time = Math.Max(1.0f, time);
          var sdoAfter = new DoAfterArgs(EntityManager,
              playerEntity,
              time,
              new UseAnchorEvent(),
              target,
-             target: playerEntity)
+             target)
          {
              MovementThreshold = 0.5f,
              BreakOnMove = true,

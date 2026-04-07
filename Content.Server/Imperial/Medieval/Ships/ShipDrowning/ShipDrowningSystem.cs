@@ -1,17 +1,12 @@
-using System.Linq;
-using Content.Server.Administration.Commands;
+using System;
 using Content.Server.Imperial.Medieval.Ships.PlayerDrowning;
 using Content.Server.Imperial.Medieval.Ships.Wave;
-using Content.Shared.Damage;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Timing;
 
 namespace Content.Server.Imperial.Medieval.Ships.ShipDrowning;
 
-/// <summary>
-/// This handles...
-/// </summary>
 public sealed class ShipDrowningSystem : EntitySystem
 {
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -20,9 +15,8 @@ public sealed class ShipDrowningSystem : EntitySystem
     [Dependency] private readonly WaveSystem _wave = default!;
 
     private const float DefaultReloadTimeSeconds = 10f;
-
     private TimeSpan _nextCheckTime;
-    /// <inheritdoc/>
+
     public override void Initialize()
     {
         base.Initialize();
@@ -34,53 +28,51 @@ public sealed class ShipDrowningSystem : EntitySystem
         base.Update(frameTime);
 
         var curTime = _timing.CurTime;
+        if (curTime <= _nextCheckTime)
+            return;
 
-        if (curTime > _nextCheckTime)
+        _nextCheckTime = curTime + TimeSpan.FromSeconds(DefaultReloadTimeSeconds);
+        foreach (var component in EntityManager.EntityQuery<ShipDrowningComponent>())
         {
-            _nextCheckTime = curTime + TimeSpan.FromSeconds(DefaultReloadTimeSeconds);
+            var ship = component.Owner;
 
-            foreach (var component in EntityManager.EntityQuery<ShipDrowningComponent>())
+            if (component.DrownLevel > component.DrownMaxLevel)
             {
-                var ship = component.Owner;
-
-                if (component.DrownLevel > component.DrownMaxLevel)
+                if (component.DrownLevel > component.DrownMaxLevel * 10)
                 {
-                    if (component.DrownLevel > component.DrownMaxLevel * 10)
-                    {
-                        _entityManager.DeleteEntity(ship);
-                        return;
-                    }
-                    EnsureComp<DrownerComponent>(ship);
-                    return;
-                }
-                if (HasComp<DrownerComponent>(ship))
-                    RemComp<DrownerComponent>(ship);
-
-                if (!TryComp<MapGridComponent>(ship, out var mapGrid))
-                    return;
-                var allTilesEnumerator = _map.GetAllTilesEnumerator(ship, mapGrid);
-
-                var brokenTilesCount = 0;
-                var allTilesCount = 0;
-                var brokenlevel = 0;
-
-                while (allTilesEnumerator.MoveNext(out var tile))
-                {
-                    allTilesCount++;
-                    brokenlevel = 0;
-                    foreach (var stage in _wave.Stages)
-                    {
-                        if (stage.Item2 == tile.Value.Tile.TypeId)
-                            brokenTilesCount+= brokenlevel;
-                        brokenlevel++;
-                    }
+                    _entityManager.DeleteEntity(ship);
+                    continue;
                 }
 
-                component.DrownLevel += brokenTilesCount;
-                component.DrownMaxLevel = allTilesCount * 100;
+                EnsureComp<DrownerComponent>(ship);
+                continue;
             }
 
-        }
+            if (HasComp<DrownerComponent>(ship))
+                RemComp<DrownerComponent>(ship);
 
+            if (!TryComp<MapGridComponent>(ship, out var mapGrid))
+                continue;
+
+            var allTilesEnumerator = _map.GetAllTilesEnumerator(ship, mapGrid);
+            var brokenTilesCount = 0;
+            var allTilesCount = 0;
+
+            while (allTilesEnumerator.MoveNext(out var tile))
+            {
+                allTilesCount++;
+                var brokenLevel = 0;
+                foreach (var stage in _wave.Stages)
+                {
+                    if (stage.Item2 == tile.Value.Tile.TypeId)
+                        brokenTilesCount += brokenLevel;
+
+                    brokenLevel++;
+                }
+            }
+
+            component.DrownLevel += brokenTilesCount;
+            component.DrownMaxLevel = allTilesCount * 100;
+        }
     }
 }

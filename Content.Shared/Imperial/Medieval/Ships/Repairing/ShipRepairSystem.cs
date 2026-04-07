@@ -1,3 +1,4 @@
+using System;
 using Content.Shared._RD.Weight.Systems;
 using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
@@ -46,16 +47,14 @@ public sealed class ShipRepairSystem : EntitySystem
         TryComp<MapGridComponent>(boat, out var boatComponent);
         if (boatComponent == null)
             return;
-        _map.TryGetTileRef(boat, boatComponent, args.ClickLocation,  out var tile);
-        _tileDefinitionManager.TryGetDefinition("FloorBrokenWoodDDD", out var floor);
-        _tileDefinitionManager.TryGetDefinition(tile.Tile.TypeId, out var test);
-        if (test == null)
+        if (!_map.TryGetTileRef(boat, boatComponent, args.ClickLocation, out var tile))
             return;
 
-        if (floor == null || tile.Tile.TypeId != floor.TileId)
+        if (!IsRepairableTile(tile.Tile.TypeId))
             return;
         _popup.PopupClient($"Ты начинаешь закрывать дыры доской", playerEntity);
-        var time = 7 -_skills.GetSkillLevel(playerEntity, "Agility") * 0.05f - _skills.GetSkillLevel(playerEntity, "Intelligence") * 0.25f;
+        var time = 7 - _skills.GetSkillLevel(playerEntity, "Agility") * 0.05f - _skills.GetSkillLevel(playerEntity, "Intelligence") * 0.25f;
+        time = Math.Max(1.0f, time);
         var sdoAfter = new DoAfterArgs(EntityManager,
             playerEntity,
             time,
@@ -84,10 +83,33 @@ public sealed class ShipRepairSystem : EntitySystem
         if (args.Cancelled || args.Target == null)
             return;
         TryComp<MapGridComponent>(args.Target, out var mapGrid);
-        _tileDefinitionManager.TryGetDefinition("woodenfloor", out var floor);
+        if (!_tileDefinitionManager.TryGetDefinition("FloorWood", out var floor))
+            _tileDefinitionManager.TryGetDefinition("woodenfloor", out floor);
         if (mapGrid == null || floor == null)
             return;
         _map.SetTile(args.Target.Value, mapGrid, component.TileCord, new Tile(floor.TileId));
         _stack.Use(uid, 1);
+    }
+
+    private bool IsRepairableTile(ushort tileId)
+    {
+        var ids = new[]
+        {
+            "woodbroken1",
+            "woodbroken2",
+            "woodbroken3",
+            "FloorBrokenWoodDDD",
+        };
+
+        foreach (var id in ids)
+        {
+            if (!_tileDefinitionManager.TryGetDefinition(id, out var tile))
+                continue;
+
+            if (tile != null && tile.TileId == tileId)
+                return true;
+        }
+
+        return false;
     }
 }

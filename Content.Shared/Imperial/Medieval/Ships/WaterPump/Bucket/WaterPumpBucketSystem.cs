@@ -1,3 +1,4 @@
+using System;
 using Content.Shared._RD.Weight.Systems;
 using Content.Shared.Chemistry.Components.SolutionManager;
 using Content.Shared.Chemistry.EntitySystems;
@@ -58,15 +59,16 @@ public sealed class WaterPumpBucketSystem : EntitySystem
         // if (_solution.PercentFull(args.Used) >= 100)
         //     return;
 
-        if (HasComp<MapGridComponent>(boat) || HasComp<ShipDrowningComponent>(boat))
+        if (!HasComp<MapGridComponent>(boat) || !HasComp<ShipDrowningComponent>(boat))
             return;
 
         _popup.PopupClient($"Ты вычёрпываешь воду с корабля", playerEntity);
-        var time = 7 -_skills.GetSkillLevel(playerEntity, "Agility") * 0.15f - _skills.GetSkillLevel(playerEntity, "Strength") * 0.15f;
+        var time = 7 - _skills.GetSkillLevel(playerEntity, "Agility") * 0.15f - _skills.GetSkillLevel(playerEntity, "Strength") * 0.15f;
+        time = Math.Max(1.0f, time);
         var sdoAfter = new DoAfterArgs(EntityManager,
             playerEntity,
             time,
-            new RepairUseEvent(),
+            new BucketUseEvent(),
             args.Used,
             boat,
             args.Used)
@@ -91,5 +93,7 @@ public sealed class WaterPumpBucketSystem : EntitySystem
         //TryComp<SolutionContainerManagerComponent>(uid, out var bucket);
 
         _waterOnShip.RemoveWater(args.Target.Value, component.WaterCount);
+        args.Repeat = true;
+        args.Handled = true;
     }
 }
