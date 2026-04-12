@@ -11,6 +11,7 @@ using Robust.Shared.Maths;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
+using Robust.Server.GameObjects;
 
 namespace Content.Server.Imperial.Medieval.Ships.Sail;
 
@@ -21,13 +22,20 @@ public sealed class SailSystem : EntitySystem
     [Dependency] private readonly RDWeightSystem _rdWeight = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] private readonly AppearanceSystem _appearance = default!;
     private TimeSpan _nextCheckTime;
 
     public override void Initialize()
     {
+        SubscribeLocalEvent<SailComponent, ComponentStartup>(OnStartup);
         SubscribeLocalEvent<SailComponent, SailFoldEvent>(OnFold);
         SubscribeLocalEvent<SailComponent, RotateEvent>(OnRotate);
         SubscribeLocalEvent<SailComponent, ActivateInWorldEvent>(OnInteractHand);
+    }
+
+    private void OnStartup(EntityUid uid, SailComponent component, ComponentStartup args)
+    {
+        UpdateSailVisuals(uid, component);
     }
 
     private void OnInteractHand(EntityUid uid, SailComponent component, ActivateInWorldEvent args)
@@ -47,7 +55,7 @@ public sealed class SailSystem : EntitySystem
         if (!TryComp<TransformComponent>(uid, out var transformComponent))
             return;
 
-        var delta = args.Direction ? -45 : 45;
+        var delta = args.Direction ? 45 : -45;
         var newAngle = transformComponent.LocalRotation + Angle.FromDegrees(delta);
         _transform.SetLocalRotation(uid, newAngle);
         args.Handled = true;
@@ -130,6 +138,12 @@ public sealed class SailSystem : EntitySystem
 
         component.Folded = !component.Folded;
         Dirty(uid, component);
+        UpdateSailVisuals(uid, component);
         args.Handled = true;
+    }
+
+    private void UpdateSailVisuals(EntityUid uid, SailComponent component)
+    {
+        _appearance.SetData(uid, SailVisuals.Folded, component.Folded);
     }
 }

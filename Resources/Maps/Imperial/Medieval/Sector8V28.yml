@@ -67,6 +67,7 @@ entities:
       sector: sector8
     - type: Map
       mapPaused: True
+    - type: SeaComponent
     - type: PhysicsMap
     - type: GridTree
     - type: MovedGrids
