@@ -21,6 +21,9 @@ public sealed class SharedWaterOnShipSystem : EntitySystem
         if (!TryComp<ShipDrowningComponent>(ship, out var shipDrowningcomp))
             return;
 
+        var previousLevel = shipDrowningcomp.DrownLevel;
         shipDrowningcomp.DrownLevel -= count;
+        if (shipDrowningcomp.DrownLevel != previousLevel)
+            Dirty(ship, shipDrowningcomp);
     }
 }

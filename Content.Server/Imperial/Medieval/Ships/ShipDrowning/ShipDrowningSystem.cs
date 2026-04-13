@@ -35,6 +35,8 @@ public sealed class ShipDrowningSystem : EntitySystem
         foreach (var component in EntityManager.EntityQuery<ShipDrowningComponent>())
         {
             var ship = component.Owner;
+            var oldDrownLevel = component.DrownLevel;
+            var oldDrownMaxLevel = component.DrownMaxLevel;
 
             if (component.DrownLevel > component.DrownMaxLevel)
             {
@@ -73,6 +75,8 @@ public sealed class ShipDrowningSystem : EntitySystem
 
             component.DrownLevel += brokenTilesCount;
             component.DrownMaxLevel = allTilesCount * 100;
+            if (component.DrownLevel != oldDrownLevel || component.DrownMaxLevel != oldDrownMaxLevel)
+                Dirty(ship, component);
         }
     }
 }

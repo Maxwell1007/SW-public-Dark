@@ -125,6 +125,9 @@ public sealed class ShipTeleportSystem : EntitySystem
     private void ApplyDrowningPenalty(EntityUid ship, MapCoordinates coords)
     {
         EnsureComp<ShipDrowningComponent>(ship, out var comp);
+        var previousLevel = comp.DrownLevel;
         comp.DrownLevel += (int) Math.Abs(coords.Position.X) + (int) Math.Abs(coords.Position.Y);
+        if (comp.DrownLevel != previousLevel)
+            Dirty(ship, comp);
     }
 }

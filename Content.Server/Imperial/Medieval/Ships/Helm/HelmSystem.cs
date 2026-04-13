@@ -64,6 +64,7 @@ public sealed class HelmSystem : EntitySystem
     private int CountSteeringOars(EntityUid boat)
     {
         var count = 0;
+        // We assume ship grids never overlap each other, so intersecting entities belong to this ship.
         foreach (var entity in _lookup.GetEntitiesIntersecting(boat))
         {
             if (HasComp<SteeringOarComponent>(entity))

@@ -31,7 +31,7 @@ public sealed class WaveSystem : EntitySystem
 
     public (string, ushort)[] Stages =
     {
-        ("woodbroken", (ushort) 1),
+        ("woodbroken1", (ushort) 1),
         ("woodbroken2", (ushort) 2),
         ("woodbroken3", (ushort) 3)
     };
@@ -126,19 +126,18 @@ public sealed class WaveSystem : EntitySystem
             if (tile.TypeId == Stages[stageLast].Item2 || tile.IsEmpty)
                 continue;
 
-            var index = 0;
-            foreach (var stage in Stages)
+            var stageIndex = -1;
+            for (var stage = 0; stage <= stageLast; stage++)
             {
-                if (stage.Item2 == tile.TypeId)
-                    break;
+                if (Stages[stage].Item2 != tile.TypeId)
+                    continue;
 
-                index++;
+                stageIndex = stage;
+                break;
             }
 
-            if (index == stageLast + 1)
-                index = 0;
-
-            _map.SetTile(grid.Owner, grid, tilePos, new Tile(Stages[index + 1].Item2, 0, 0));
+            var nextStageIndex = stageIndex < 0 ? 0 : stageIndex + 1;
+            _map.SetTile(grid.Owner, grid, tilePos, new Tile(Stages[nextStageIndex].Item2, 0, 0));
         }
 
         if (!TerminatingOrDeleted(args.OtherEntity))

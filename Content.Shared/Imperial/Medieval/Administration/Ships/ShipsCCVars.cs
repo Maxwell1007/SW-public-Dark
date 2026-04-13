@@ -24,15 +24,15 @@ public sealed class ShipsCCVars : CVars
     public static readonly CVarDef<float> WindDelay =
         CVarDef.Create("ships.winddelay", 1f, CVar.REPLICATED | CVar.SERVER);
     /// <summary>
-    /// как часто появляются волны
+    /// Частота спавна волн
     /// </summary>
     public static readonly CVarDef<float> WaveDelay =
         CVarDef.Create("ships.wavedelay", 1f, CVar.REPLICATED | CVar.SERVER);
     /// <summary>
-    /// Минимальный уровень для поломки лодки (Шторма если кто не понял)
+    /// Работает ли ветер
     /// </summary>
     public static readonly CVarDef<bool> WindEnabled =
-        CVarDef.Create("ships.waveenabled", true, CVar.REPLICATED | CVar.SERVER);
+        CVarDef.Create("ships.windenabled", true, CVar.REPLICATED | CVar.SERVER);
     /// <summary>
     /// сила с которой ветер толкает
     /// </summary>

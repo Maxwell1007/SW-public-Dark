@@ -51,9 +51,6 @@ public sealed class OarSystem : EntitySystem
 
         var directionVec = new Vector2(MathF.Cos(normalizedAngle), MathF.Sin(normalizedAngle));
 
-        if (TryComp<TransformComponent>(player, out var playerTransform))
-            directionVec = playerTransform.LocalRotation.RotateVec(directionVec);
-
         var impulse = directionVec * (power / weight);
 
         if (!TryComp<PhysicsComponent>(boat, out var body))
