@@ -6,6 +6,7 @@ using Content.Shared.Imperial.Medieval.Ships.Sail;
 using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 using Content.Shared.Interaction;
+using Content.Shared.Light.Components;
 using Robust.Shared.Configuration;
 using Robust.Shared.Maths;
 using Robust.Shared.Physics.Systems;
@@ -36,6 +37,13 @@ public sealed class SailSystem : EntitySystem
     private void OnStartup(EntityUid uid, SailComponent component, ComponentStartup args)
     {
         UpdateSailVisuals(uid, component);
+
+        var sailXform = Transform(uid);
+        if (sailXform.GridUid is not { } boat)
+            return;
+
+        if (HasComp<ImplicitRoofComponent>(boat))
+            RemComp<ImplicitRoofComponent>(boat);
     }
 
     private void OnInteractHand(EntityUid uid, SailComponent component, ActivateInWorldEvent args)
@@ -55,7 +63,7 @@ public sealed class SailSystem : EntitySystem
         if (!TryComp<TransformComponent>(uid, out var transformComponent))
             return;
 
-        var delta = args.Direction ? 45 : -45;
+        var delta = args.Direction ? 45f : -45f;
         var newAngle = transformComponent.LocalRotation + Angle.FromDegrees(delta);
         _transform.SetLocalRotation(uid, newAngle);
         args.Handled = true;
@@ -105,11 +113,20 @@ public sealed class SailSystem : EntitySystem
 
             var sailDirection = _transform.GetWorldRotation(sailEntity);
             var efficiency = GetEfficiencyByAngle(sailDirection, windDirection);
-            var weight = MathF.Max(10f, _rdWeight.GetTotal(boat));
+            var weightDivider = GetWeightDivider(boat);
+            if (weightDivider <= 0f)
+                continue;
+
             var force = stormLevel * windPower * sailComponent.SailSize * efficiency;
-            var impulse = sailDirection.ToVec() * (force / weight);
+            var impulse = sailDirection.ToVec() * (force / weightDivider);
             _physics.ApplyLinearImpulse(boat, impulse);
         }
+    }
+
+    private float GetWeightDivider(EntityUid boat)
+    {
+        var weight = _rdWeight.GetTotal(boat);
+        return MathF.Max(0f, 1f + weight * 0.01f);
     }
 
     private static float GetEfficiencyByAngle(Angle sailDirection, Angle windDirection)

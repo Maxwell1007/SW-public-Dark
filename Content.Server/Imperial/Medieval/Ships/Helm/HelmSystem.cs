@@ -53,9 +53,13 @@ public sealed class HelmSystem : EntitySystem
         if (MathF.Abs(steeringInput) < 0.001f)
             return;
 
-        var weight = MathF.Max(helmComponent.MinShipWeight, _rdWeight.GetTotal(boat));
+        var weight = _rdWeight.GetTotal(boat);
+        var weightDivider = MathF.Max(0f, 1f + weight * 0.01f);
+        if (weightDivider <= 0f)
+            return;
+
         var motionFactor = MathF.Max(helmComponent.MinMotionFactor, _physics.GetMapLinearVelocity(boat).Length());
-        var angularImpulse = steeringInput * motionFactor * steeringOars * helmComponent.TurnImpulseScalar / weight;
+        var angularImpulse = steeringInput * motionFactor * steeringOars * helmComponent.TurnImpulseScalar / weightDivider;
 
         _physics.WakeBody(boat);
         _physics.ApplyAngularImpulse(boat, angularImpulse);

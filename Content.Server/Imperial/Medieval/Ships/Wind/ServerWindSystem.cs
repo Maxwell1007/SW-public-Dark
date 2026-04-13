@@ -41,17 +41,15 @@ public sealed class ServerWindSystem : EntitySystem
 
     private void RandomiseVind()
     {
-        var windForce = MathF.Max(0f, _cfg.GetCVar(ShipsCCVars.StormLevel));
+        var windForce = _cfg.GetCVar(ShipsCCVars.StormLevel);
         var countShips = FindShips();
 
-        if (windForce <= 0)
+        if (windForce <= 0 + countShips)
             windForce += _random.Next(0, 2);
         else if (windForce >= 2 + countShips || countShips >= 10)
             windForce -= _random.Next(0, 2);
         else
             windForce += _random.Next(-1, 2);
-
-        windForce = MathF.Max(0f, windForce);
         _cfg.SetCVar(ShipsCCVars.WindPower, windForce);
 
         var windAngle = _cfg.GetCVar(ShipsCCVars.WindRotation);
