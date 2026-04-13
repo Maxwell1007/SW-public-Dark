@@ -1639,7 +1639,7 @@ entities:
     - type: Transform
     - type: Map
       mapPaused: True
-    - type: SeaComponent
+    - type: Sea
     - type: GridTree
     - type: Broadphase
     - type: OccluderTree

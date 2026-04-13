@@ -15,7 +15,7 @@ entities:
       type: MetaData
     - type: Transform
     - type: Map
-    - type: SeaComponent
+    - type: Sea
     - type: PhysicsMap
     - type: GridTree
     - type: MovedGrids

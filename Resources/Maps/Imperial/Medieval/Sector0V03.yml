@@ -59,7 +59,7 @@ entities:
     - type: Transform
     - type: Map
       mapPaused: True
-    - type: SeaComponent
+    - type: Sea
     - type: PhysicsMap
     - type: GridTree
     - type: MovedGrids
