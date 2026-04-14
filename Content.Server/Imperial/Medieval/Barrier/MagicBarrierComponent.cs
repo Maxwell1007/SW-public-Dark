@@ -1,6 +1,4 @@
 using System.Numerics;
-using Content.Server.Imperial.Medieval.Ships.Sea.Init;
-using Robust.Shared.Map;
 using Robust.Shared.Network;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype;
 using Robust.Shared.Prototypes;
@@ -55,16 +53,8 @@ namespace Content.Server.MagicBarrier.Components
 
         [DataField]
         public Dictionary<NetUserId, int> ReviveCount = new();
-
-
-        // Приветик, делаем генерацию морей
-        [DataField]
-        public bool SeaInitalazed = false;
-
-
-        [DataField]
-        public SeaMatrix? SeaMatrix = null;
     }
 }
+
 
 

@@ -1,5 +1,5 @@
 using System;
-using Content.Server.MagicBarrier.Components;
+using Content.Server.Imperial.Medieval.Ships.Sea.Generation;
 using Content.Shared.Imperial.Medieval.Administration.Ships;
 using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
@@ -59,9 +59,9 @@ public sealed class ShipTeleportSystem : EntitySystem
         var tpRange = _cfg.GetCVar(ShipsCCVars.TeleportRange);
         var tpDist = mapScale + tpRange;
         var newcoords = coords.Position;
-        foreach (var magicBarrier in EntityManager.EntityQuery<MagicBarrierComponent>())
+        foreach (var seasGenerationState in EntityManager.EntityQuery<SeasGenerationStateComponent>())
         {
-            var seematrix = magicBarrier.SeaMatrix;
+            var seematrix = seasGenerationState.SeaMatrix;
             if (seematrix is null)
                 continue;
 

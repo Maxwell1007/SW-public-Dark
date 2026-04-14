@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Content.Server.Imperial.Medieval.Ships.Sea.Init;
-using Content.Server.MagicBarrier.Components;
 using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Content.Shared.Parallax;
 using Robust.Server.GameObjects;
@@ -23,7 +22,6 @@ public sealed class SeasGenerationSystem : EntitySystem
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly MetaDataSystem _metaData = default!;
-    [Dependency] private readonly SeaMatrixInitSystem _seaMatrix = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
 
     private const int MapMin = -75;
@@ -38,11 +36,10 @@ public sealed class SeasGenerationSystem : EntitySystem
 
     public override void Initialize()
     {
-        SubscribeLocalEvent<MagicBarrierComponent, ComponentInit>(OnInit);
         SubscribeLocalEvent<SeasGenerationEvent>(OnSeasGeneration);
     }
 
-    private void OnInit(EntityUid uid, MagicBarrierComponent component, ComponentInit args)
+    public void EnsureSeasGenerated(SeasGenerationStateComponent component)
     {
         if (component.SeaMatrix == null)
             component.SeaMatrix = new SeaMatrix(new List<(int x, int y)>
@@ -52,7 +49,8 @@ public sealed class SeasGenerationSystem : EntitySystem
                 (4, 2), (4, 3), (4, 4),
             });
 
-        if (component.SeaInitalazed) return;
+        if (component.SeaInitialized)
+            return;
 
         var seaMatrix = component.SeaMatrix;
 
@@ -78,7 +76,7 @@ public sealed class SeasGenerationSystem : EntitySystem
         // вњ… Р“Р•РќР•Р РР РЈР•Рњ РћРЎРўР РћР’Рђ РЎ РРЎРџРћР›Р¬Р—РћР’РђРќРР•Рњ IPrototypeManager
         GenerateIslandsOnSeaMaps(seaMatrix);
 
-        component.SeaInitalazed = true;
+        component.SeaInitialized = true;
     }
 
     /// <summary>
