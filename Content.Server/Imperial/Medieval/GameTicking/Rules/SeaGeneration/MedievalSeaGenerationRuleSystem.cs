@@ -8,10 +8,21 @@ public sealed class MedievalSeaGenerationRuleSystem : GameRuleSystem<MedievalSea
 {
     [Dependency] private readonly SeasGenerationSystem _seasGeneration = default!;
 
+    protected override void Added(EntityUid uid, MedievalSeaGenerationRuleComponent component, GameRuleComponent gameRule, GameRuleAddedEvent args)
+    {
+        base.Added(uid, component, gameRule, args);
+        EnsureSeaGenerated(uid, component);
+    }
+
     protected override void Started(EntityUid uid, MedievalSeaGenerationRuleComponent component, GameRuleComponent gameRule, GameRuleStartedEvent args)
     {
         base.Started(uid, component, gameRule, args);
+        EnsureSeaGenerated(uid, component);
+        ForceEndSelf(uid, gameRule);
+    }
 
+    private void EnsureSeaGenerated(EntityUid uid, MedievalSeaGenerationRuleComponent component)
+    {
         if (component.Executed)
             return;
 
@@ -19,6 +30,5 @@ public sealed class MedievalSeaGenerationRuleSystem : GameRuleSystem<MedievalSea
         _seasGeneration.EnsureSeasGenerated(seasGenerationState);
 
         component.Executed = true;
-        ForceEndSelf(uid, gameRule);
     }
 }

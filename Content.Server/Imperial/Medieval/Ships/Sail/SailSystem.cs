@@ -1,4 +1,3 @@
-using System;
 using Content.Shared._RD.Weight.Systems;
 using Content.Shared.Imperial.Medieval.Administration.Ships;
 using Content.Shared.Imperial.Medieval.Ships.Islands;
@@ -8,7 +7,6 @@ using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 using Content.Shared.Interaction;
 using Content.Shared.Light.Components;
 using Robust.Shared.Configuration;
-using Robust.Shared.Maths;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
