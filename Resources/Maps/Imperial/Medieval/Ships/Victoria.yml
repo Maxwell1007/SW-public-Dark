@@ -1158,7 +1158,6 @@ entities:
     - type: RDWeightExamine
       current: 'Вес: [color=#7DFF66]легкий[/color]'
     - type: Sail
-      Push: False
   - uid: 219
     components:
     - type: Transform
