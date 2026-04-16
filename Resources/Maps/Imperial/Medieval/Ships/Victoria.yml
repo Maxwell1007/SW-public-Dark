@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 03/03/2026 16:07:46
-  entityCount: 220
+  entityCount: 221
 maps: []
 grids:
 - 1
@@ -1979,6 +1979,15 @@ entities:
     - type: Transform
       pos: -0.5,-0.5
       parent: 1
+- proto: WarpPoint
+  entities:
+  - uid: 221
+    components:
+    - type: Transform
+      pos: -1.5,-1
+      parent: 1
+    - type: WarpPoint
+      location: Корабль Victoria
 - proto: Ointment
   entities:
   - uid: 173

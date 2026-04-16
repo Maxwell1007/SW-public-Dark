@@ -1,9 +1,14 @@
 using System.Numerics;
+using Content.Server.Atmos.EntitySystems;
 using Content.Server.Imperial.Medieval.Ships.Sea.Init;
+using Content.Shared.Atmos;
+using Content.Shared.Gravity;
 using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Content.Shared.Parallax;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
+using Robust.Shared.Maths;
 using Robust.Shared.Random;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
@@ -18,6 +23,7 @@ public sealed class SeasGenerationSystem : EntitySystem
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly MetaDataSystem _metaData = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
+    [Dependency] private readonly AtmosphereSystem _atmos = default!;
 
     private const int MapMin = -75;
     private const int MapMax = 75;
@@ -58,7 +64,23 @@ public sealed class SeasGenerationSystem : EntitySystem
                     continue;
 
                 var mapUid = _map.CreateMap();
-                _metaData.SetEntityName(mapUid, $"РњРѕСЂРµ {x} {y}");
+                _metaData.SetEntityName(mapUid, $"Sea {x} {y}");
+
+                var gravity = EnsureComp<GravityComponent>(mapUid);
+                gravity.Enabled = true;
+                gravity.Inherent = true;
+                Dirty(mapUid, gravity);
+
+                var light = EnsureComp<MapLightComponent>(mapUid);
+                light.AmbientLightColor = Color.FromHex("#D8B059");
+                Dirty(mapUid, light);
+
+                var moles = new float[Atmospherics.AdjustedNumberOfGases];
+                moles[(int) Gas.Oxygen] = 21.824779f;
+                moles[(int) Gas.Nitrogen] = 82.10312f;
+                var mixture = new GasMixture(moles, Atmospherics.T20C);
+                _atmos.SetMapAtmosphere(mapUid, false, mixture);
+
                 var parallax = AddComp<ParallaxComponent>(mapUid);
                 parallax.Parallax = "OceanMedieval";
                 var mapId = _transform.GetMapId(mapUid);
