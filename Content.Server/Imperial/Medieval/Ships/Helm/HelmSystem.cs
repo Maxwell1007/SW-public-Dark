@@ -43,7 +43,6 @@ public sealed class HelmSystem : EntitySystem
     {
         component.HelmRotation = NormalizeHelmRotation((float) Transform(uid).LocalRotation.Degrees);
         _transform.SetLocalRotation(uid, Angle.FromDegrees(component.HelmRotation));
-        Dirty(uid, component);
     }
 
     private void OnInteractHand(EntityUid uid, HelmComponent component, ActivateInWorldEvent args)
@@ -137,7 +136,6 @@ public sealed class HelmSystem : EntitySystem
 
         helmComponent.HelmRotation = NormalizeHelmRotation(helmComponent.HelmRotation);
         _transform.SetLocalRotation(helm, Angle.FromDegrees(helmComponent.HelmRotation));
-        Dirty(helm, helmComponent);
     }
 
     public override void Update(float frameTime)
