@@ -3,6 +3,7 @@ using Content.Server.Administration.Logs;
 using Content.Server.Imperial.Medieval.Ships.Helm;
 using Content.Server.Imperial.Medieval.Ships.ShipDrowning;
 using Content.Server.Imperial.Medieval.Ships.WeatherVane;
+using Content.Server.Shuttles.Components;
 using Content.Shared._RD.Weight.Components;
 using Content.Shared._RD.Weight.Systems;
 using Content.Shared.Changeling;
@@ -154,6 +155,9 @@ public sealed class SailSystem : EntitySystem
     private void Push(EntityUid sail, float windForce, Angle torque , bool push = true)
     {
         var boat = _transform.GetParentUid(sail);
+
+        if (TryComp<ShuttleComponent>(boat, out var shuttle) && !shuttle.Enabled)
+            return;
 
         var boatAngle = _transform.GetWorldRotation(boat);
 

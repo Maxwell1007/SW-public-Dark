@@ -1,3 +1,4 @@
+using System;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 
 namespace Content.Shared.Imperial.Medieval.Ships.WaterPump;
@@ -21,6 +22,7 @@ public sealed class SharedWaterOnShipSystem : EntitySystem
         if (!TryComp<ShipDrowningComponent>(ship, out var shipDrowningcomp))
             return;
 
-        shipDrowningcomp.DrownLevel -= count;
+        shipDrowningcomp.DrownLevel = Math.Max(0, shipDrowningcomp.DrownLevel - count);
+        Dirty(ship, shipDrowningcomp);
     }
 }

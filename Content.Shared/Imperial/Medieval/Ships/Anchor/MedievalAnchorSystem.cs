@@ -1,22 +1,14 @@
-using Content.Shared.Imperial.Medieval.Ships.Sail;
-using Content.Shared.Interaction;
-using Content.Shared.Construction.Components;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.Skills;
-using Content.Shared.Popups;
-
+using Content.Shared.Interaction;
 
 namespace Content.Shared.Imperial.Medieval.Ships.Anchor;
 
-/// <summary>
-/// система для поднятия и опускания якоря
-/// </summary>
 public sealed class MedievalAnchorSystem : EntitySystem
 {
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
-    [Dependency] private readonly SharedSkillsSystem  _skills = default!;
-    [Dependency] private readonly SharedPopupSystem _popup = default!;
-    /// <inheritdoc/>
+    [Dependency] private readonly SharedSkillsSystem _skills = default!;
+
     public override void Initialize()
     {
         SubscribeLocalEvent<MedievalAnchorComponent, ActivateInWorldEvent>(OnActivate);
@@ -35,30 +27,25 @@ public sealed class MedievalAnchorSystem : EntitySystem
 
     private void Use(EntityUid playerEntity, EntityUid target)
     {
+        var time = 7 - _skills.GetSkillLevel(playerEntity, "Strength") * 0.3f;
+        var doAfter = new DoAfterArgs(EntityManager,
+            playerEntity,
+            time,
+            new UseAnchorEvent(),
+            target,
+            target: target)
+        {
+            MovementThreshold = 0.5f,
+            BreakOnMove = true,
+            CancelDuplicate = true,
+            DistanceThreshold = 2,
+            BreakOnDamage = true,
+            RequireCanInteract = false,
+            BreakOnDropItem = true,
+            BreakOnHandChange = true,
+            NeedHand = true,
+        };
 
-
-         var time = 7 -_skills.GetSkillLevel(playerEntity, "Strength") * 0.3f;
-         var sdoAfter = new DoAfterArgs(EntityManager,
-             playerEntity,
-             time,
-             new UseAnchorEvent(),
-             target,
-             target: playerEntity)
-         {
-             MovementThreshold = 0.5f,
-             BreakOnMove = true,
-             CancelDuplicate = true,
-             DistanceThreshold = 2,
-             BreakOnDamage = true,
-             RequireCanInteract = false,
-             BreakOnDropItem = true,
-             BreakOnHandChange = true,
-             NeedHand = true,
-         };
-
-
-         _doAfter.TryStartDoAfter(sdoAfter);
-
+        _doAfter.TryStartDoAfter(doAfter);
     }
-
 }

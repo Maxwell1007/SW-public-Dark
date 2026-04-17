@@ -116,6 +116,7 @@ public sealed class ShipTeleportSystem : EntitySystem
             {
                 EnsureComp<ShipDrowningComponent>(ship, out var comp);
                 comp.DrownLevel += (int)Math.Abs(coords.Position.X) + (int)Math.Abs(coords.Position.Y);
+                Dirty(ship, comp);
             }
 
             var nmapcoords = new MapCoordinates(newcoords, mapId);
