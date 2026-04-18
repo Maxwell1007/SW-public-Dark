@@ -28,8 +28,10 @@
         density: 100
         hard: false
         layer:
-        - MapGrid
+        - LargeMobLayer
         mask:
+        - Impassable
+        - BulletImpassable
         - MapGrid
   - type: Damageable
     damageContainer: Inorganic

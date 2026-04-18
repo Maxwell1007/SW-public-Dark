@@ -10,6 +10,7 @@ using Content.Shared.Interaction;
 using Content.Shared.Light.Components;
 using Robust.Server.GameObjects;
 using Robust.Shared.Configuration;
+using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
@@ -120,7 +121,12 @@ public sealed class SailSystem : EntitySystem
             var weightDivider = GetWeightDivider(boat);
             var force = stormLevel * windPower * sailComponent.SailSize * efficiency;
             var impulse = sailDirection.ToVec() * (force / weightDivider);
-            _physics.ApplyLinearImpulse(boat, impulse);
+
+            if (!TryComp<PhysicsComponent>(boat, out var body))
+                continue;
+
+            _physics.WakeBody(boat);
+            _physics.ApplyLinearImpulse(boat, impulse, body: body);
         }
     }
 

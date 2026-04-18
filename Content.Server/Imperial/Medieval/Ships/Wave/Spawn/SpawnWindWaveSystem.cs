@@ -5,6 +5,7 @@ using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 using Robust.Shared.Configuration;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
@@ -41,18 +42,26 @@ public sealed class SpawnWindWaveSystem : EntitySystem
             foreach (var shipComp in ships)
             {
                 var ship = shipComp.Owner;
+                if (!TryComp<MapGridComponent>(ship, out var grid))
+                    continue;
+
                 var maxWaves = Math.Max(0, (int) MathF.Ceiling(_cfg.GetCVar(ShipsCCVars.StormLevel)));
                 var waveCount = _random.Next(0, maxWaves + 1);
-                var shipMapCoords = _transform.GetMapCoordinates(ship);
+                var shipCenter = _transform.ToMapCoordinates(new EntityCoordinates(ship, grid.LocalAABB.Center));
+                var shipRadius = grid.LocalAABB.Size.Length() * 0.5f;
 
                 for (var i = 0; i < waveCount; i++)
                 {
                     var waveOffset = GenerateWave();
-                    var waveCoords = _transform.ToMapCoordinates(new EntityCoordinates(ship, waveOffset));
-                    var forceDirection = shipMapCoords.Position - waveCoords.Position;
-                    if (forceDirection.LengthSquared() <= 0f)
+                    var offsetLength = waveOffset.Length();
+                    if (offsetLength <= 0f)
                         continue;
 
+                    var direction = waveOffset / offsetLength;
+                    var spawnDistance = shipRadius + offsetLength;
+                    var wavePosition = shipCenter.Position + direction * spawnDistance;
+                    var waveCoords = new MapCoordinates(wavePosition, seaMapId);
+                    var forceDirection = shipCenter.Position - wavePosition;
                     var force = forceDirection.Normalized() * _cfg.GetCVar(ShipsCCVars.WaveForce);
                     _wave.SpawnWave(waveCoords, force);
                 }

@@ -28,6 +28,9 @@ public sealed class MedievalAnchorSystem : EntitySystem
 
     private void Use(EntityUid playerEntity, EntityUid target)
     {
+        if (!_skills.HasSkill(playerEntity, SharedSkillsSystem.StrengthId))
+            return;
+
         var time = 7 - _skills.GetSkillLevel(playerEntity, "Strength") * 0.3f;
         time = Math.Max(1.0f, time);
 

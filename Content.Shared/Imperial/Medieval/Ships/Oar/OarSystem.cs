@@ -50,6 +50,9 @@ public sealed class OarSystem : EntitySystem
         if (args.Handled || !args.CanReach )
             return;
 
+        if (!_skills.HasSkill(playerEntity, SharedSkillsSystem.StrengthId))
+            return;
+
         var boat = _transform.GetParentUid(playerEntity);
 
         if (boat == args.ClickLocation.EntityId)

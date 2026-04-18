@@ -31,6 +31,9 @@ public sealed class OarSystem : EntitySystem
         if (args.Cancelled || args.Handled || item == null)
             return;
 
+        if (!_skills.HasSkill(args.User, SharedSkillsSystem.StrengthId))
+            return;
+
         if (!TryComp<OarComponent>(item, out var oarComp))
             return;
 

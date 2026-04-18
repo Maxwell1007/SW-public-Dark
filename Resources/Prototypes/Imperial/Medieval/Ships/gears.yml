@@ -1,8 +1,8 @@
 - type: entity
   id: MedievalAnchorBase
   abstract: true
-  name: РЎРЏР С”Р С•РЎР‚РЎРЉ
-  description: Р РЃРЎвЂљРЎС“Р С”Р В° РЎвЂЎРЎвЂљР С• Р Р…Р Вµ Р Т‘Р В°РЎвЂРЎвЂљ Р Т‘Р Р†Р С‘Р С–Р В°РЎвЂљРЎРѓРЎРЏ Р В»Р С•Р Т‘Р С”Р Вµ
+  name: якорь
+  description: Старое, но надежное железо для фиксации корабля.
   placement:
     mode: SnapgridCenter
   components:
@@ -14,15 +14,15 @@
 
 - type: entity
   id: WaterPump
-  name: Р вЂ™Р С•Р Т‘Р Р…Р В°РЎРЏ Р С—Р С•Р СР С—Р В°
+  name: водяная помпа
   parent: WoodenSupportWall
   components:
   - type: WaterPump
 
 - type: entity
   id: SteeringOar
-  name: Р В РЎС“Р В»Р ВµР Р†Р С•Р Вµ Р Р†Р ВµРЎРѓР В»Р С•
-  description: Р В РЎС“Р В»Р ВµР Р†Р С•Р Вµ Р Р†Р ВµРЎРѓР В»Р С• РЎвЂЎРЎвЂљР С• Р С‘РЎРѓР С—Р С•Р В»РЎРЉР В·РЎС“Р ВµРЎвЂљРЎРѓРЎРЏ Р Т‘Р В»РЎРЏ Р С—Р С•Р Р†Р С•РЎР‚Р С•РЎвЂљР В° Р В»Р С•Р Т‘Р С”Р С‘
+  name: рулевое весло
+  description: Рулевое весло, помогающее держать курс корабля.
   parent: WoodenSupportWall
   components:
   - type: Sprite
