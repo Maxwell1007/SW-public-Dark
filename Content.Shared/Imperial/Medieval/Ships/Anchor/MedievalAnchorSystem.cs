@@ -1,3 +1,4 @@
+using System;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.Skills;
 using Content.Shared.Interaction;
@@ -28,6 +29,8 @@ public sealed class MedievalAnchorSystem : EntitySystem
     private void Use(EntityUid playerEntity, EntityUid target)
     {
         var time = 7 - _skills.GetSkillLevel(playerEntity, "Strength") * 0.3f;
+        time = Math.Max(1.0f, time);
+
         var doAfter = new DoAfterArgs(EntityManager,
             playerEntity,
             time,

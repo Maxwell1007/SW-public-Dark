@@ -1,3 +1,4 @@
+using System;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.Ships.Hull;
 using Content.Shared.Imperial.Medieval.Skills;
@@ -33,7 +34,8 @@ public sealed class ShipRepairSystem : EntitySystem
             return;
 
         var boat = _transform.GetParentUid(playerEntity);
-        if (boat != args.ClickLocation.EntityId)
+        var clickEntity = args.ClickLocation.EntityId;
+        if (boat != clickEntity)
             return;
 
         if (!TryComp<MapGridComponent>(boat, out var boatComponent))
@@ -45,8 +47,10 @@ public sealed class ShipRepairSystem : EntitySystem
         if (!_shipHull.TryGetPreviousDamageTile(tile.Tile.TypeId, out _))
             return;
 
-        _popup.PopupClient("РўС‹ РЅР°С‡РёРЅР°РµС€СЊ Р·Р°РєСЂС‹РІР°С‚СЊ РґС‹СЂС‹ РґРѕСЃРєРѕР№", playerEntity);
+        _popup.PopupClient("Ты начинаешь закрывать дыры доской", playerEntity);
         var time = 7 - _skills.GetSkillLevel(playerEntity, "Agility") * 0.05f - _skills.GetSkillLevel(playerEntity, "Intelligence") * 0.25f;
+        time = Math.Max(1.0f, time);
+
         var doAfter = new DoAfterArgs(EntityManager,
             playerEntity,
             time,
@@ -71,7 +75,7 @@ public sealed class ShipRepairSystem : EntitySystem
 
     private void OnRepairUse(EntityUid uid, RepairMaterialComponent component, RepairUseEvent args)
     {
-        if (args.Cancelled || args.Target == null)
+        if (args.Cancelled || args.Target is null)
             return;
 
         if (!TryComp<MapGridComponent>(args.Target, out var mapGrid))
@@ -85,5 +89,6 @@ public sealed class ShipRepairSystem : EntitySystem
 
         _map.SetTile(args.Target.Value, mapGrid, args.TileCoordinates, new Tile(repairedTile));
         _stack.Use(uid, 1);
+        args.Handled = true;
     }
 }

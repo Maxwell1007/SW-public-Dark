@@ -36,7 +36,7 @@ public sealed class ShipDrowningSystem : EntitySystem
         _nextCheckTime = curTime + TimeSpan.FromSeconds(UpdateDelaySeconds);
 
         var enumerator = EntityQueryEnumerator<ShipDrowningComponent, MapGridComponent, TransformComponent>();
-        while (enumerator.MoveNext(out var uid, out var drowning, out var mapGrid, out var xform))
+        while (enumerator.MoveNext(out var uid, out var drowning, out var mapGrid, out _))
         {
             var previousDrownLevel = drowning.DrownLevel;
             var previousDrownMaxLevel = drowning.DrownMaxLevel;
@@ -65,7 +65,7 @@ public sealed class ShipDrowningSystem : EntitySystem
 
             if (drowning.DrownLevel >= drowning.DrownMaxLevel)
             {
-                SinkShip(uid, xform);
+                SinkShip(uid);
                 continue;
             }
 
@@ -74,7 +74,7 @@ public sealed class ShipDrowningSystem : EntitySystem
         }
     }
 
-    private void SinkShip(EntityUid ship, TransformComponent xform)
+    private void SinkShip(EntityUid ship)
     {
         EntityManager.QueueDeleteEntity(ship);
     }

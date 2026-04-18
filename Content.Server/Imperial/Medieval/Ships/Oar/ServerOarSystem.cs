@@ -1,11 +1,10 @@
+using System;
 using System.Numerics;
 using Content.Server.Shuttles.Components;
-using Content.Shared._RD.Weight.Components;
 using Content.Shared._RD.Weight.Systems;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Imperial.Medieval.Ships.Oar;
 using Content.Shared.Imperial.Medieval.Skills;
-using Robust.Shared.Maths;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 
@@ -16,9 +15,10 @@ public sealed class OarSystem : EntitySystem
     [Dependency] private readonly SharedPhysicsSystem _physics = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly SharedSkillsSystem _skills = default!;
-    [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly SharedHandsSystem _hands = default!;
     [Dependency] private readonly RDWeightSystem _rdWeight = default!;
+
+    private const float MinWeight = 10f;
 
     public override void Initialize()
     {
@@ -31,44 +31,29 @@ public sealed class OarSystem : EntitySystem
         if (args.Cancelled || args.Handled || item == null)
             return;
 
-        if (!TryComp<OarComponent>(item, out var oar))
+        if (!TryComp<OarComponent>(item, out var oarComp))
             return;
 
-        Push(oar.Direction, oar.Power, args.User);
+        Push(oarComp.Direction, oarComp.Power, args.User);
         args.Handled = true;
         args.Repeat = true;
     }
 
     private void Push(Angle direction, float power, EntityUid player)
     {
-        power += power * (10 - _skills.GetSkillLevel(player, "Strength")) * 0.1f;
+        power += power * (_skills.GetSkillLevel(player, "Strength") - 10) * 0.1f;
 
         var boat = _transform.GetParentUid(player);
         if (TryComp<ShuttleComponent>(boat, out var shuttle) && !shuttle.Enabled)
             return;
 
-        var weight = _rdWeight.GetTotal(boat);
-        if (weight == 0)
-            weight = 10;
-
-        var entities = _lookup.GetEntitiesIntersecting(boat);
-        if (entities.Count > 1000)
-            return;
-
-        foreach (var entity in entities)
-        {
-            if (HasComp<RDWeightComponent>(entity))
-                weight += _rdWeight.GetTotal(entity);
-        }
+        var weight = MathF.Max(MinWeight, _rdWeight.GetTotal(boat));
 
         var normalizedAngle = (float) direction.Theta % (2 * MathF.PI);
         if (normalizedAngle < 0)
             normalizedAngle += 2 * MathF.PI;
 
         var directionVec = new Vector2(MathF.Cos(normalizedAngle), MathF.Sin(normalizedAngle));
-        if (TryComp<TransformComponent>(player, out var playerTransform))
-            directionVec = playerTransform.LocalRotation.RotateVec(directionVec);
-
         var impulse = directionVec * (power / weight);
         if (!TryComp<PhysicsComponent>(boat, out var body))
             return;

@@ -1,3 +1,4 @@
+using System;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 using Content.Shared.Imperial.Medieval.Ships.WaterPump.Bucket;
@@ -29,14 +30,17 @@ public sealed class WaterPumpBucketSystem : EntitySystem
             return;
 
         var boat = _transform.GetParentUid(playerEntity);
-        if (boat != args.ClickLocation.EntityId)
+        var clickEntity = args.ClickLocation.EntityId;
+        if (boat != clickEntity)
             return;
 
         if (!HasComp<MapGridComponent>(boat) || !HasComp<ShipDrowningComponent>(boat))
             return;
 
-        _popup.PopupClient("РўС‹ РІС‹С‡С‘СЂРїС‹РІР°РµС€СЊ РІРѕРґСѓ СЃ РєРѕСЂР°Р±Р»СЏ", playerEntity);
+        _popup.PopupClient("Ты вычёрпываешь воду с корабля", playerEntity);
         var time = 7 - _skills.GetSkillLevel(playerEntity, "Agility") * 0.15f - _skills.GetSkillLevel(playerEntity, "Strength") * 0.15f;
+        time = Math.Max(1.0f, time);
+
         var doAfter = new DoAfterArgs(EntityManager,
             playerEntity,
             time,
@@ -65,6 +69,7 @@ public sealed class WaterPumpBucketSystem : EntitySystem
             return;
 
         _waterOnShip.RemoveWater(args.Target.Value, component.WaterCount);
+        args.Repeat = true;
         args.Handled = true;
     }
 }

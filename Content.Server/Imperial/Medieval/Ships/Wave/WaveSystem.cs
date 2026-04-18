@@ -15,12 +15,12 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Random;
+using Robust.Shared.Spawners;
 
 namespace Content.Server.Imperial.Medieval.Ships.Wave;
 
 public sealed class WaveSystem : EntitySystem
 {
-    [Dependency] private readonly IMapManager _mapManager = default!;
     [Dependency] private readonly SharedMapSystem _map = default!;
     [Dependency] private readonly PhysicsSystem _physics = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
@@ -28,8 +28,8 @@ public sealed class WaveSystem : EntitySystem
     [Dependency] private readonly SharedShipHullSystem _shipHull = default!;
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly TagSystem _tags = default!;
-
     [Dependency] private readonly IRobustRandom _random = default!;
+
     private readonly List<Vector2i> _nearbyTiles = new();
     private readonly HashSet<EntityUid> _tileContents = new();
 
@@ -60,6 +60,9 @@ public sealed class WaveSystem : EntitySystem
             targetEntity = gridUid.Value;
         }
 
+        if (component.HitList.Contains(targetEntity))
+            return;
+
         if (!HasComp<ShipDrowningComponent>(targetEntity))
         {
             if (component.DeleteOnCollide)
@@ -67,9 +70,6 @@ public sealed class WaveSystem : EntitySystem
 
             return;
         }
-
-        if (component.HitList.Contains(targetEntity))
-            return;
 
         if (_cfg.GetCVar(ShipsCCVars.WaveMinToBreakLevel) > _cfg.GetCVar(ShipsCCVars.StormLevel))
         {
@@ -129,19 +129,23 @@ public sealed class WaveSystem : EntitySystem
             return;
         }
 
-        _random.Shuffle(_nearbyTiles);
-
-        var tilesToReplace = Math.Min(_random.Next(1, _cfg.GetCVar(ShipsCCVars.WaveMaxBreakCount) + 1), _nearbyTiles.Count);
-        for (var i = 0; i < tilesToReplace; i++)
+        var maxBreakCount = Math.Max(0, _cfg.GetCVar(ShipsCCVars.WaveMaxBreakCount));
+        if (maxBreakCount > 0)
         {
-            var tilePos = _nearbyTiles[i];
-            if (!_map.TryGetTileRef(grid.Owner, grid.Comp, tilePos, out var tile) || tile.Tile.IsEmpty)
-                continue;
+            _random.Shuffle(_nearbyTiles);
 
-            if (!_shipHull.TryGetNextDamageTile(tile.Tile.TypeId, out var damagedTileType))
-                continue;
+            var tilesToReplace = Math.Min(_random.Next(1, maxBreakCount + 1), _nearbyTiles.Count);
+            for (var i = 0; i < tilesToReplace; i++)
+            {
+                var tilePos = _nearbyTiles[i];
+                if (!_map.TryGetTileRef(grid.Owner, grid.Comp, tilePos, out var tile) || tile.Tile.IsEmpty)
+                    continue;
 
-            _map.SetTile(grid.Owner, grid, tilePos, new Tile(damagedTileType, 0, 0));
+                if (!_shipHull.TryGetNextDamageTile(tile.Tile.TypeId, out var damagedTileType))
+                    continue;
+
+                _map.SetTile(grid.Owner, grid, tilePos, new Tile(damagedTileType, 0, 0));
+            }
         }
 
         if (!TerminatingOrDeleted(targetEntity))
@@ -151,33 +155,24 @@ public sealed class WaveSystem : EntitySystem
             EntityManager.DeleteEntity(args.OurEntity);
     }
 
-    /// <summary>
-    /// Spawns a one-tile wave grid at the requested map position and optionally pushes it.
-    /// </summary>
     public void SpawnWave(EntityCoordinates coords, MapId mapId, Vector2 force = default, bool deleteOnCollide = true, float lifetime = 60)
     {
-        if (!_map.TryGetMap(mapId, out var mapEntity))
+        if (!_map.TryGetMap(mapId, out _))
             return;
 
-        var grid = _mapManager.CreateGridEntity(mapId);
-        _transform.SetParent(grid, mapEntity.Value);
-
-        var waveComponent = EnsureComp<WaveComponent>(grid);
+        var wave = Spawn("WaveLarge", coords);
+        var waveComponent = EnsureComp<WaveComponent>(wave);
         waveComponent.DeleteOnCollide = deleteOnCollide;
 
-        _map.SetTile(grid, new Vector2i(0, 0), new Tile(_shipHull.IntactHullTileId, 0, 0));
+        _physics.WakeBody(wave);
+        _physics.ApplyLinearImpulse(wave, force);
 
-        if (!HasComp<TransformComponent>(grid))
-            return;
-
-        _transform.SetCoordinates(grid, coords);
-        _physics.WakeBody(grid);
-        _physics.ApplyLinearImpulse(grid, force);
-
+        RemComp<TimedDespawnComponent>(wave);
+        RemComp<MedievalTimedDespawnComponent>(wave);
         if (lifetime <= 0)
             return;
 
-        var despawnComponent = EnsureComp<MedievalTimedDespawnComponent>(grid);
+        var despawnComponent = EnsureComp<MedievalTimedDespawnComponent>(wave);
         despawnComponent.Lifetime = lifetime;
         despawnComponent.OriginalLifeTime = lifetime;
     }
