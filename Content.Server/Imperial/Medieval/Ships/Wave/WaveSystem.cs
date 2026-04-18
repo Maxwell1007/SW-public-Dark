@@ -155,10 +155,10 @@ public sealed class WaveSystem : EntitySystem
             EntityManager.DeleteEntity(args.OurEntity);
     }
 
-    public void SpawnWave(EntityCoordinates coords, MapId mapId, Vector2 force = default, bool deleteOnCollide = true, float lifetime = 60)
+    public EntityUid? SpawnWave(MapCoordinates coords, Vector2 force = default, bool deleteOnCollide = true, float lifetime = 60)
     {
-        if (!_map.TryGetMap(mapId, out _))
-            return;
+        if (!_map.TryGetMap(coords.MapId, out _))
+            return null;
 
         var wave = Spawn("WaveLarge", coords);
         var waveComponent = EnsureComp<WaveComponent>(wave);
@@ -170,10 +170,11 @@ public sealed class WaveSystem : EntitySystem
         RemComp<TimedDespawnComponent>(wave);
         RemComp<MedievalTimedDespawnComponent>(wave);
         if (lifetime <= 0)
-            return;
+            return wave;
 
         var despawnComponent = EnsureComp<MedievalTimedDespawnComponent>(wave);
         despawnComponent.Lifetime = lifetime;
         despawnComponent.OriginalLifeTime = lifetime;
+        return wave;
     }
 }

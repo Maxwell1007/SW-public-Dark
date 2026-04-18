@@ -1,5 +1,6 @@
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
+using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Timing;
@@ -15,7 +16,6 @@ public sealed class PlayerDrowningSystem : EntitySystem
     private const int DrownTimeMax = 15;
     private TimeSpan _nextCheckTime;
 
-    [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly EntityManager _entityManager = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
@@ -26,7 +26,7 @@ public sealed class PlayerDrowningSystem : EntitySystem
     {
         base.Initialize();
         _nextCheckTime = _timing.CurTime + TimeSpan.FromSeconds(DefaultReloadTimeSeconds);
-
+        SubscribeLocalEvent<SeaComponent, ComponentStartup>(OnSeaStartup);
     }
 
     public override void Update(float frameTime)
@@ -43,9 +43,15 @@ public sealed class PlayerDrowningSystem : EntitySystem
             {
                 if (!TryComp<TransformComponent>(component.Owner, out var transform))
                     continue;
+
                 var childBasement = transform.ChildEnumerator;
                 while (childBasement.MoveNext(out var childUid))
+                {
+                    if (HasComp<MapGridComponent>(childUid) || HasComp<Content.Server.Imperial.Medieval.Ships.Wave.WaveComponent>(childUid))
+                        continue;
+
                     EnsureComp<PlayerDrowningComponent>(childUid);
+                }
             }
 
             foreach (var component in EntityManager.EntityQuery<PlayerDrowningComponent>())
@@ -63,6 +69,11 @@ public sealed class PlayerDrowningSystem : EntitySystem
             }
 
         }
+    }
+
+    private void OnSeaStartup(EntityUid uid, SeaComponent component, ComponentStartup args)
+    {
+        EnsureComp<DrownerComponent>(uid);
     }
 
     private void ProcessDrowning(EntityUid uid)

@@ -43,12 +43,18 @@ public sealed class SpawnWindWaveSystem : EntitySystem
                 var ship = shipComp.Owner;
                 var maxWaves = Math.Max(0, (int) MathF.Ceiling(_cfg.GetCVar(ShipsCCVars.StormLevel)));
                 var waveCount = _random.Next(0, maxWaves + 1);
+                var shipMapCoords = _transform.GetMapCoordinates(ship);
 
                 for (var i = 0; i < waveCount; i++)
                 {
-                    var waveCoords = new EntityCoordinates(ship, GenerateWave());
-                    var force = waveCoords.Position.Normalized() * _cfg.GetCVar(ShipsCCVars.WaveForce) * -1;
-                    _wave.SpawnWave(waveCoords, seaMapId, force);
+                    var waveOffset = GenerateWave();
+                    var waveCoords = _transform.ToMapCoordinates(new EntityCoordinates(ship, waveOffset));
+                    var forceDirection = shipMapCoords.Position - waveCoords.Position;
+                    if (forceDirection.LengthSquared() <= 0f)
+                        continue;
+
+                    var force = forceDirection.Normalized() * _cfg.GetCVar(ShipsCCVars.WaveForce);
+                    _wave.SpawnWave(waveCoords, force);
                 }
             }
         }

@@ -54,10 +54,7 @@
   parent: WoodenSupportWall
   description: Hold on tight, sailors! We're going to make a sharp turn! Grrrr!
   components:
-    - type: Sprite
-      sprite: Imperial/Medieval/Decor/steeringwheel.rsi
-      state: wheel
-    - type: Helm
-    - type: Rotatable
-      RotateWhileAnchored: true
-      Increment: 5
+  - type: Sprite
+    sprite: Imperial/Medieval/Decor/steeringwheel.rsi
+    state: wheel
+  - type: Helm

@@ -1,9 +1,12 @@
 using System.Numerics;
+using Content.Server.Imperial.Medieval.Ships.PlayerDrowning;
+using Content.Server.Imperial.Medieval.Ships.Wave;
 using Content.Server.Shuttles.Components;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.Ships.Anchor;
 using Content.Shared.Imperial.Medieval.Ships.Hull;
 using Content.Shared.Imperial.Medieval.Ships.Repairing;
+using Content.Shared.Imperial.Medieval.Ships.Sea;
 using Content.Shared.Imperial.Medieval.Ships.ShipDrowning;
 using Content.Shared.Maps;
 using Content.Shared.Stacks;
@@ -390,6 +393,72 @@ public sealed class ShipSystemsTest
                 Assert.That(shuttle.Enabled, Is.True);
             });
         });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task SpawnedWavesStayOnTheSeaMapInsteadOfBecomingShipChildren()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var testMap = await pair.CreateTestMap();
+
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var mapManager = server.ResolveDependency<IMapManager>();
+        var mapSystem = entMan.System<SharedMapSystem>();
+        var transform = entMan.System<SharedTransformSystem>();
+        var shipHull = entMan.System<SharedShipHullSystem>();
+        var waveSystem = entMan.System<WaveSystem>();
+
+        EntityUid gridUid = default;
+        EntityUid waveUid = default;
+
+        await server.WaitAssertion(() =>
+        {
+            gridUid = SpawnSingleTileGrid(mapManager, mapSystem, testMap.MapId, shipHull.IntactHullTileId, out _);
+            var waveCoords = transform.ToMapCoordinates(new EntityCoordinates(gridUid, new Vector2(5f, 0f)));
+            waveUid = waveSystem.SpawnWave(waveCoords, new Vector2(-1f, 0f))!.Value;
+        });
+
+        await server.WaitRunTicks(1);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entMan.EntityExists(waveUid), Is.True);
+            var waveXform = entMan.GetComponent<TransformComponent>(waveUid);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(waveXform.ParentUid, Is.EqualTo(testMap.MapUid));
+                Assert.That(waveXform.GridUid, Is.Null);
+                Assert.That(waveXform.ParentUid, Is.Not.EqualTo(gridUid));
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LooseEntitiesOnSeaMapsGainDrowningAndEventuallyDisappear()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var testMap = await pair.CreateTestMap();
+
+        var entMan = server.ResolveDependency<IEntityManager>();
+
+        EntityUid itemUid = default;
+
+        await server.WaitAssertion(() =>
+        {
+            entMan.EnsureComponent<SeaComponent>(testMap.MapUid);
+            itemUid = entMan.SpawnEntity("MaterialWoodPlank1", new EntityCoordinates(testMap.MapUid, new Vector2(1f, 1f)));
+        });
+
+        await PoolManager.WaitUntil(server, () => entMan.TryGetComponent<DrownerComponent>(testMap.MapUid, out _), maxTicks: 120);
+        await PoolManager.WaitUntil(server, () => entMan.TryGetComponent<PlayerDrowningComponent>(itemUid, out _), maxTicks: 120);
+        await PoolManager.WaitUntil(server, () => !entMan.EntityExists(itemUid), maxTicks: 700);
 
         await pair.CleanReturnAsync();
     }

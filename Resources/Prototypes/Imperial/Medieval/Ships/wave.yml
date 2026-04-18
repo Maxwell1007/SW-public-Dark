@@ -31,7 +31,6 @@
         - MapGrid
         mask:
         - MapGrid
-        - Impassable
   - type: Damageable
     damageContainer: Inorganic
   - type: TileFrictionModifier
