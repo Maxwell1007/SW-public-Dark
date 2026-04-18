@@ -17,6 +17,9 @@
   name: водяная помпа
   parent: WoodenSupportWall
   components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Ships/WaterPump.rsi
+    state: icon
   - type: WaterPump
 
 - type: entity
@@ -55,6 +58,6 @@
   description: Hold on tight, sailors! We're going to make a sharp turn! Grrrr!
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Decor/steeringwheel.rsi
+    sprite: Imperial/Medieval/Ships/SteeringWheel.rsi
     state: wheel
   - type: Helm
