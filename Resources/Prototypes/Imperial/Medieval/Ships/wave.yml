@@ -1,12 +1,12 @@
 - type: entity
   id: BaseWave
-  name: meteor
-  description: You prefer them when they're burning up in the atmosphere.
+  name: волна
+  description: Может она намочит вам ботинки, а может пробьёт дыру в корабле.
   abstract: true
   components:
   - type: Sprite
     noRot: false
-    sprite: Objects/Misc/meteor.rsi
+    sprite: Imperial/Medieval/Ships/Wave/wave.rsi
   - type: Projectile
     damage: {}
     deleteOnCollide: false
@@ -43,7 +43,7 @@
   suffix: Large
   components:
   - type: Sprite
-    state: big
+    state: default
   - type: Destructible
     thresholds:
     - trigger:
