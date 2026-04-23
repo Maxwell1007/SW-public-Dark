@@ -138,7 +138,7 @@
   suffix: medieval
   components:
   - type: CommsCharger
-    faction: null
+    faction: "tribe"
   - type: ObeliskDestroyable
     faction: Tribe
     lockedDepartment: Tribe
