@@ -70,8 +70,8 @@ public sealed class MedievalArmorIntegritySystem : EntitySystem
         using (args.PushGroup(nameof(MedievalArmorIntegrityComponent)))
         {
             args.PushMarkup(Loc.GetString("armor-integrity-examine-current",
-                ("current", (int) MathF.Round(ent.Comp.CurrentArmorHP)),
-                ("max", (int) MathF.Round(ent.Comp.MaxArmorHP)),
+                ("current", MathF.Round(ent.Comp.CurrentArmorHP, 2)),
+                ("max", MathF.Round(ent.Comp.MaxArmorHP, 2)),
                 ("color", GetIntegrityColor(ent.Comp.CurrentArmorHP, ent.Comp.MaxArmorHP).ToHexNoAlpha())));
             args.PushMarkup(Loc.GetString("armor-integrity-examine-maximum",
                 ("maximum", MathF.Round(ent.Comp.ContainerArmorHP, 2))));
