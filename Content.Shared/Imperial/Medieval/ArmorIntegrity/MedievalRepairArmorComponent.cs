@@ -33,8 +33,5 @@ public sealed partial class MedievalRepairArmorComponent : Component
     public float SkilledCrafterMaxArmorRemovalModifier = 0.5f;
 
     [DataField]
-    public int Charges = 10;
-
-    [DataField]
     public SoundSpecifier? UseSound;
 }

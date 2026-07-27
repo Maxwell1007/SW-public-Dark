@@ -14,7 +14,7 @@ armor-repair-fully-repaired-popup = Эта броня уже полностью 
 armor-repair-irreparable-popup = Эта броня уже не подлежит ремонту.
 armor-repair-tool-max-durability-cost = Инструмент расходует [color=yellow]{$amount}[/color] максимальной прочности у брони.
 armor-repair-tool-no-max-durability-cost = Этот инструмент не расходует максимальную прочность брони.
-armor-repair-tool-charges = Осталось зарядов: [color=yellow]{$charges}[/color].
+stack-medieval-armor-repair-sewing-example = набор для починки брони
 armor-repair-type-sewing = Предназначено для ткани и кожи.
 armor-repair-type-smithing = Предназначено для металлической брони.
 armor-repair-station-speed = Этот верстак ускоряет починку в [color=yellow]{$modifier}[/color] раз.

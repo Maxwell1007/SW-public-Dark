@@ -14,7 +14,7 @@ armor-repair-fully-repaired-popup = This armor is already fully repaired.
 armor-repair-irreparable-popup = This armor can no longer be repaired.
 armor-repair-tool-max-durability-cost = This tool consumes [color=yellow]{$amount}[/color] maximum armor durability.
 armor-repair-tool-no-max-durability-cost = This tool does not consume maximum armor durability.
-armor-repair-tool-charges = Charges remaining: [color=yellow]{$charges}[/color].
+stack-medieval-armor-repair-sewing-example = armor repair sewing kit
 armor-repair-type-sewing = Intended for cloth and leather.
 armor-repair-type-smithing = Intended for metal armor.
 armor-repair-station-speed = This workbench speeds up repairs by [color=yellow]{$modifier}[/color] times.

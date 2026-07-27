@@ -1,3 +1,9 @@
+- type: stack
+  id: MedievalArmorRepairSewingExample
+  name: stack-medieval-armor-repair-sewing-example
+  icon: { sprite: /Textures/Imperial/Medieval/Misc/repairkit.rsi, state: icon }
+  spawn: MedievalArmorRepairSewingExample
+
 - type: entity
   parent: MedievalClothingOuterArmorIronCuirass
   id: MedievalArmorIntegritySmithingExample
@@ -124,6 +130,8 @@
     repairTime: 8
     maxArmorRemove: 1
     skilledCrafterMaxArmorRemovalModifier: 0.5
-    charges: 6
     useSound:
       path: /Audio/Imperial/Medieval/craft_cloth.ogg
+  - type: Stack
+    stackType: MedievalArmorRepairSewingExample
+    count: 6

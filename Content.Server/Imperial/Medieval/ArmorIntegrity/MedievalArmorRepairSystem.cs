@@ -1,4 +1,5 @@
 using Content.Server._CP14.Workbench;
+using Content.Server.Stack;
 using Content.Shared.Clothing.Components;
 using Content.Shared.DoAfter;
 using Content.Shared.Examine;
@@ -6,6 +7,7 @@ using Content.Shared.Imperial.Medieval.ArmorIntegrity;
 using Content.Shared.Imperial.Medieval.Skills;
 using Content.Shared.Interaction;
 using Content.Shared.Popups;
+using Content.Shared.Stacks;
 using Robust.Shared.Audio.Systems;
 
 namespace Content.Server.Imperial.Medieval.ArmorIntegrity;
@@ -17,13 +19,13 @@ public sealed class MedievalArmorRepairSystem : EntitySystem
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly MedievalArmorIntegritySystem _armorIntegrity = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
+    [Dependency] private readonly StackSystem _stack = default!;
 
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<MedievalRepairArmorComponent, AfterInteractEvent>(OnAfterInteract);
-        SubscribeLocalEvent<MedievalRepairArmorComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<MedievalRepairArmorComponent, ExaminedEvent>(OnRepairToolExamined);
         SubscribeLocalEvent<MedievalRepairStationComponent, ExaminedEvent>(OnRepairStationExamined);
         SubscribeLocalEvent<MedievalArmorIntegrityComponent, MedievalArmorRepairDoAfterEvent>(OnRepairDoAfter);
@@ -77,9 +79,6 @@ public sealed class MedievalArmorRepairSystem : EntitySystem
             return;
         }
 
-        if (repairTool.Comp.IsSpendable && repairTool.Comp.Charges <= 0)
-            return;
-
         var station = FindRepairStation(
             target,
             armor.RepairType,
@@ -115,22 +114,6 @@ public sealed class MedievalArmorRepairSystem : EntitySystem
         PlayUseSound(repairTool, target);
     }
 
-    private void OnInteractUsing(Entity<MedievalRepairArmorComponent> donor, ref InteractUsingEvent args)
-    {
-        if (args.Handled ||
-            !donor.Comp.IsSpendable ||
-            !TryComp<MedievalRepairArmorComponent>(args.Used, out var recipient) ||
-            !recipient.IsSpendable ||
-            MetaData(donor).EntityPrototype?.ID != MetaData(args.Used).EntityPrototype?.ID)
-        {
-            return;
-        }
-
-        recipient.Charges = Math.Max(0, recipient.Charges) + Math.Max(0, donor.Comp.Charges);
-        QueueDel(donor);
-        args.Handled = true;
-    }
-
     private void OnRepairDoAfter(
         Entity<MedievalArmorIntegrityComponent> armor,
         ref MedievalArmorRepairDoAfterEvent args)
@@ -141,11 +124,14 @@ public sealed class MedievalArmorRepairSystem : EntitySystem
             !TryComp<MedievalRepairArmorComponent>(used, out var repairTool) ||
             repairTool.RepairType != armor.Comp.RepairType ||
             IsArmorEquipped(armor) ||
-            MathHelper.CloseTo(armor.Comp.CurrentArmorHP, armor.Comp.MaxArmorHP) ||
-            repairTool.IsSpendable && repairTool.Charges <= 0)
+            MathHelper.CloseTo(armor.Comp.CurrentArmorHP, armor.Comp.MaxArmorHP))
         {
             return;
         }
+
+        var toolSpent = false;
+        if (repairTool.IsSpendable && !SpendToolCharge(used, out toolSpent))
+            return;
 
         var oldCurrentArmorHp = armor.Comp.CurrentArmorHP;
         var oldMaxArmorHp = armor.Comp.MaxArmorHP;
@@ -157,18 +143,6 @@ public sealed class MedievalArmorRepairSystem : EntitySystem
             maxArmorRemoval *= repairTool.SkilledCrafterMaxArmorRemovalModifier;
 
         _armorIntegrity.SetMaxArmorHP(armor, armor.Comp.MaxArmorHP - maxArmorRemoval);
-
-        var toolSpent = false;
-        if (repairTool.IsSpendable)
-        {
-            repairTool.Charges = Math.Max(0, repairTool.Charges - 1);
-
-            if (repairTool.Charges == 0)
-            {
-                QueueDel(used);
-                toolSpent = true;
-            }
-        }
 
         args.Handled = true;
 
@@ -212,14 +186,23 @@ public sealed class MedievalArmorRepairSystem : EntitySystem
             }
 
             args.PushMarkup(Loc.GetString(GetRepairTypeLocKey(repairTool.Comp.RepairType)));
-
-            if (repairTool.Comp.IsSpendable)
-            {
-                args.PushMarkup(Loc.GetString(
-                    "armor-repair-tool-charges",
-                    ("charges", repairTool.Comp.Charges)));
-            }
         }
+    }
+
+    private bool SpendToolCharge(EntityUid tool, out bool toolSpent)
+    {
+        toolSpent = false;
+
+        if (!TryComp<StackComponent>(tool, out var stack))
+        {
+            Log.Error($"Spendable armor repair tool {ToPrettyString(tool)} has no {nameof(StackComponent)}.");
+            return false;
+        }
+
+        var newCount = Math.Max(0, stack.Count - 1);
+        _stack.SetCount(tool, newCount, stack);
+        toolSpent = newCount == 0;
+        return true;
     }
 
     private void OnRepairStationExamined(Entity<MedievalRepairStationComponent> station, ref ExaminedEvent args)
