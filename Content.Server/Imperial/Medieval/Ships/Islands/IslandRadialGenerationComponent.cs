@@ -105,6 +105,6 @@ public sealed partial class IslandRadialGenerationComponent : Component
     [DataField]
     public float InterIslandsThreshold = 16f;
 
-    [DataField]
-    public int MaxCandidatesPerPoint = 30;
+    [DataField("maxCandidatesPerPoint")]
+    public int MaxPlacementAttempts = 30;
 }

@@ -44,7 +44,7 @@ public sealed class IslandRadialGenerationSystem : EntitySystem
 
         var cellSize = maxR > 0f ? maxR + config.InterIslandsThreshold : config.InterIslandsThreshold;
         var grid = new IslandSpatialGrid(cellSize);
-        var gen  = new IslandBridsonGenerator(config.InterIslandsThreshold, config.MaxCandidatesPerPoint);
+        var gen = new IslandRejectionGenerator(config.InterIslandsThreshold, config.MaxPlacementAttempts);
 
         var placements = new List<IslandPlacement>();
         placements.AddRange(gen.Generate(
