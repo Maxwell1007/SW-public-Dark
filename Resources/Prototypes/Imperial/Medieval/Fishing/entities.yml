@@ -37,6 +37,9 @@
     interfaces:
       enum.FishingRodUiKey.Key:
         type: FishingBoundUserInterface
+  - type: Construction
+    graph: FishingRodT1Construction
+    node: FishingRodT1
 
 - type: entity
   id: FishingRodT2
