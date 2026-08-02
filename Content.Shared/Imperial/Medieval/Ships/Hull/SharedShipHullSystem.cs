@@ -116,7 +116,7 @@ public sealed class SharedShipHullSystem : EntitySystem
     public bool IsBreakagePrevented(TileRef tile, HashSet<EntityUid> tileContents)
     {
         tileContents.Clear();
-        _lookup.GetEntitiesInTile(tile, tileContents);
+        _lookup.GetEntitiesInTile(tile, tileContents, LookupFlags.Uncontained);
 
         foreach (var tileEntity in tileContents)
         {
