@@ -1,0 +1,13 @@
+- type: entity
+  id: MedievalAstrolabe
+  parent: BaseItem
+  name: astrolabe
+  description: peculiar instrument used for navigating in a deep sea
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Astrolabe/astrolabe.rsi
+    state: icon
+  - type: Item
+    size: Small
+    sprite: Imperial/Medieval/Astrolabe/astrolabe.rsi
+  - type: Astrolabe

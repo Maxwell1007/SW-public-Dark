@@ -8,6 +8,14 @@
   result: MedievalGear
 
 - type: CP14Recipe
+  id: MedievalAstrolabe
+  craftTime: 3
+  iconOverride: MedievalAstrolabe
+  stacks:
+    MedievalSteelIngot: 1
+  result: MedievalAstrolabe
+
+- type: CP14Recipe
   id: MedievalChain
   craftTime: 12
   iconOverride: MedievalChain

@@ -5,6 +5,14 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototy
 
 namespace Content.Server.MagicBarrier.Components
 {
+    public enum MagicBarrierRiftState : byte
+    {
+        Ready,
+        Active,
+        Resetting,
+        Completed,
+    }
+
     [RegisterComponent]
     public sealed partial class MagicBarrierRiftComponent : Component
     {
@@ -16,6 +24,10 @@ namespace Content.Server.MagicBarrier.Components
 
         [DataField]
         public List<EntityUid> Guardians = new();
+
+        public int RemainingGuardians;
+
+        public MagicBarrierRiftState State;
 
         [DataField(customTypeSerializer: typeof(PrototypeIdListSerializer<EntityPrototype>))]
         public List<string> GuardianEntities = new()

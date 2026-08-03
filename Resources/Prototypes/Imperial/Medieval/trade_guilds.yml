@@ -226,6 +226,9 @@
   - productEntity: MedievalServerMap
     cost: 5
     reputationForBuying: 0.15
+  - productEntity: MedievalAstrolabe
+    cost: 20
+    reputationForBuying: 0.7
   - productEntity: MedievalPen
     cost: 3
     reputationForBuying: 0.1

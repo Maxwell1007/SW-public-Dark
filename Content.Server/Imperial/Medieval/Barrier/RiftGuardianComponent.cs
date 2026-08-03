@@ -5,5 +5,7 @@ namespace Content.Server.MagicBarrier.Components
     {
         [DataField]
         public EntityUid Rift;
+
+        public bool Defeated;
     }
 }
