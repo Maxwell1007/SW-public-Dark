@@ -39,6 +39,7 @@ courier-letter-recipient-sex = Пол: {$sex}
 courier-letter-recipient-unknown-species = неизвестно
 courier-letter-recipient-unknown-sex = неизвестно
 
-courier-letter-trash-description-recipient-missing = Получателя этого письма более нет на острове, теперь это мусор
+courier-letter-trash-description-recipient-missing = Получателя этого письма более нет на архипелаге, теперь это мусор
 courier-letter-trash-description-box-destroyed = Посылка была уничтожена, теперь это бесполезный мусор
 courier-letter-expired-popup = [color=red]Письмо просрочилось![/color]
+courier-no-valid-recipients-popup = На архипелаге не осталось подходящих адресатов.

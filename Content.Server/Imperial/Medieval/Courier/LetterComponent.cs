@@ -1,3 +1,4 @@
+using Content.Shared.Imperial.Medieval.Courier;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 
@@ -26,6 +27,8 @@ public sealed partial class LetterComponent : Component
 
     [DataField]
     public EntityUid? Recipient;
+
+    public LetterRecipientData? RecipientData;
 
     [DataField]
     public TimeSpan UrgentTimer = TimeSpan.Zero;

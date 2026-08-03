@@ -2,11 +2,14 @@ using System.Linq;
 using Content.Server.Ghost.Roles.Components;
 using Content.Server.Mind;
 using Content.Server.Roles.Jobs;
+using Content.Server.Station.Systems;
 using Content.Server.Storage.Components;
 using Content.Server.Stack;
+using Content.Shared.Destructible;
 using Content.Shared.EntityTable;
 using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
+using Content.Shared.Ghost;
 using Content.Shared.Hands;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
@@ -18,7 +21,7 @@ using Content.Shared.Inventory.Events;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Preferences;
-using Content.Shared.Destructible;
+using Content.Shared.Roles.Components;
 using Content.Shared.Storage;
 using Content.Shared.UserInterface;
 using Robust.Server.Audio;
@@ -46,6 +49,8 @@ public sealed class CourierSystem : EntitySystem
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly JobSystem _job = default!;
+    [Dependency] private readonly StationSystem _station = default!;
+    [Dependency] private readonly StationJobsSystem _stationJobs = default!;
     private TimeSpan _nextMinuteCheck;
 
     public override void Initialize()
@@ -79,7 +84,7 @@ public sealed class CourierSystem : EntitySystem
         while (pitQuery.MoveNext(out var uid, out var pit))
         {
             EnsureNextRewardTime(uid, pit);
-            ProcessDisconnectedRecipients(pit);
+            ProcessUnavailableRecipients(pit);
 
             if (_timing.CurTime < pit.NextRewardTime)
                 continue;
@@ -145,13 +150,32 @@ public sealed class CourierSystem : EntitySystem
         if (!_prototype.HasIndex(offer.ProductEntity))
             return;
 
+        if (AssignRecipient(component) is not { } recipient)
+        {
+            _popup.PopupEntity(
+                Loc.GetString("courier-no-valid-recipients-popup"),
+                user,
+                user,
+                PopupType.MediumCaution);
+            return;
+        }
+
         courier.Balance -= offer.BalanceCost;
         courier.DeliveryPoints -= offer.DeliveryPointsCost;
         courier.FreeMailsCount -= offer.FreeMailsCost;
 
         var ent = Spawn(offer.ProductEntity, Transform(user).Coordinates);
         if (TryComp<LetterComponent>(ent, out var letter))
-            InitializePurchasedLetter(ent, letter, offer, user, component);
+        {
+            InitializePurchasedLetter(
+                ent,
+                letter,
+                offer,
+                user,
+                recipient.Entity,
+                recipient.Data,
+                component);
+        }
 
         _hands.PickupOrDrop(user, ent);
 
@@ -257,9 +281,8 @@ public sealed class CourierSystem : EntitySystem
 
     private void OnLetterExamined(EntityUid uid, LetterComponent component, ExaminedEvent args)
     {
-        var recipientName = Loc.GetString("courier-letter-examine-recipient-unknown");
-        if (component.Recipient is { } recipient && !TerminatingOrDeleted(recipient))
-            recipientName = Name(recipient);
+        var recipientName = component.RecipientData?.Profile.Name ??
+            Loc.GetString("courier-letter-examine-recipient-unknown");
 
         args.PushMarkup(Loc.GetString("courier-letter-examine-recipient", ("recipient", recipientName)));
         args.PushMarkup(Loc.GetString("courier-letter-examine-reward", ("reward", component.BalanceReward)));
@@ -282,9 +305,11 @@ public sealed class CourierSystem : EntitySystem
 
     private LetterRecipientData? GetLetterRecipientData(LetterComponent letter)
     {
-        if (letter.Recipient is not { } recipient || TerminatingOrDeleted(recipient))
-            return null;
+        return letter.Recipient is null ? null : letter.RecipientData;
+    }
 
+    private LetterRecipientData? BuildRecipientData(EntityUid recipient)
+    {
         var profile = BuildRecipientProfile(recipient);
         if (profile == null)
             return null;
@@ -421,6 +446,8 @@ public sealed class CourierSystem : EntitySystem
         LetterComponent letter,
         CourierTradeOffer offer,
         EntityUid buyerUid,
+        EntityUid recipient,
+        LetterRecipientData recipientData,
         CourierPitComponent pit)
     {
         letter.FreeMailBuyBack = offer.FreeMailsCost;
@@ -443,8 +470,9 @@ public sealed class CourierSystem : EntitySystem
 
         letter.BalanceReward = balanceReward;
 
-        letter.Recipient = AssighRecipient(pit);
         SetLastCourierHeld(letterUid, buyerUid);
+        letter.Recipient = recipient;
+        letter.RecipientData = recipientData;
 
         if (letter.IsUrgent)
         {
@@ -493,63 +521,32 @@ public sealed class CourierSystem : EntitySystem
         }
     }
 
-    private void ProcessDisconnectedRecipients(CourierPitComponent pit)
+    private void ProcessUnavailableRecipients(CourierPitComponent pit)
     {
-        if (pit.Weight.Count == 0)
-            return;
-
-        var activeUsers = new HashSet<EntityUid>();
-        foreach (var session in _player.Sessions)
-        {
-            if (session.AttachedEntity is not { Valid: true } attached)
-                continue;
-
-            activeUsers.Add(attached);
-        }
-
-        var disconnectedCandidates = new HashSet<EntityUid>();
-        foreach (var candidate in pit.Weight.Keys)
-        {
-            if (!IsEligibleRecipientCandidate(candidate))
-                continue;
-
-            if (!activeUsers.Contains(candidate))
-                disconnectedCandidates.Add(candidate);
-        }
-
-        if (disconnectedCandidates.Count == 0)
-            return;
+        var activeCandidates = GetActiveRecipientCandidates();
 
         var letters = EntityQueryEnumerator<LetterComponent>();
         while (letters.MoveNext(out _, out var letter))
         {
-            if (letter.Recipient is not { } recipient)
-                continue;
-
-            if (!disconnectedCandidates.Contains(recipient))
+            if (letter.Recipient is { } recipient && activeCandidates.Contains(recipient))
                 continue;
 
             ReturnBuyBack(letter);
         }
+
+        foreach (var candidate in pit.Weight.Keys.ToList())
+        {
+            if (!activeCandidates.Contains(candidate))
+                CandidateLeave(pit, candidate);
+        }
     }
 
-    private EntityUid? AssighRecipient(CourierPitComponent pit)
+    private (EntityUid Entity, LetterRecipientData Data)? AssignRecipient(CourierPitComponent pit)
     {
-        var activeCandidates = new HashSet<EntityUid>();
+        var activeCandidates = GetActiveRecipientCandidates();
 
-        foreach (var session in _player.Sessions)
-        {
-            if (session.AttachedEntity is not { Valid: true } attached)
-                continue;
-
-            if (!IsEligibleRecipientCandidate(attached))
-                continue;
-
-            activeCandidates.Add(attached);
-
-            if (!pit.Weight.ContainsKey(attached))
-                CandidateJoin(pit, attached);
-        }
+        foreach (var candidate in activeCandidates)
+            CandidateJoin(pit, candidate);
 
         foreach (var candidate in pit.Weight.Keys.ToList())
         {
@@ -571,15 +568,31 @@ public sealed class CourierSystem : EntitySystem
                 pit.Weight[candidate] = Math.Max(1, pit.Weight[candidate] + 1);
         }
 
-        return winner;
+        var data = BuildRecipientData(winner);
+        return data == null ? null : (winner, data);
+    }
+
+    private HashSet<EntityUid> GetActiveRecipientCandidates()
+    {
+        var activeCandidates = new HashSet<EntityUid>();
+
+        foreach (var session in _player.Sessions)
+        {
+            if (session.AttachedEntity is not { Valid: true } attached ||
+                !IsEligibleRecipientCandidate(attached, session))
+            {
+                continue;
+            }
+
+            activeCandidates.Add(attached);
+        }
+
+        return activeCandidates;
     }
 
     private void CandidateJoin(CourierPitComponent pit, EntityUid candidate)
     {
         if (pit.Weight.ContainsKey(candidate))
-            return;
-
-        if (!IsEligibleRecipientCandidate(candidate))
             return;
 
         var initialWeight = pit.Weight.Count == 0
@@ -618,12 +631,40 @@ public sealed class CourierSystem : EntitySystem
         return pit.Weight.First().Key;
     }
 
-    private bool IsEligibleRecipientCandidate(EntityUid candidate)
+    private bool IsEligibleRecipientCandidate(EntityUid candidate, ICommonSession session)
     {
-        if (HasComp<CourierComponent>(candidate))
+        if (HasComp<CourierComponent>(candidate) ||
+            HasComp<GhostComponent>(candidate) ||
+            HasComp<GhostRoleComponent>(candidate) ||
+            !HasComp<HumanoidAppearanceComponent>(candidate) ||
+            !_mind.TryGetMind(session, out _, out var mind) ||
+            mind.OwnedEntity != candidate ||
+            !HasRoundJob(session))
+        {
             return false;
+        }
 
-        return !HasComp<GhostRoleComponent>(candidate);
+        foreach (var role in mind.MindRoleContainer.ContainedEntities)
+        {
+            if (HasComp<GhostRoleMarkerRoleComponent>(role))
+                return false;
+        }
+
+        return true;
+    }
+
+    private bool HasRoundJob(ICommonSession session)
+    {
+        foreach (var station in _station.GetStationsSet())
+        {
+            if (_stationJobs.TryGetPlayerJobs(station, session.UserId, out var jobs) &&
+                jobs.Count > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void UpdateUi(EntityUid pitUid, CourierPitComponent pit, EntityUid user, CourierComponent courier)
