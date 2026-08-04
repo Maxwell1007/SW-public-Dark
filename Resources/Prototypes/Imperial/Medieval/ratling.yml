@@ -171,6 +171,9 @@
     modifier: 100
   - type: Damageable
     damageModifierSet: Ratling
+  - type: PointLight
+    netsync: false
+    enabled: false
   - type: LocalLight
     energy: 0.2
     radius: 4.2

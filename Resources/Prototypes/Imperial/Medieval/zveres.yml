@@ -200,6 +200,9 @@
   - type: Wagging
   - type: Damageable
     damageModifierSet: Zveres
+  - type: PointLight
+    netsync: false
+    enabled: false
   - type: LocalLight
     energy: 0.2
     radius: 2

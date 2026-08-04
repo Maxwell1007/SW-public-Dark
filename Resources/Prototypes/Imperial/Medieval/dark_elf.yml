@@ -184,6 +184,9 @@
       180: Dead
   - type: NeedSleep
     sleepLevelPerUpdate: 0.21
+  - type: PointLight
+    netsync: false
+    enabled: false
   - type: LocalLight
     energy: 0.2
     radius: 2.8

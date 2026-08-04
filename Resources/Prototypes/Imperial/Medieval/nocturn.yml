@@ -294,6 +294,9 @@
     maxManaRaceModifier: 0.95
     regenRaceModifier: 0.95
   - type: Nocturn
+  - type: PointLight
+    netsync: false
+    enabled: false
   - type: LocalLight
     energy: 0.4
     radius: 4.5
