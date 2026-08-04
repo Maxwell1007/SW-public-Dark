@@ -103,6 +103,9 @@
       types:
         Blunt: 5
   - type: SleepEmitSound
+  - type: NeedSleep
+    emotes:
+    - Yawn
   - type: SSDIndicator
   - type: StandingState
   - type: Crawler

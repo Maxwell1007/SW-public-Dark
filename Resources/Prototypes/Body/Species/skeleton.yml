@@ -112,6 +112,8 @@
       Female: Skeleton
       Unsexed: Skeleton
   - type: SkeletonAccent
+  - type: NeedSleep
+    enabled: false
   - type: Fixtures
     fixtures:
       fix1:
