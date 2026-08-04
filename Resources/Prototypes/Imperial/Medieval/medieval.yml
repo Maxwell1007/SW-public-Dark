@@ -671,6 +671,7 @@
     anchored: true
   - type: Appearance
   - type: Battery
+    netsync: false
     maxCharge: 500000000
     startingCharge: 500000000
   - type: NodeContainer
