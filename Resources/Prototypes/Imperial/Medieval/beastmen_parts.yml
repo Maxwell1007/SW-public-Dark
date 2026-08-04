@@ -21,23 +21,30 @@
 # TODO: Add descriptions (many)
 # TODO BODY: Part damage
 - type: entity
-  id: PartBeastmen
-  parent: [BaseItem, BasePart]
-  name: "Beastmen body part"
+  parent: OrganBase
+  id: OrganBeastmen
   abstract: true
-  components:
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: Fat
-        Quantity: 3
-      - ReagentId: BeastmenBlood
-        Quantity: 10
+  suffix: beastmen
 
 - type: entity
-  id: TorsoBeastmen
+  parent: OrganBeastmen
+  id: OrganBeastmenExternal
+  abstract: true
+  components:
+  - type: VisualOrganMarkings
+    markingData:
+      group: Beastmen
+
+- type: entity
+  parent: OrganBeastmen
+  id: OrganBeastmenInternal
+  abstract: true
+
+
+- type: entity
+  id: OrganBeastmenTorso
   name: "Beastmen torso"
-  parent: [PartBeastmen, BaseTorso]
+  parent: [OrganBeastmenExternal, OrganBaseTorso]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
@@ -51,9 +58,9 @@
         Quantity: 20
 
 - type: entity
-  id: HeadBeastmen
+  id: OrganBeastmenHead
   name: "Beastmen head"
-  parent: [PartBeastmen, BaseHead]
+  parent: [OrganBeastmenExternal, OrganBaseHead]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
@@ -67,72 +74,72 @@
         Quantity: 10
 
 - type: entity
-  id: LeftArmBeastmen
+  id: OrganBeastmenArmLeft
   name: "left Beastmen arm"
-  parent: [PartBeastmen, BaseLeftArm]
+  parent: [OrganBeastmenExternal, OrganBaseArmLeft]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "l_arm"
 
 - type: entity
-  id: RightArmBeastmen
+  id: OrganBeastmenArmRight
   name: "right Beastmen arm"
-  parent: [PartBeastmen, BaseRightArm]
+  parent: [OrganBeastmenExternal, OrganBaseArmRight]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "r_arm"
 
 - type: entity
-  id: LeftHandBeastmen
+  id: OrganBeastmenHandLeft
   name: "left Beastmen hand"
-  parent: [PartBeastmen, BaseLeftHand]
+  parent: [OrganBeastmenExternal, OrganBaseHandLeft]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "l_hand"
 
 - type: entity
-  id: RightHandBeastmen
+  id: OrganBeastmenHandRight
   name: "right Beastmen hand"
-  parent: [PartBeastmen, BaseRightHand]
+  parent: [OrganBeastmenExternal, OrganBaseHandRight]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "r_hand"
 
 - type: entity
-  id: LeftLegBeastmen
+  id: OrganBeastmenLegLeft
   name: "left Beastmen leg"
-  parent: [PartBeastmen, BaseLeftLeg]
+  parent: [OrganBeastmenExternal, OrganBaseLegLeft]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "l_leg"
 
 - type: entity
-  id: RightLegBeastmen
+  id: OrganBeastmenLegRight
   name: "right Beastmen leg"
-  parent: [PartBeastmen, BaseRightLeg]
+  parent: [OrganBeastmenExternal, OrganBaseLegRight]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "r_leg"
 
 - type: entity
-  id: LeftFootBeastmen
+  id: OrganBeastmenFootLeft
   name: "left Beastmen foot"
-  parent: [PartBeastmen, BaseLeftFoot]
+  parent: [OrganBeastmenExternal, OrganBaseFootLeft]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
     state: "l_foot"
 
 - type: entity
-  id: RightFootBeastmen
+  id: OrganBeastmenFootRight
   name: "right Beastmen foot"
-  parent: [PartBeastmen, BaseRightFoot]
+  parent: [OrganBeastmenExternal, OrganBaseFootRight]
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Species/Beastmen/parts.rsi

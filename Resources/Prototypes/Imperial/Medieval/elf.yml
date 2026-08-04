@@ -1,3 +1,54 @@
+- type: markingsGroup
+  parent: Undergarments
+  id: Elf
+  limits:
+    enum.HumanoidVisualLayers.Hair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.FacialHair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Chest:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.Snout:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.HeadTop:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Tail:
+      limit: 1
+      required: false
+
+- type: entity
+  parent: BaseSpeciesAppearance
+  id: AppearanceElf
+  categories: [ HideSpawnMenu ]
+  name: elf appearance
+  components:
+  - type: InitialBody
+    organs:
+      Head: OrganElfHead
+      Brain: OrganHumanBrain
+      Eyes: OrganHumanEyes
+      Torso: OrganElfTorso
+      Lungs: OrganHumanLungs
+      Heart: OrganElfHeart
+      Stomach: OrganElfStomach
+      Liver: OrganElfLiver
+      Kidneys: OrganHumanKidneys
+      ArmLeft: OrganHumanArmLeft
+      ArmRight: OrganHumanArmRight
+      HandLeft: OrganHumanHandLeft
+      HandRight: OrganHumanHandRight
+      LegLeft: OrganHumanLegLeft
+      LegRight: OrganHumanLegRight
+      FootLeft: OrganHumanFootLeft
+      FootRight: OrganHumanFootRight
+  - type: HumanoidProfile
+    species: Elf
+
 # Blood
 
 - type: reagent
@@ -18,23 +69,30 @@
   description: flavor-complex-elvish-blood
 
 - type: entity
-  id: PartElf
-  parent: [BaseItem, BasePart]
-  name: "Elf body part"
+  parent: OrganBase
+  id: OrganElf
   abstract: true
-  components:
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: Fat
-        Quantity: 3
-      - ReagentId: ElvishBlood
-        Quantity: 10
+  suffix: elf
 
 - type: entity
-  id: TorsoElf
+  parent: OrganElf
+  id: OrganElfExternal
+  abstract: true
+  components:
+  - type: VisualOrganMarkings
+    markingData:
+      group: Elf
+
+- type: entity
+  parent: OrganElf
+  id: OrganElfInternal
+  abstract: true
+
+
+- type: entity
+  id: OrganElfTorso
   name: "Elf torso"
-  parent: [PartElf, BaseTorso]
+  parent: [OrganElfExternal, OrganBaseTorso]
   components:
   - type: Sprite
     sprite: Mobs/Species/Human/parts.rsi
@@ -48,9 +106,9 @@
         Quantity: 20
 
 - type: entity
-  id: HeadElf
+  id: OrganElfHead
   name: "Elf head"
-  parent: [PartDarkElf, BaseHead]
+  parent: [OrganElfExternal, OrganBaseHead]
   components:
   - type: Sprite
     sprite: Mobs/Species/Human/parts.rsi
@@ -102,56 +160,6 @@
     maxReagents: 5
     metabolizerTypes: [Elf]
 
-- type: body
-  id: Elf
-  name: "elf"
-  root: torso
-  slots:
-    head:
-      part: HeadElf
-      connections:
-      - torso
-      organs:
-        brain: OrganHumanBrain
-        eyes: OrganHumanEyes
-    torso:
-      part: TorsoElf
-      connections:
-      - right arm
-      - left arm
-      - right leg
-      - left leg
-      organs:
-        heart: OrganElfHeart
-        lungs: OrganHumanLungs
-        stomach: OrganElfStomach
-        liver: OrganElfLiver
-        kidneys: OrganHumanKidneys
-    right arm:
-      part: RightArmHuman
-      connections:
-      - right hand
-    left arm:
-      part: LeftArmHuman
-      connections:
-      - left hand
-    right hand:
-      part: RightHandHuman
-    left hand:
-      part: LeftHandHuman
-    right leg:
-      part: RightLegHuman
-      connections:
-      - right foot
-    left leg:
-      part: LeftLegHuman
-      connections:
-      - left foot
-    right foot:
-      part: RightFootHuman
-    left foot:
-      part: LeftFootHuman
-
 - type: metabolizerType
   id: Elf
   name: elf
@@ -165,7 +173,7 @@
 - type: entity
   save: false
   name: Urist McHands The Elf
-  parent: BaseMobSpeciesOrganic
+  parent: [AppearanceElf, BaseSpeciesMobOrganic]
   id: BaseMobElf
   abstract: true
   components:
@@ -185,9 +193,6 @@
     noRot: true
     drawdepth: Mobs
     scale: 0.97, 1.03
-  - type: Body
-    prototype: Elf
-    requiredLegs: 2
   - type: Butcherable
     butcheringType: Spike
     spawned:
@@ -233,7 +238,7 @@
       Unsexed: MaleHuman
   - type: Speech
     speechSounds: Alto
-  - type:  HumanoidAppearance
+  - type: HumanoidProfile
     species: Elf
   - type: Mana
     maxManaRaceModifier: 1.12
@@ -249,7 +254,7 @@
     bloodReagent: ElvishBlood
 
 - type: entity
-  parent: BaseSpeciesDummy
+  parent: AppearanceElf
   id: MobElfDummy
   noSpawn: true
   components:
@@ -268,9 +273,7 @@
   name: Лесной эльф
   roundStart: true
   prototype: MobElf
-  sprites: MobHumanSprites
-  markingLimits: MobElfMarkingLimits
-  dollPrototype: MobElfDummy
+  dollPrototype: AppearanceElf
   skinColoration: TintedHues
 
 - type: marking
@@ -339,14 +342,3 @@
   - sprite: Mobs/Customization/ears.rsi
     state: long_ears_standard
 
-- type: markingPoints
-  id: MobElfMarkingLimits
-  onlyWhitelisted: false
-  points:
-    HeadTop:
-      points: 1
-      required: true
-      defaultMarkings: [ ElfEarsStandart ]
-    Hair:
-      points: 1
-      required: false

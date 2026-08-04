@@ -101,9 +101,6 @@
             False: { visible: false }
     - type: Speech
       speechVerb: Ghost
-    - type: Body
-      prototype: Reptilian
-      requiredLegs: 2
     - type: CreamPied
     - type: FireVisuals
       sprite: Mobs/Effects/onfire.rsi

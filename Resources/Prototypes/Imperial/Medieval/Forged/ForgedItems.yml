@@ -86,7 +86,7 @@
   physicalDesc: Переливается странной радугой.
   flavor: Неописуем
   metabolisms:
-    Food:
+    Digestion:
       effects:
       - !type:HealthChange
         damage:
@@ -106,7 +106,7 @@
     MedievalMagicCrystallReagent:
       amount: 1
   effects:
-    - !type:CreateEntityReactionEffect
+    - !type:SpawnEntity
       entity: MedievalMagicDust
 
 - type: entity

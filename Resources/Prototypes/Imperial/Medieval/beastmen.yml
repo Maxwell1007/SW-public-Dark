@@ -1,3 +1,54 @@
+- type: markingsGroup
+  parent: Undergarments
+  id: Beastmen
+  limits:
+    enum.HumanoidVisualLayers.Hair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.FacialHair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Chest:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.Snout:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.HeadTop:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Tail:
+      limit: 1
+      required: false
+
+- type: entity
+  parent: BaseSpeciesAppearance
+  id: AppearanceBeastmen
+  categories: [ HideSpawnMenu ]
+  name: beastmen appearance
+  components:
+  - type: InitialBody
+    organs:
+      Head: OrganBeastmenHead
+      Brain: OrganHumanBrain
+      Eyes: OrganHumanEyes
+      Torso: OrganBeastmenTorso
+      Lungs: OrganHumanLungs
+      Heart: OrganBeastmenHeart
+      Stomach: OrganBeastmenStomach
+      Liver: OrganBeastmenLiver
+      Kidneys: OrganHumanKidneys
+      ArmLeft: OrganBeastmenArmLeft
+      ArmRight: OrganBeastmenArmRight
+      HandLeft: OrganBeastmenHandLeft
+      HandRight: OrganBeastmenHandRight
+      LegLeft: OrganBeastmenLegLeft
+      LegRight: OrganBeastmenLegRight
+      FootLeft: OrganBeastmenFootLeft
+      FootRight: OrganBeastmenFootRight
+  - type: HumanoidProfile
+    species: Beastmen
+
 - type: entity
   id: OrganBeastmenHeart
   parent: OrganHumanHeart
@@ -37,56 +88,6 @@
     maxReagents: 5
     metabolizerTypes: [Beastmen]
 
-- type: body
-  id: Beastmen
-  name: "beastmen"
-  root: torso
-  slots:
-    head:
-      part: HeadBeastmen
-      connections:
-      - torso
-      organs:
-        brain: OrganHumanBrain
-        eyes: OrganHumanEyes
-    torso:
-      part: TorsoBeastmen
-      connections:
-      - right arm
-      - left arm
-      - right leg
-      - left leg
-      organs:
-        heart: OrganBeastmenHeart
-        lungs: OrganHumanLungs
-        stomach: OrganBeastmenStomach
-        liver: OrganBeastmenLiver
-        kidneys: OrganHumanKidneys
-    right arm:
-      part: RightArmBeastmen
-      connections:
-      - right hand
-    left arm:
-      part: LeftArmBeastmen
-      connections:
-      - left hand
-    right hand:
-      part: RightHandBeastmen
-    left hand:
-      part: LeftHandBeastmen
-    right leg:
-      part: RightLegBeastmen
-      connections:
-      - right foot
-    left leg:
-      part: LeftLegBeastmen
-      connections:
-      - left foot
-    right foot:
-      part: RightFootBeastmen
-    left foot:
-      part: LeftFootBeastmen
-
 - type: metabolizerType
   id: Beastmen
   name: Beastmen
@@ -100,7 +101,7 @@
 - type: entity
   save: false
   name: Urist McHands The Beastmen
-  parent: BaseMobSpeciesOrganic
+  parent: [AppearanceBeastmen, BaseSpeciesMobOrganic]
   id: BaseMobBeastmen
   abstract: true
   components:
@@ -120,9 +121,6 @@
     noRot: true
     drawdepth: Mobs
     #scale: 0.97, 1.03
-  - type: Body
-    prototype: Beastmen
-    requiredLegs: 2
   - type: Bloodstream
     bloodReagent: BeastmenBlood
   - type: LanguageSpeaker
@@ -169,7 +167,7 @@
       Unsexed: MaleHuman
   - type: Speech
     speechSounds: Alto
-  - type:  HumanoidAppearance
+  - type: HumanoidProfile
     species: Beastmen
   - type: Mana
     maxManaRaceModifier: 1.00
@@ -193,7 +191,7 @@
     proto: wolf
 
 - type: entity
-  parent: BaseMobBeastmen
+  parent: AppearanceBeastmen
   id: MobBeastmenDummy
   noSpawn: true
   components:
@@ -227,144 +225,6 @@
   name: Зверолюд
   roundStart: true
   prototype: MobBeastmen
-  sprites: MobBeastmenSprites
-  markingLimits: MobBeastmenMarkingLimits
-  dollPrototype: MobBeastmenDummy
+  dollPrototype: AppearanceBeastmen
   skinColoration: HumanToned
 
-- type: speciesBaseSprites
-  id: MobBeastmenSprites
-  sprites:
-    Head: MobBeastmenHead
-    Hair: MobHumanoidAnyMarking
-    FacialHair: MobHumanoidAnyMarking
-    Snout: MobHumanoidAnyMarking
-    Chest: MobBeastmenTorso
-    Eyes: MobHumanoidEyes
-    LArm: MobBeastmenLArm
-    RArm: MobBeastmenRArm
-    LHand: MobBeastmenLHand
-    RHand: MobBeastmenRHand
-    LLeg: MobBeastmenLLeg
-    RLeg: MobBeastmenRLeg
-    LFoot: MobBeastmenLFoot
-    RFoot: MobBeastmenRFoot
-    Tail: MobHumanoidAnyMarking # imperial HairAndTail
-    HeadTop: MobHumanoidAnyMarking # imperial HairAndTail
-
-- type: markingPoints
-  id: MobBeastmenMarkingLimits
-  points:
-    #Special: # the cat ear joke
-    #  points: 0
-    #  required: false
-    Hair:
-      points: 1
-      required: false
-    FacialHair:
-      points: 1
-      required: false
-    Snout:
-      points: 1
-      required: false
-    Tail: # the cat tail joke
-      points: 1 # imperial HairAndTail
-      required: true
-      defaultMarkings: [ CatTailStripes ]
-    HeadTop:
-      points: 1
-      required: true
-      defaultMarkings: [ CatEars ]
-    Chest:
-      points: 1
-      required: false
-    Legs:
-      points: 2
-      required: false
-    Arms:
-      points: 2
-      required: false
-
-- type: humanoidBaseSprite
-  id: MobBeastmenHead
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: head_m
-
-- type: humanoidBaseSprite
-  id: MobBeastmenHeadMale
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: head_m
-
-- type: humanoidBaseSprite
-  id: MobBeastmenHeadFemale
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: head_f
-
-- type: humanoidBaseSprite
-  id: MobBeastmenTorso
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: torso_m
-
-- type: humanoidBaseSprite
-  id: MobBeastmenTorsoMale
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: torso_m
-
-- type: humanoidBaseSprite
-  id: MobBeastmenTorsoFemale
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: torso_f
-
-- type: humanoidBaseSprite
-  id: MobBeastmenLLeg
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: l_leg
-
-- type: humanoidBaseSprite
-  id: MobBeastmenLArm
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: l_arm
-
-- type: humanoidBaseSprite
-  id: MobBeastmenLHand
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: l_hand
-
-- type: humanoidBaseSprite
-  id: MobBeastmenLFoot
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: l_foot
-
-- type: humanoidBaseSprite
-  id: MobBeastmenRLeg
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: r_leg
-
-- type: humanoidBaseSprite
-  id: MobBeastmenRArm
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: r_arm
-
-- type: humanoidBaseSprite
-  id: MobBeastmenRHand
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: r_hand
-
-- type: humanoidBaseSprite
-  id: MobBeastmenRFoot
-  baseSprite:
-    sprite: Imperial/Medieval/Species/Beastmen/parts.rsi
-    state: r_foot

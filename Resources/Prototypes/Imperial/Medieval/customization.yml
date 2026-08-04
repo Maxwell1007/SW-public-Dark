@@ -1,34 +1,5 @@
 ### Zveres
 
-- type: markingPoints
-  id: MobZveresMarkingLimits
-  #onlyWhitelisted: true
-  points:
-    Hair:
-      points: 1
-      required: false
-    FacialHair:
-      points: 0
-      required: false
-    Tail:
-      points: 1
-      required: true
-      defaultMarkings: [ ZveresTailDefault ]
-    HeadTop:
-      points: 1
-      required: true
-      defaultMarkings: [ ZveresEarsDefault ]
-    Overlay:
-      points: 1
-      required: false
-    HeadSide:
-      points: 2
-      required: false
-    Chest:
-      points: 1
-      required: false
-
-### TAILS
 
 - type: marking
   id: ZveresTailDefault

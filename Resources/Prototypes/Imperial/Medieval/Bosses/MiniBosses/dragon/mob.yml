@@ -141,7 +141,7 @@
     - type: Devourer
       foodPreferenceWhitelist:
         components:
-        - HumanoidAppearance
+        - HumanoidProfile
       stomachStorageWhitelist:
         components:
         - MobState
@@ -167,7 +167,7 @@
       - map: ["enum.DamageStateVisualLayers.Base"]
         state: alive
       sprite: Imperial/Medieval/Mobs/Bosses/Dragons/icedragon.rsi
-    - type: HitscanBatteryAmmoProvider
+    - type: BatteryAmmoProvider
       proto: MedievalProjectileWaterSphereBeginner
       fireCost: 1
     - type: Battery
@@ -403,7 +403,7 @@
     - type: NpcFactionMember
       factions:
       - Syndicate
-    - type: HitscanBatteryAmmoProvider
+    - type: BatteryAmmoProvider
       proto: MedievalProjectileNecroDragon
       fireCost: 1
     - type: Battery

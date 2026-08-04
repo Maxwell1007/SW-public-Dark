@@ -1167,9 +1167,6 @@
       state: monkey
       sprite: Imperial/Medieval/Mobs/goblin.rsi
   - type: Hands
-  - type: Body
-    prototype: Reptilian
-    requiredLegs: 2
   - type: DamageStateVisuals
     states:
       Alive:
@@ -1317,9 +1314,6 @@
     - map: [ "enum.DamageStateVisualLayers.Base" ]
       state: hobgoblin
       sprite: Imperial/Medieval/Mobs/hobgoblin.rsi
-  - type: Body
-    prototype: Reptilian
-    requiredLegs: 2
   - type: DamageStateVisuals
     states:
       Alive:
@@ -1486,9 +1480,6 @@
       sprite: Imperial/Medieval/Mobs/murlok.rsi
   - type: Hands
   - type: ComplexInteraction
-  - type: Body
-    prototype: Reptilian
-    requiredLegs: 2
   - type: DamageStateVisuals
     states:
       Alive:
@@ -4787,7 +4778,7 @@
   - type: HTN
     rootTask:
       task: SimpleRangedHostileCompound
-  - type: HitscanBatteryAmmoProvider
+  - type: BatteryAmmoProvider
     proto: MedievalProjectileWaterSphereSenior
     fireCost: 1
   - type: Battery
