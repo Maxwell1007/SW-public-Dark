@@ -822,7 +822,8 @@
     solutions:
       beaker:
         maxVol: 30
-        canMix: true
+  - type: MixableSolution
+    solution: beaker
   - type: FitsInDispenser
     solution: beaker
   - type: RefillableSolution
@@ -900,12 +901,13 @@
         map: ["enum.SolutionContainerLayers.Fill"]
         visible: false
   - type: Item
-    sprite: Imperial/Medieval/Drinks/wooden_beaker.rsi
+    sprite: Imperial/Medieval/Drinks/wooden_wineskin.rsi
   - type: SolutionContainerManager
     solutions:
       beaker:
         maxVol: 80
-        canMix: true
+  - type: MixableSolution
+    solution: beaker
   - type: FitsInDispenser
     solution: beaker
   - type: RefillableSolution
