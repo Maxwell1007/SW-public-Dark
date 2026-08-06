@@ -97,6 +97,9 @@
     spawned:
     - id: FoodMeatHuman
       amount: 5
+  - type: LanguageSpeaker
+    languages:
+      Common: Speak
 
 - type: entity
   parent: OrganBase
