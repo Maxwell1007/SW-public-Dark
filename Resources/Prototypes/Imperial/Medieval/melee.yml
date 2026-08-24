@@ -481,10 +481,11 @@
   - type: MeleeParry
     parryChanse: 0.6
   - type: MeleeWeapon
-    clickDamageModifier: 1.25
+    clickDamageModifier: 1.35
     wideAnimationRotation: -140
     attackRate: 0.25
     angle: 150
+    range: 1.75
     damage:
       types:
         Piercing: 10
@@ -2127,9 +2128,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: false
     cPAnimationOffset: 1
-    clickDamageModifier: 1.25
+    clickDamageModifier: 1.35
     wideAnimationRotation: -140
     attackRate: 0.25
+    range: 1.75
     damage:
       types:
         Piercing: 9
@@ -2209,9 +2211,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 1.22
+    clickDamageModifier: 0.6 
     wideAnimationRotation: -140
     attackRate: 0.5
+    range: 1.85 # higher range to accomodate for ping differences with wide swinging
     damage:
       types:
         Blunt: 1
@@ -2230,7 +2233,7 @@
       types:
         Blunt: 1
         Structural: 9
-        Slash: 14
+        Slash: 21.7 #higher damage to accomodate for the constant wideswinging
   - type: Item
     size: Huge
   - type: DamageOtherOnHit
@@ -2296,9 +2299,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 1.22
+    clickDamageModifier: 0.6
     wideAnimationRotation: -140
     attackRate: 0.5
+    range: 1.85 # higher range to accomodate for ping differences with wide swinging
     damage:
       types:
         Blunt: 1
@@ -2317,7 +2321,7 @@
       types:
         Blunt: 1
         Structural: 17
-        Slash: 14.3
+        Slash: 24.1 #higher damage to accomodate for the constant wideswinging
   - type: Item
     size: Huge
   - type: DamageOtherOnHit
@@ -2447,9 +2451,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 1.2
+    clickDamageModifier: 1.5 # higher lmb modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
+    range: 1.75
     damage:
       types:
         Piercing: 6
@@ -2532,9 +2537,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 1.22
+    clickDamageModifier: 1.5 # higher lmb modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
+    range: 1.75
     damage:
       types:
         Piercing: 10
@@ -2615,9 +2621,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 1.2
+    clickDamageModifier: 1.5 # higher damage modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
+    range: 1.75
     damage:
       types:
         Piercing: 6
@@ -2700,9 +2707,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 1.22
+    clickDamageModifier: 1.5 # higher lmb modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
+    range: 1.75
     damage:
       types:
         Piercing: 4
@@ -3616,9 +3624,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: false
     cPAnimationOffset: 1
-    clickDamageModifier: 1.25
+    clickDamageModifier: 1.35
     wideAnimationRotation: -140
     attackRate: 0.25
+    range: 1.9
     damage:
       types:
         Piercing: 13
