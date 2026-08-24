@@ -100,7 +100,7 @@
     damage:
       types:
         Slash: 11
-        Caustic: 1
+        Caustic: 0.5
         ParryAble: 1
     resetOnHandSelected: false
     soundHit:
@@ -157,7 +157,7 @@
     damage:
       types:
         Slash: 17.5
-        Caustic: 1.5
+        Caustic: 0.5
         ParryAble: 1
     resetOnHandSelected: false
     soundHit:
@@ -252,7 +252,7 @@
     damage:
       types:
         Piercing: 17
-        Caustic: 2
+        Caustic: 1
         ParryAble: 1
     angle: 0
     animation: CP14WeaponArcThrust
@@ -424,7 +424,7 @@
       types:
         Blunt: 8.5
         Piercing: 7
-        Caustic: 1.5
+        Caustic: 0.5
         ParryAble: 1
     animation: CP14WeaponArcThrust
     wideAnimation: CP14WeaponArcSlash
@@ -483,14 +483,14 @@
   - type: MeleeWeapon
     clickDamageModifier: 1.25
     wideAnimationRotation: -140
-    attackRate: 0.42
+    attackRate: 0.25
     angle: 150
     damage:
       types:
         Piercing: 10
         Slash: 12
         Structural: 3
-        Caustic: 3
+        Caustic: 1
         ParryAble: 1
     animation: CP14WeaponArcThrust
     wideAnimation: CP14WeaponArcSlash
@@ -2129,7 +2129,7 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.25
     wideAnimationRotation: -140
-    attackRate: 0.26
+    attackRate: 0.25
     damage:
       types:
         Piercing: 9
@@ -2148,7 +2148,7 @@
       types:
         Blunt: 11
         Structural: 15
-        Slash: 15
+        Piercing: 15
   - type: Item
     size: Huge
   - type: DamageOtherOnHit
@@ -2211,10 +2211,10 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.22
     wideAnimationRotation: -140
-    attackRate: 0.35
+    attackRate: 0.5
     damage:
       types:
-        Piercing: 1
+        Blunt: 1
         Slash: 6
         Structural: 2
         ParryAble: 1
@@ -2230,7 +2230,7 @@
       types:
         Blunt: 1
         Structural: 9
-        Slash: 11
+        Slash: 14
   - type: Item
     size: Huge
   - type: DamageOtherOnHit
@@ -2298,10 +2298,10 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.22
     wideAnimationRotation: -140
-    attackRate: 0.4
+    attackRate: 0.5
     damage:
       types:
-        Piercing: 1
+        Blunt: 1
         Slash: 11.7
         Structural: 3
         ParryAble: 1
@@ -2317,7 +2317,7 @@
       types:
         Blunt: 1
         Structural: 17
-        Slash: 12
+        Slash: 14.3
   - type: Item
     size: Huge
   - type: DamageOtherOnHit
@@ -2449,7 +2449,7 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.2
     wideAnimationRotation: -140
-    attackRate: 0.34
+    attackRate: 0.375
     damage:
       types:
         Piercing: 6
@@ -2534,11 +2534,11 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.22
     wideAnimationRotation: -140
-    attackRate: 0.4
+    attackRate: 0.375
     damage:
       types:
         Piercing: 10
-        Slash: 15.7
+        Slash: 15
         Structural: 3
         ParryAble: 1
     soundHit:
@@ -2551,7 +2551,7 @@
   - type: IncreaseDamageOnWield
     damage:
       types:
-        Blunt: 9
+        Blunt: 5
         Structural: 17
         Slash: 12
   - type: Item
@@ -2617,7 +2617,7 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.2
     wideAnimationRotation: -140
-    attackRate: 0.34
+    attackRate: 0.375
     damage:
       types:
         Piercing: 6
@@ -2634,9 +2634,9 @@
   - type: IncreaseDamageOnWield
     damage:
       types:
-        Blunt: 8
+        Blunt: 10
         Structural: 9
-        Slash: 14
+        Slash: 11
   - type: Item
     size: Huge
     sprite: Imperial/Medieval/Melee/claymore_inhand.rsi
@@ -2702,11 +2702,11 @@
     cPAnimationOffset: 1
     clickDamageModifier: 1.22
     wideAnimationRotation: -140
-    attackRate: 0.4
+    attackRate: 0.375
     damage:
       types:
-        Piercing: 8
-        Slash: 17.7
+        Piercing: 4
+        Slash: 17
         Structural: 3
         ParryAble: 1
     soundHit:
@@ -2719,9 +2719,9 @@
   - type: IncreaseDamageOnWield
     damage:
       types:
-        Blunt: 9
+        Blunt: 15
         Structural: 17
-        Slash: 12
+        Slash: 6
   - type: Item
     size: Huge
     sprite: Imperial/Medieval/Melee/claymore_inhand.rsi
@@ -3637,7 +3637,7 @@
       types:
         Blunt: 10
         Structural: 23
-        Slash: 18
+        Piercing: 18
   - type: Item
     size: Huge
   - type: DamageOtherOnHit
