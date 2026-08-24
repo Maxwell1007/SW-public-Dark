@@ -1036,7 +1036,7 @@
       thresholds:
         - trigger:
             !type:DamageTrigger
-            damage: 220
+            damage: 330
           behaviors:
             - !type:DoActsBehavior
               acts: [ "Destruction" ]
@@ -1126,7 +1126,7 @@
       thresholds:
         - trigger:
             !type:DamageTrigger
-            damage: 120
+            damage: 180
           behaviors:
             - !type:DoActsBehavior
               acts: [ "Destruction" ]
@@ -1178,7 +1178,7 @@
       thresholds:
         - trigger:
             !type:DamageTrigger
-            damage: 90
+            damage: 135
           behaviors:
             - !type:DoActsBehavior
               acts: [ "Destruction" ]
@@ -1242,7 +1242,7 @@
       thresholds:
         - trigger:
             !type:DamageTrigger
-            damage: 300
+            damage: 450 # this shield is unobtainable but oh well
           behaviors:
             - !type:DoActsBehavior
               acts: [ "Destruction" ]
@@ -1303,7 +1303,7 @@
       thresholds:
         - trigger:
             !type:DamageTrigger
-            damage: 156
+            damage: 250
           behaviors:
             - !type:DoActsBehavior
               acts: [ "Destruction" ]
@@ -5153,7 +5153,7 @@
       thresholds:
         - trigger:
             !type:DamageTrigger
-            damage: 70
+            damage: 105
           behaviors:
             - !type:DoActsBehavior
               acts: [ "Destruction" ]
