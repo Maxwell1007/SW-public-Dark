@@ -485,7 +485,7 @@
     wideAnimationRotation: -140
     attackRate: 0.25
     angle: 150
-    range: 1.75
+    range: 1.8
     damage:
       types:
         Piercing: 10
@@ -601,7 +601,7 @@
   - type: MeleeParry
     parryChanse: 0.6
   - type: MeleeWeapon
-    clickDamageModifier: 2.2
+    clickDamageModifier: 1.8
     wideAnimationRotation: -140
     attackRate: 0.15
     animation: CP14WeaponArcThrust
@@ -609,6 +609,7 @@
     cPSwingBeverage: true
     angle: 120
     cPAnimationOffset: 1
+    range: 1.8
     damage:
       types:
         Blunt: 12
@@ -622,7 +623,7 @@
   - type: IncreaseDamageOnWield
     damage:
       types:
-        Blunt: 17
+        Blunt: 61 # this number seems big but it's the exact % difference when comparing attackrate with a halberd
         Structural: 50
   - type: Item
     size: Huge
@@ -2131,7 +2132,7 @@
     clickDamageModifier: 1.35
     wideAnimationRotation: -140
     attackRate: 0.25
-    range: 1.75
+    range: 1.8
     damage:
       types:
         Piercing: 9
@@ -2454,7 +2455,7 @@
     clickDamageModifier: 1.5 # higher lmb modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
-    range: 1.75
+    range: 1.8
     damage:
       types:
         Piercing: 6
@@ -2540,7 +2541,7 @@
     clickDamageModifier: 1.5 # higher lmb modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
-    range: 1.75
+    range: 1.8
     damage:
       types:
         Piercing: 10
@@ -2624,7 +2625,7 @@
     clickDamageModifier: 1.5 # higher damage modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
-    range: 1.75
+    range: 1.8
     damage:
       types:
         Piercing: 6
@@ -2710,7 +2711,7 @@
     clickDamageModifier: 1.5 # higher lmb modifier because quirk
     wideAnimationRotation: -140
     attackRate: 0.375
-    range: 1.75
+    range: 1.8
     damage:
       types:
         Piercing: 4
@@ -3627,7 +3628,7 @@
     clickDamageModifier: 1.35
     wideAnimationRotation: -140
     attackRate: 0.25
-    range: 1.9
+    range: 1.8
     damage:
       types:
         Piercing: 13
@@ -3711,9 +3712,10 @@
     wideAnimation: CP14WeaponArcSlash
     cPSwingBeverage: true
     cPAnimationOffset: 1
-    clickDamageModifier: 2.2
+    clickDamageModifier: 1.8
     wideAnimationRotation: -140
     attackRate: 0.15
+    range: 1.8
     damage:
       types:
         Blunt: 14
@@ -3727,7 +3729,7 @@
   - type: IncreaseDamageOnWield
     damage:
       types:
-        Blunt: 20
+        Blunt: 79 # holy shit. this number seems big but it's the exact % difference when comparing attackrate with a halberd... i hope.
         Structural: 114
   - type: Item
     size: Huge
