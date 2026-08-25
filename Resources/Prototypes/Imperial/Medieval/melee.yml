@@ -2183,7 +2183,7 @@
 
 - type: entity
   name: iron halberd
-  parent: [ BaseItem, BaseTwoHandedCharged ]
+  parent: [ BaseItem, BaseSekirCharged ]
   id: MedievalIronSekir
   description: A medieval poleaxe.
   components:
@@ -2271,7 +2271,7 @@
 
 - type: entity
   name: iron halberd
-  parent: [ BaseItem, BaseTwoHandedCharged ]
+  parent: [ BaseItem, BaseSekirCharged ]
   id: MedievalIronSekirSteel
   description: A medieval poleaxe.
   components:
@@ -4566,7 +4566,7 @@
 
 - type: entity
   name: dagger
-  parent: [ BaseKnife, BaseOneHandedCharged ]
+  parent: [ BaseKnife, BaseSaberCharged ]
   id: MedievalSaber
   description: A deadly knife intended for melee confrontations.
   components:
@@ -4649,7 +4649,7 @@
 
 - type: entity
   name: dagger
-  parent: [ BaseKnife, BaseOneHandedCharged ]
+  parent: [ BaseKnife, BaseSaberCharged ]
   id: MedievalSaberRusty
   description: A deadly knife intended for melee confrontations.
   components:
