@@ -144,7 +144,7 @@ public sealed class WeaponSkillSystem : EntitySystem
             BypassDamage = AddDamage(ev.BypassDamage, comp.BypassType, comp.BypassAmount),
         };
     }
-    #endregion
+#endregion
 
             #region Helpers
 
