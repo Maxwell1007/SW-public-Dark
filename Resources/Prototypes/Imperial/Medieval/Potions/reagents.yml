@@ -1318,7 +1318,7 @@
       effects:
       - !type:DeleteDeathCurseEffect
     Poison:
-      metabolismRate: 0.4
+      metabolismRate: 0.5
       effects:
       - !type:HealthChange
         damage:
