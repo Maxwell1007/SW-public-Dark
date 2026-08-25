@@ -45,16 +45,16 @@
   - type: SolutionContainerManager
     solutions:
       ammo:
-        maxVol: 2
+        maxVol: 0.5
   - type: RefillableSolution
     solution: ammo
   - type: InjectableSolution
     solution: ammo
   - type: SolutionInjectOnEmbed
-    transferAmount: 2
+    transferAmount: 0.5
     solution: ammo
   - type: SolutionTransfer
-    maxTransferAmount: 1
+    maxTransferAmount: 0.5
   - type: Appearance
   - type: SolutionContainerVisuals
     maxFillLevels: 2
