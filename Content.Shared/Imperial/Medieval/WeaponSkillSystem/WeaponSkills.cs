@@ -89,7 +89,7 @@ public sealed partial class CrossbowSkillComponent : Component
 public sealed partial class BowSkillComponent : Component
 {
     [DataField("bypassType")] public string BypassType = "Piercing";
-    [DataField("bypassAmount")] public FixedPoint2 BypassAmount = 3f;
+    [DataField("bypassAmount")] public FixedPoint2 BypassAmount = 4f;
 }
 
 [RegisterComponent, NetworkedComponent]
