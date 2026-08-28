@@ -1,0 +1,32 @@
+# Begginer
+
+- type: entity
+  id: MedievalSeedlingsBeginner
+  components:
+  - type: TriggerOnSpawn
+  - type: RandomOffsetSpawn
+    spawnedEntityID: MedievalFloraTreeLarge01
+    radius: 1
+    quantity: 1
+
+# Midle
+
+- type: entity
+  id: MedievalSeedlingsMiddle
+  components:
+  - type: TriggerOnSpawn
+  - type: RandomOffsetSpawn
+    spawnedEntityID: MedievalFloraTreeLarge01
+    radius: 6
+    quantity: 10
+
+# Senior
+
+- type: entity
+  id: MedievalSeedlingsSenior
+  components:
+  - type: TriggerOnSpawn
+  - type: RandomOffsetSpawn
+    spawnedEntityID: MedievalFloraTreeLarge01
+    radius: 12
+    quantity: 25
