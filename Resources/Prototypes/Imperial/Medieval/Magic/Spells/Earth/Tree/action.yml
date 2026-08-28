@@ -1,4 +1,4 @@
-# Beginner
+﻿# Beginner
 
 - type: entity
   id: MedievalActionSeedlingsBeginner
@@ -20,6 +20,9 @@
     itemIconStyle: BigAction
     sound: !type:SoundPathSpecifier
       path: /Audio/Imperial/Medieval/mob_spawn_effect.ogg
+    icon:
+      sprite: Imperial/Medieval/Magic/Earth/Tree/icons.rsi
+      state: beginner
   - type: TargetAction
     checkCanAccess: false
     range: 8
@@ -65,6 +68,9 @@
     itemIconStyle: BigAction
     sound: !type:SoundPathSpecifier
       path: /Audio/Imperial/Medieval/mob_spawn_effect.ogg
+    icon:
+      sprite: Imperial/Medieval/Magic/Earth/Tree/icons.rsi
+      state: middle
   - type: TargetAction
     checkCanAccess: false
     range: 8
@@ -106,6 +112,9 @@
     itemIconStyle: BigAction
     sound: !type:SoundPathSpecifier
       path: /Audio/Imperial/Medieval/mob_spawn_effect.ogg
+    icon:
+      sprite: Imperial/Medieval/Magic/Earth/Tree/icons.rsi
+      state: senior
   - type: TargetAction
     checkCanAccess: false
     range: 12
