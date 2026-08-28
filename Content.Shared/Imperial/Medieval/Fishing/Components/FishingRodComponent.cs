@@ -1,4 +1,5 @@
 using Content.Shared.Fishing.Enums;
+using Content.Shared.Tag;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
 using Robust.Shared.Map;
@@ -9,6 +10,9 @@ namespace Content.Shared.Imperial.Medieval.Fishing.Components;
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class FishingRodComponent : Component
 {
+    [DataField]
+    public ProtoId<TagPrototype> MeatTag = "Meat";
+
     [DataField]
     public EntProtoId BobberPrototype = "FishingBobber";
 

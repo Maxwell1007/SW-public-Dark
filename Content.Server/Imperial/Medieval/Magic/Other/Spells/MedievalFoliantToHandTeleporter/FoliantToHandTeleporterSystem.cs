@@ -1,11 +1,12 @@
 using Content.Server.Imperial.Medieval.Magic.BindStoreOnEquip;
+using Content.Server.Imperial.Medieval.Magic.MedievalSpawnInFreeSlot;
 using Content.Shared.Imperial.Medieval.Magic;
-using Content.Shared.Hands.EntitySystems;
 
 namespace Content.Server.Imperial.Medieval.Magic.MedievalFoliantToHandTeleporter;
+
 public sealed partial class FoliantToHandTeleporterSystem : EntitySystem
 {
-    [Dependency] private readonly SharedHandsSystem _handsSystem = default!;
+    [Dependency] private readonly MedievalSpawnInFreeSlotSystem _placementSystem = default!;
 
     public override void Initialize()
     {
@@ -22,7 +23,7 @@ public sealed partial class FoliantToHandTeleporterSystem : EntitySystem
         {
             if (bindComp.BindedEntity == playerUid)
             {
-                _handsSystem.TryForcePickupAnyHand(playerUid, folliantUID);
+                _placementSystem.TryPlaceInFreeSlot(playerUid, folliantUID);
                 break;
             }
         }

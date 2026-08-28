@@ -15,9 +15,21 @@ public sealed partial class PraiseViewWindow : DefaultWindow
     public Action<PraiseViewRecord>? OnEditWeightButtonPressed;
     public Action<PraiseViewRecord>? OnDeleteButtonPressed;
 
-    public PraiseViewWindow(List<PraiseViewRecord> praises, bool admin, bool spam)
+    public PraiseViewWindow(List<PraiseViewRecord> praises, bool admin, bool spam, bool wait)
     {
         RobustXamlLoader.Load(this);
+
+        if (wait)
+        {
+            RichTextLabel waitLabel = new RichTextLabel
+            {
+                HorizontalExpand = true,
+                HorizontalAlignment = HAlignment.Center,
+                VerticalAlignment = VAlignment.Center
+            };
+            waitLabel.SetMarkup(Loc.GetString("praises-view-wait"));
+            MainContainer.AddChild(waitLabel);
+        }
 
         if (spam)
         {

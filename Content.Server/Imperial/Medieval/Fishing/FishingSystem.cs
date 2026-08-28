@@ -38,8 +38,6 @@ namespace Content.Server.Imperial.Medieval.Fishing;
 
 public sealed partial class FishingSystem : EntitySystem
 {
-    private static readonly ProtoId<TagPrototype> MeatTag = "Meat";
-
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedHandsSystem _hands = default!;
     [Dependency] private readonly SharedInteractionSystem _interaction = default!;
@@ -116,7 +114,7 @@ public sealed partial class FishingSystem : EntitySystem
         if (!_interaction.InRangeAndAccessible(args.User, fishingTargetUid, ent.Comp.AfterInteractDistanceThreshold))
             return;
 
-        if (ent.Comp.Bait is not { } baitUid || !TryGetFishingBaitType(baitUid, out _))
+        if (ent.Comp.Bait is not { } baitUid || !TryGetFishingBaitType(ent.Comp, baitUid, out _))
         {
             if (ent.Comp.Bait != null)
             {
@@ -668,7 +666,7 @@ public sealed partial class FishingSystem : EntitySystem
     {
         var result = new List<(EntProtoId Prototype, float Weight, int Level)>();
 
-        if (rod.Comp.Bait is not { } baitUid || !TryGetFishingBaitType(baitUid, out var baitType))
+        if (rod.Comp.Bait is not { } baitUid || !TryGetFishingBaitType(rod.Comp, baitUid, out var baitType))
             return result;
 
         foreach (var (prototypeId, weight) in rod.Comp.FishWeights)
@@ -731,7 +729,7 @@ public sealed partial class FishingSystem : EntitySystem
 
     private float GetBaitQualityBias(Entity<FishingRodComponent> rod)
     {
-        if (rod.Comp.Bait is not { } baitUid || !TryGetFishingBaitType(baitUid, out var baitType))
+        if (rod.Comp.Bait is not { } baitUid || !TryGetFishingBaitType(rod.Comp, baitUid, out var baitType))
             return 0f;
 
         return rod.Comp.BaitQualityBiases.TryGetValue(baitType, out var qualityBias)
@@ -739,7 +737,7 @@ public sealed partial class FishingSystem : EntitySystem
             : 0f;
     }
 
-    public bool TryGetFishingBaitType(EntityUid baitUid, out FishingBaitType baitType)
+    public bool TryGetFishingBaitType(FishingRodComponent rod, EntityUid baitUid, out FishingBaitType baitType)
     {
         baitType = default;
 
@@ -752,7 +750,7 @@ public sealed partial class FishingSystem : EntitySystem
             return true;
         }
 
-        if (!_tag.HasTag(baitUid, MeatTag))
+        if (!_tag.HasTag(baitUid, rod.MeatTag))
             return false;
 
         baitType = FishingBaitType.Meat;

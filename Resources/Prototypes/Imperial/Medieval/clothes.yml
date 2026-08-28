@@ -2345,6 +2345,7 @@
   - type: Dumpable
 
 - type: entity
+  parent: BaseItem
   id: MedievalFireFetter
   name: ent-MedievalFireFetter
   description: ent-MedievalFireFetter
@@ -2379,6 +2380,7 @@
     - Handcuffs
 
 - type: entity
+  parent: BaseItem
   id: MedievalCursedFetter
   name: ent-MedievalCursedFetter
   description: ent-MedievalCursedFetter

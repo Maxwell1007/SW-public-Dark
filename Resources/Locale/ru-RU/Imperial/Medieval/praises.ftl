@@ -14,3 +14,4 @@ praises-view-weightbutton = Изменить вес
 praises-view-delbutton = Удалить
 praises-view-delbutton-confirm = Вы уверены?
 praises-view-spam = [bold][color=#ff0000]Вы открываете окно похвал слишком часто, подождите пару секунд прежде чем снова это сделать.[/color][/bold]
+praises-view-wait = [bold][color=#ffff00]Пожалуйста подождите...[/color][/bold]

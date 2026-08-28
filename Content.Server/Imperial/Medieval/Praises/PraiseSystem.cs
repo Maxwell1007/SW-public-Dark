@@ -77,25 +77,22 @@ public sealed class PraiseSystem : EntitySystem
 
     private bool CanPraise(ICommonSession user, ICommonSession target, out bool noPraises, out bool praisedRecently)
     {
-        if (_adminMan.IsAdmin(user))
-        {
-            noPraises = praisedRecently = false;
-            return true;
-        }
+        noPraises = praisedRecently = false;
 
         if (!_remainingPraises.ContainsKey(user.UserId))
             _remainingPraises[user.UserId] = _cfgMan.GetCVar(ICCVars.PraisesPerRound);
-
-        noPraises = praisedRecently = false;
-
-        if (_remainingPraises[user.UserId] <= 0)
-            noPraises = true;
 
         if (!_praises.ContainsKey(target.UserId))
             _praises[target.UserId] = new(); //shouldn't happen but just in case
 
         if (!_newPraises.ContainsKey(target.UserId))
             _newPraises[target.UserId] = new();
+
+        if (_adminMan.IsAdmin(user))
+            return true;
+
+        if (_remainingPraises[user.UserId] <= 0)
+            noPraises = true;
 
         IEnumerable<Praise> praises = _praises[target.UserId].Concat(_newPraises[target.UserId]);
         DateTime tp = DateTime.Now - _cfgMan.GetCVar(ICCVars.PraiseCooldown);
@@ -108,7 +105,7 @@ public sealed class PraiseSystem : EntitySystem
         return !(noPraises || praisedRecently);
     }
 
-    private PraiseWindowMessage GenerateMessage(bool open, ICommonSession user, ICommonSession target)
+    private PraiseWindowMessage GenerateMessage(ICommonSession user, ICommonSession target)
     {
         bool canPraise = CanPraise(user, target, out bool noPraises, out bool praisedRecently);
 
@@ -118,13 +115,15 @@ public sealed class PraiseSystem : EntitySystem
         if (praisedRecently)
             msg = Loc.GetString("praises-window-praisedrecently");
 
-        return new PraiseWindowMessage { Open = open, Message = msg, SendButtonDisabled = !canPraise };
+        return new PraiseWindowMessage { Message = msg, SendButtonDisabled = !canPraise };
     }
 
     private void OnGetVerbs(EntityUid uid, PraiseComponent praise, ref GetVerbsEvent<ExamineVerb> args)
     {
         EntityUid userUid = args.User;
-        if (!TryComp<PraiseComponent>(userUid, out var praiseUser) || uid == userUid)
+        if (!TryComp<PraiseComponent>(userUid, out var praiseUser) ||
+            !_playerMan.TryGetSessionByEntity(uid, out var target) ||
+            uid == userUid)
             return;
 
         args.Verbs.Add(new ExamineVerb()
@@ -136,7 +135,7 @@ public sealed class PraiseSystem : EntitySystem
                     return;
 
                 _lastPraiseTarget[user.UserId] = target;
-                RaiseNetworkEvent(GenerateMessage(true, user, target), user);
+                RaiseNetworkEvent(GenerateMessage(user, target), user);
             },
             CloseMenu = true,
             Icon = new SpriteSpecifier.Rsi(new ResPath("/Textures/Imperial/Medieval/date.rsi"), "date"),
@@ -188,7 +187,7 @@ public sealed class PraiseSystem : EntitySystem
             });
         }
 
-        RaiseNetworkEvent(GenerateMessage(false, user, target), user);
+        RaiseNetworkEvent(GenerateMessage(user, target), user);
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)

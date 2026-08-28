@@ -14,3 +14,4 @@ praises-view-weightbutton = Edit weight
 praises-view-delbutton = Delete
 praises-view-delbutton-confirm = Are you sure?
 praises-view-spam = [bold][color=#ff0000]You're reopening praise window too frequently, please wait a few seconds before doing it again.[/color][/bold]
+praises-view-wait = [bold][color=#ffff00]Please wait...[/color][/bold]

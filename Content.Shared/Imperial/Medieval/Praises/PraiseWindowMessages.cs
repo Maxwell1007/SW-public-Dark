@@ -5,7 +5,6 @@ namespace Content.Shared.Imperial.Medieval.Praises;
 [Serializable, NetSerializable]
 public sealed class PraiseWindowMessage : EntityEventArgs
 {
-    public bool Open;
     public string Message = default!;
     public bool SendButtonDisabled;
 }
