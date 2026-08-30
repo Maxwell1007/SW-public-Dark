@@ -1080,7 +1080,8 @@
   iconOverride: MedievalFalshionT3Silver
   stacks:
     MedievalGold: 1
-    MedievalSilver: 7
+    MedievalSilver: 4
+    MedievalIronIngot: 3
     WoodPlank: 7
   result: WorkpieceMedievalFalshionT3Silver
 
@@ -1100,7 +1101,8 @@
   iconOverride: MedievalSpearT3Silver
   stacks:
     MedievalGold: 1
-    MedievalSilver: 11
+    MedievalSilver: 6
+    MedievalIronIngot: 7
     WoodPlank: 8
   result: WorkpieceMedievalSpearT3Silver
 
@@ -1110,6 +1112,7 @@
   iconOverride: MedievalSaberSilver
   stacks:
     MedievalGold: 1
-    MedievalSilver: 7
+    MedievalSilver: 5
+    MedievalIronIngot: 5
     WoodPlank: 7
   result: WorkpieceMedievalSaberSilver

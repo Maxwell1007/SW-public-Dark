@@ -59,20 +59,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 15
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievalhealbloodandoxygen
@@ -102,20 +102,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 15
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievalacid
@@ -523,20 +523,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 10
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievalstamina
@@ -1036,20 +1036,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 15
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievaladvancedsmokeandexplosion
@@ -1109,20 +1109,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 20
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievaladvancedhealslash
@@ -1279,20 +1279,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 20
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievalbestacidradiation
@@ -1372,20 +1372,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 10
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievaladvancedslow
@@ -1529,20 +1529,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 20
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievaladvancedstimulant
@@ -1600,20 +1600,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 20
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievaladvancedignite
@@ -1784,20 +1784,20 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 30
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
 
 - type: reagent
   id: medievalbestpoison
@@ -1912,17 +1912,17 @@
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11
       - !type:HealthChange
         damage:
           groups:
-            Toxin: 6
+            Toxin: 30
         conditions:
         - !type:ReagentThreshold
-          min: 30
+          min: 11

@@ -1,4 +1,4 @@
-﻿- type: entity
+- type: entity
   id: MercBountyBoard
   name: notice board
   description: Is there a job for a witcher?
@@ -61,4 +61,4 @@
       enum.LetterRecipientUiKey.Key:
         type: LetterRecipientBoundUserInterface
   - type: MercenaryContract
-    payoutRange: 125, 200
+    payoutRange: 190, 300

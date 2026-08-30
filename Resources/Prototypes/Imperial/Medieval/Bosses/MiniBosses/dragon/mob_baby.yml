@@ -14,6 +14,7 @@
   id: MedievalBabyBossBaseDragon
   description: small dragon
   components:
+    - type: ForcedSleepImmune
     - type: Hands
       hands:
         hand_left:

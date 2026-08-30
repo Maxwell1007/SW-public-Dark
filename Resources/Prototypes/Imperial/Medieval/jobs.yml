@@ -4688,6 +4688,7 @@
   storage:
     back:
     - MedievalSpellBookRecodeCollegiumStrong
+    - MedievalCommsCrystallColl
 
 - type: playTimeTracker
   id: JobMedievalCollegiumLeader

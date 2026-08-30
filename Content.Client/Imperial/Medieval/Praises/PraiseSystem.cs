@@ -19,27 +19,21 @@ public sealed class PraiseSystem : EntitySystem
 
     private void OnPraiseWindowMessage(PraiseWindowMessage ev)
     {
-        if (ev.Open && _praiseWindow != null)
-        {
+        if (_praiseWindow != null && !_praiseWindow.Disposed)
             _praiseWindow.Dispose();
-            _praiseWindow = null;
-        }
 
         _praiseWindow = new();
         _praiseWindow.OnSendButtonPressed += reason => RaiseNetworkEvent(new PraiseWindowPraiseMessage { Reason = reason });
-        _praiseWindow.Update(ev);
         _praiseWindow.OpenCentered();
+        _praiseWindow.Update(ev);
     }
 
     private void OnPraiseViewMessage(PraiseViewMessage ev)
     {
-        if (_viewWindow != null)
-        {
+        if (_viewWindow != null && !_viewWindow.Disposed)
             _viewWindow.Dispose();
-            _viewWindow = null;
-        }
 
-        _viewWindow = new(ev.Records, ev.Admin, ev.Spam);
+        _viewWindow = new(ev.Records, ev.Admin, ev.Spam, false);
         _viewWindow.OnEditWeightButtonPressed += record => RaiseNetworkEvent(new PraiseViewEditMessage { Target = ev.Target, Record = record });
         _viewWindow.OnDeleteButtonPressed += record => RaiseNetworkEvent(new PraiseViewDeleteMessage { Target = ev.Target, Record = record });
         _viewWindow.OpenCentered();
@@ -47,11 +41,8 @@ public sealed class PraiseSystem : EntitySystem
 
     private void OnPraiseRatingMessage(PraiseRatingMessage ev)
     {
-        if (_ratingWindow != null)
-        {
+        if (_ratingWindow != null && !_ratingWindow.Disposed)
             _ratingWindow.Dispose();
-            _ratingWindow = null;
-        }
 
         _ratingWindow = new(ev.Rating);
         _ratingWindow.OpenCentered();
@@ -59,6 +50,12 @@ public sealed class PraiseSystem : EntitySystem
 
     public void OpenView(NetUserId target)
     {
+        if (_viewWindow != null && !_viewWindow.Disposed) //please wait message
+            _viewWindow.Dispose();
+
+        _viewWindow = new(new(), false, false, true);
+        _viewWindow.OpenCentered();
+
         RaiseNetworkEvent(new PraiseViewOpenedMessage { Target = target });
     }
 
