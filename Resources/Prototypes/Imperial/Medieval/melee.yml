@@ -41,6 +41,7 @@
     slots:
     - back
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 0.5
   - type: IncreaseDamageOnWield
     damage:
@@ -328,6 +329,7 @@
     - back
     - suitStorage
   - type: Wieldable
+    useDelayOnWield: false
   - type: IncreaseDamageOnWield
     damage:
       types:
@@ -564,6 +566,7 @@
     soundHit:
       path: /Audio/Weapons/bladeslice.ogg
   - type: Wieldable
+    useDelayOnWield: false
   - type: IncreaseDamageOnWield
     damage:
       types:
@@ -619,6 +622,7 @@
     resourceWaste: 0.7
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3.5
   - type: IncreaseDamageOnWield
     damage:
@@ -805,6 +809,7 @@
   - type: StaticPrice
     price: 40
   - type: Wieldable
+    useDelayOnWield: false
   - type: IncreaseDamageOnWield
     damage:
       types:
@@ -1767,6 +1772,7 @@
     - back
     - suitStorage
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 0.5
   - type: IncreaseDamageOnWield
     damage:
@@ -1861,6 +1867,7 @@
     - back
     - suitStorage
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 0.5
   - type: IncreaseDamageOnWield
     damage:
@@ -2146,6 +2153,7 @@
     resourceWaste: 0.8
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -2229,6 +2237,7 @@
     resourceWaste: 0.7
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -2317,6 +2326,7 @@
     resourceWaste: 0.6
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -2469,6 +2479,7 @@
     resourceWaste: 0.6
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -2555,6 +2566,7 @@
     resourceWaste: 0.5
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -2639,6 +2651,7 @@
     resourceWaste: 0.6
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -2725,6 +2738,7 @@
     resourceWaste: 0.5
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -3414,6 +3428,7 @@
     - back
     - suitStorage
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 0.5
   - type: IncreaseDamageOnWield
     damage:
@@ -3642,6 +3657,7 @@
     resourceWaste: 0.7
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3
   - type: IncreaseDamageOnWield
     damage:
@@ -3726,6 +3742,7 @@
     resourceWaste: 0.7
     safeToHitGroup: structure
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3.5
   - type: IncreaseDamageOnWield
     damage:
@@ -3937,6 +3954,7 @@
     soundHit:
       path: /Audio/Weapons/bladeslice.ogg
   - type: Wieldable
+    useDelayOnWield: false
     #wieldTime: 3.5
   - type: IncreaseDamageOnWield
     damage:
@@ -5268,6 +5286,7 @@
         Structural: 18
         ParryAble: 1
   - type: Wieldable
+    useDelayOnWield: false
   - type: IncreaseDamageOnWield
     damage:
       types:
@@ -5331,6 +5350,7 @@
         Structural: 9
         ParryAble: 1
   - type: Wieldable
+    useDelayOnWield: false
   - type: IncreaseDamageOnWield
     damage:
       types:
@@ -5534,6 +5554,7 @@
     sprite: Imperial/Medieval/Melee/cavalery_spear.rsi
     state: spear
   - type: Wieldable
+    useDelayOnWield: false
   - type: Item
     size: Huge
   - type: Clothing
