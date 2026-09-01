@@ -64,7 +64,7 @@
         Burn: 12
   - type: MedievalTargetSpell
   - type: Action
-    useDelay: 300
+    useDelay: 120
     itemIconStyle: BigAction
     sound: !type:SoundPathSpecifier
       path: /Audio/Imperial/Medieval/mob_spawn_effect.ogg

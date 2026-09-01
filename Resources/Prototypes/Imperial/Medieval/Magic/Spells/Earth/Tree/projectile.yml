@@ -154,8 +154,8 @@
   - type: TriggerOnSpawn
   - type: RandomOffsetSpawn
     spawnedEntityID: RandomFloraTreeNoRoots
-    radius: 16
-    quantity: 5
+    radius: 6
+    quantity: 4
 
 # Senior
 
@@ -165,5 +165,5 @@
   - type: TriggerOnSpawn
   - type: RandomOffsetSpawn
     spawnedEntityID: RandomFloraTreeNoRoots
-    radius: 40
-    quantity: 20
+    radius: 10
+    quantity: 7
