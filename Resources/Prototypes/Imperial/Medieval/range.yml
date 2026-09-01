@@ -187,6 +187,10 @@
     rotation: -135
     layers:
     - state: proto
+  - type: APDamageOnHit
+    damage:
+      types:
+        Blunt: 100
 
 - type: entity
   parent: BaseCartridge
