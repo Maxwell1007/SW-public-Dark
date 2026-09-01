@@ -13,5 +13,5 @@
     energy: 2
     color: "#AB8C00"
   - type: TimedDespawn
-    lifetime: 1
+    lifetime: 5
       

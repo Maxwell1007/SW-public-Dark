@@ -7,7 +7,7 @@
   components:
   - type: ManaDrainSpell
     manaDrain: 20
-    canUseWithoutMana: true
+    canUseWithoutMana: false
     manaLowMessage: medieval-spell-speach-not-enough-mana-fire-spell
     damageOnUseWithoutMana:
       groups:
@@ -16,7 +16,7 @@
     effectProto: SeedlingsSpellCastEffectBeginner
   - type: MedievalTargetSpell
   - type: Action
-    useDelay: 20
+    useDelay: 60
     itemIconStyle: BigAction
     sound: !type:SoundPathSpecifier
       path: /Audio/Imperial/Medieval/mob_spawn_effect.ogg
@@ -31,7 +31,7 @@
       spawnedEntityPrototype: MedievalSeedlingsBeginner
       spawnType: SpawnOnMousePosition
       spellCastDoAfter:
-        delay: 1
+        delay: 3
         breakOnDropItem: false
         breakOnWeightlessMove: false
         breakOnMove: false
@@ -57,14 +57,14 @@
   components:
   - type: ManaDrainSpell
     manaDrain: 50
-    canUseWithoutMana: true
+    canUseWithoutMana: false
     manaLowMessage: medieval-spell-speach-not-enough-mana-fire-spell
     damageOnUseWithoutMana:
       groups:
         Burn: 12
   - type: MedievalTargetSpell
   - type: Action
-    useDelay: 50
+    useDelay: 300
     itemIconStyle: BigAction
     sound: !type:SoundPathSpecifier
       path: /Audio/Imperial/Medieval/mob_spawn_effect.ogg
@@ -79,7 +79,7 @@
       spawnedEntityPrototype: MedievalSeedlingsMiddle
       spawnType: SpawnOnMousePosition
       spellCastDoAfter:
-        delay: 1
+        delay: 15
         breakOnDropItem: false
         breakOnWeightlessMove: false
         breakOnMove: false
