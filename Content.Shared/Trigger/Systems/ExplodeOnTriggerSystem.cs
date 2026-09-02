@@ -1,4 +1,5 @@
 using Content.Shared.Explosion.EntitySystems;
+using Content.Shared.Projectiles;
 using Content.Shared.Trigger.Components.Effects;
 
 namespace Content.Shared.Trigger.Systems;
@@ -25,7 +26,11 @@ public sealed class ExplodeOnTriggerSystem : EntitySystem
         if (target == null)
             return;
 
-        _explosion.TriggerExplosive(target.Value, user: args.User);
+        var user = args.User;
+        if (TryComp<ProjectileComponent>(ent.Owner, out var projectile) && projectile.Shooter != null)
+            user = projectile.Shooter;
+
+        _explosion.TriggerExplosive(target.Value, user: user);
         args.Handled = true;
     }
 

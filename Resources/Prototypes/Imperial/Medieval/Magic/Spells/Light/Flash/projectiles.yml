@@ -4,14 +4,14 @@
   id: MedievalProjectileFlashBeginner
   name: Flash
   description: You my sunshine
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Magic/Light/Flash/projectiles.rsi
     layers:
     - state: beginner
       shader: unshaded
-  - type: MedievalStaminaDamageOnCollide
+  - type: StaminaDamageOnCollide
     damage: 16
   - type: Explosive
     explosionType: Cryo
@@ -33,14 +33,14 @@
   id: MedievalProjectileFlashMiddle
   name: Flash
   description: You my sunshine
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Magic/Light/Flash/projectiles.rsi
     layers:
     - state: beginner
       shader: unshaded
-  - type: MedievalStaminaDamageOnCollide
+  - type: StaminaDamageOnCollide
     damage: 24
   - type: Explosive
     explosionType: Cryo

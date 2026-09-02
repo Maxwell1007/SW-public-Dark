@@ -2,7 +2,7 @@
 
 - type: entity
   id: MedievalProjectileMagicArrowCursorFolloverBeginner
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -11,7 +11,7 @@
     layers:
     - state: cursor
       shader: unshaded
-  - type: MedievalStaminaDamageOnCollide
+  - type: StaminaDamageOnCollide
     damage: 3
   - type: Explosive
     explosionType: Cryo
@@ -31,7 +31,7 @@
 
 - type: entity
   id: MedievalProjectileMagicArrowCursorFolloverMiddle
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -40,7 +40,7 @@
     layers:
     - state: cursor
       shader: unshaded
-  - type: MedievalStaminaDamageOnCollide
+  - type: StaminaDamageOnCollide
     damage: 3
   - type: Explosive
     explosionType: Cryo
@@ -60,7 +60,7 @@
 
 - type: entity
   id: MedievalProjectileMagicArrowCursorFolloverSenior
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -69,7 +69,7 @@
     layers:
     - state: cursor
       shader: unshaded
-  - type: MedievalStaminaDamageOnCollide
+  - type: StaminaDamageOnCollide
     damage: 9
   - type: Explosive
     explosionType: Cryo

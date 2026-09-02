@@ -2,7 +2,7 @@
 
 - type: entity
   id: MedievalProjectileFireballBeginner
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -53,7 +53,7 @@
 
 - type: entity
   id: MedievalProjectileFireballMiddle
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -108,7 +108,7 @@
 
 - type: entity
   id: MedievalProjectileFireballSenior
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:

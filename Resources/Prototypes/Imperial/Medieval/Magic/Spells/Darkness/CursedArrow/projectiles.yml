@@ -2,14 +2,14 @@
   id: MedievalProjectileCursedArrow
   name: fireball
   description: You better GITTAH WEIGH.
-  parent: MedievalSpellBulletRocket
+  parent: BulletRocket
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Magic/Darkness/CursedArrow/projectiles.rsi
     layers:
     - state: kunai
       shader: unshaded
-  - type: MedievalStaminaDamageOnCollide
+  - type: StaminaDamageOnCollide
     damage: 15
   - type: Explosive
     explosionType: Cryo
