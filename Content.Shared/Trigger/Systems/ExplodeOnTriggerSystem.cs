@@ -26,11 +26,7 @@ public sealed class ExplodeOnTriggerSystem : EntitySystem
         if (target == null)
             return;
 
-        var user = args.User;
-        if (TryComp<ProjectileComponent>(ent.Owner, out var projectile) && projectile.Shooter != null)
-            user = projectile.Shooter;
-
-        _explosion.TriggerExplosive(target.Value, user: user);
+        _explosion.TriggerExplosive(target.Value, user: GetTriggerUser(ent.Owner, args.User));
         args.Handled = true;
     }
 
@@ -53,7 +49,15 @@ public sealed class ExplodeOnTriggerSystem : EntitySystem
                                     comp.TileBreakScale,
                                     comp.MaxTileBreak,
                                     comp.CanCreateVacuum,
-                                    args.User);
+                                    GetTriggerUser(uid, args.User));
         args.Handled = true;
+    }
+
+    private EntityUid? GetTriggerUser(EntityUid uid, EntityUid? user)
+    {
+        if (TryComp<ProjectileComponent>(uid, out var projectile) && projectile.Shooter != null)
+            return projectile.Shooter;
+
+        return user;
     }
 }

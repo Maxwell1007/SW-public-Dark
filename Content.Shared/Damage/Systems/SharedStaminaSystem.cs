@@ -236,7 +236,7 @@ public abstract partial class SharedStaminaSystem : EntitySystem
             target,
             component.Damage,
             source: source ?? uid,
-            with: uid,
+            with: source != null ? uid : null,
             sound: component.Sound);
     }
 
