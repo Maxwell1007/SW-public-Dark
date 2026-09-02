@@ -60,7 +60,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
                 var position = _transformSystem.GetWorldPosition(entity);
                 var wavePosition = _transformSystem.GetWorldPosition(uid);
 
-                if (!EntityInRange(wavePosition, position, innerRadius)) continue;
+                if (!EntityOutsideRange(wavePosition, position, innerRadius)) continue;
 
                 component.CollidedEntities.Add(entity);
 
@@ -112,7 +112,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
 
     #region Helpers
 
-    private bool EntityInRange(Vector2 v1, Vector2 v2, float range)
+    private bool EntityOutsideRange(Vector2 v1, Vector2 v2, float range)
     {
         var dx = v1.X - v2.X;
         var dy = v1.Y - v2.Y;
