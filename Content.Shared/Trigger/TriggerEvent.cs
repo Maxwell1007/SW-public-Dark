@@ -9,9 +9,8 @@ namespace Content.Shared.Trigger;
 /// Setting this to null will activate all triggers.
 /// </param>
 /// <param name="Handled">Marks the event as handled if at least one trigger effect was activated.</param>
-/// <param name="Target">An optional explicit target for effects that target the trigger user.</param>
 [ByRefEvent]
-public record struct TriggerEvent(EntityUid? User = null, string? Key = null, bool Handled = false, EntityUid? Target = null);
+public record struct TriggerEvent(EntityUid? User = null, string? Key = null, bool Handled = false);
 
 /// <summary>
 /// Raised before a trigger is activated.

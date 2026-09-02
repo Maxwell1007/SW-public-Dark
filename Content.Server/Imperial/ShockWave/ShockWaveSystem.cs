@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server.Explosion.EntitySystems;
+using Content.Shared.Damage.Components;
+using Content.Shared.Damage.Systems;
 using Content.Shared.EntityEffects;
 using Content.Shared.Imperial.ShockWave;
 using Content.Shared.Imperial.Medieval.Magic;
@@ -18,6 +20,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
     [Dependency] private readonly EntityLookupSystem _lookupSystem = default!;
     [Dependency] private readonly TransformSystem _transformSystem = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly SharedStaminaSystem _stamina = default!;
 
 
     public override void Initialize()
@@ -26,6 +29,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
 
         SubscribeLocalEvent<ShockWaveComponent, ComponentStartup>(OnInit);
         SubscribeLocalEvent<ShockWaveComponent, MedievalAfterSpawnEntityBySpellEvent>(OnSpellSpawned);
+        SubscribeLocalEvent<ShockWaveStaminaDamageComponent, ShockWaveEntityCollideEvent>(OnStaminaHit);
     }
 
     public override void Update(float frameTime)
@@ -45,6 +49,9 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
 
             if (radius <= 0) continue;
 
+            var innerRadius = MathF.Max(0f, component.PreviousRadius - component.BorderWidth);
+            component.PreviousRadius = radius;
+
             var collidedEntities = _lookupSystem.GetEntitiesInRange(uid, radius, component.CollideFlags);
 
             foreach (var entity in collidedEntities)
@@ -53,11 +60,11 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
                 var position = _transformSystem.GetWorldPosition(entity);
                 var wavePosition = _transformSystem.GetWorldPosition(uid);
 
-                if (!EntityInRange(wavePosition, position, radius - component.BorderWidth)) continue;
+                if (!EntityInRange(wavePosition, position, innerRadius)) continue;
 
                 component.CollidedEntities.Add(entity);
 
-                var triggerEv = new TriggerEvent(component.User, Target: entity);
+                var triggerEv = new TriggerEvent(entity);
 
                 RaiseLocalEvent(uid, new ShockWaveEntityCollideEvent(uid, entity));
                 RaiseLocalEvent(uid, ref triggerEv, true);
@@ -78,6 +85,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
     private void OnInit(EntityUid uid, ShockWaveComponent component, ComponentStartup args)
     {
         component.SpawnTime = _timing.CurTime;
+        component.PreviousRadius = 0f;
 
         _pvs.AddGlobalOverride(uid);
     }
@@ -85,6 +93,21 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
     private void OnSpellSpawned(EntityUid uid, ShockWaveComponent component, MedievalAfterSpawnEntityBySpellEvent args)
     {
         component.User = args.Performer;
+    }
+
+    private void OnStaminaHit(EntityUid uid, ShockWaveStaminaDamageComponent component, ShockWaveEntityCollideEvent args)
+    {
+        if (!TryComp<StaminaComponent>(args.Collided, out var stamina))
+            return;
+
+        var user = Comp<ShockWaveComponent>(uid).User;
+
+        _stamina.TakeStaminaDamage(args.Collided,
+            component.Stamina,
+            stamina,
+            source: user,
+            with: uid,
+            sound: component.Sound);
     }
 
     #region Helpers

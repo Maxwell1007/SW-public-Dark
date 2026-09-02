@@ -32,6 +32,9 @@ public sealed partial class ShockWaveComponent : Component
     public TimeSpan SpawnTime = TimeSpan.FromSeconds(0);
 
     [ViewVariables]
+    public float PreviousRadius;
+
+    [ViewVariables]
     public EntityUid? User;
 
     [ViewVariables]
