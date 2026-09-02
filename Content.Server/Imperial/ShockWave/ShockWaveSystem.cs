@@ -3,6 +3,7 @@ using System.Numerics;
 using Content.Server.Explosion.EntitySystems;
 using Content.Shared.EntityEffects;
 using Content.Shared.Imperial.ShockWave;
+using Content.Shared.Imperial.Medieval.Magic;
 using Content.Shared.Trigger;
 using Robust.Server.GameObjects;
 using Robust.Server.GameStates;
@@ -24,6 +25,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
         base.Initialize();
 
         SubscribeLocalEvent<ShockWaveComponent, ComponentStartup>(OnInit);
+        SubscribeLocalEvent<ShockWaveComponent, MedievalAfterSpawnEntityBySpellEvent>(OnSpellSpawned);
     }
 
     public override void Update(float frameTime)
@@ -55,7 +57,7 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
 
                 component.CollidedEntities.Add(entity);
 
-                var triggerEv = new TriggerEvent(entity);
+                var triggerEv = new TriggerEvent(component.User, Target: entity);
 
                 RaiseLocalEvent(uid, new ShockWaveEntityCollideEvent(uid, entity));
                 RaiseLocalEvent(uid, ref triggerEv, true);
@@ -78,6 +80,11 @@ public sealed class ShockWaveSystem : SharedShockWaveSystem
         component.SpawnTime = _timing.CurTime;
 
         _pvs.AddGlobalOverride(uid);
+    }
+
+    private void OnSpellSpawned(EntityUid uid, ShockWaveComponent component, MedievalAfterSpawnEntityBySpellEvent args)
+    {
+        component.User = args.Performer;
     }
 
     #region Helpers

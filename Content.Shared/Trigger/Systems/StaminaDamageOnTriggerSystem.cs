@@ -20,7 +20,7 @@ public sealed class StaminaDamageOnTriggerSystem : EntitySystem
         if (args.Key != null && !ent.Comp.KeysIn.Contains(args.Key))
             return;
 
-        var target = ent.Comp.TargetUser ? args.User : ent.Owner;
+        var target = ent.Comp.TargetUser ? args.Target ?? args.User : ent.Owner;
 
         if (target == null)
             return;

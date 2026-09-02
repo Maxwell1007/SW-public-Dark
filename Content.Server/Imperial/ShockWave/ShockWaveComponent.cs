@@ -32,5 +32,8 @@ public sealed partial class ShockWaveComponent : Component
     public TimeSpan SpawnTime = TimeSpan.FromSeconds(0);
 
     [ViewVariables]
+    public EntityUid? User;
+
+    [ViewVariables]
     public List<EntityUid> CollidedEntities = new();
 }
