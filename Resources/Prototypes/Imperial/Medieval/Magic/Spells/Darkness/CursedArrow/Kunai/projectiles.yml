@@ -2,7 +2,7 @@
 
 - type: entity
   id: MedievalProjectileCursedArrowKunaiBeginner
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -11,7 +11,7 @@
     layers:
     - state: kunai
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 3
   - type: Explosive
     explosionType: Cryo
@@ -29,7 +29,7 @@
 
 - type: entity
   id: MedievalProjectileCursedArrowKunaiMiddle
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -38,7 +38,7 @@
     layers:
     - state: kunai
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 3
   - type: Explosive
     explosionType: Cryo
@@ -56,7 +56,7 @@
 
 - type: entity
   id: MedievalProjectileCursedArrowKunaiSenior
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -65,7 +65,7 @@
     layers:
     - state: kunai
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 9
   - type: Explosive
     explosionType: Cryo

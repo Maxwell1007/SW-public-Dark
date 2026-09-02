@@ -4,14 +4,14 @@
   id: MedievalProjectileDisablerBeginner
   name: Disabler spell
   description: OH FUCK. WIZARD HAVE A STUNNER
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   components:
   - type: Sprite
     sprite: Objects/Weapons/Guns/Projectiles/projectiles_tg.rsi
     layers:
     - state: omnilaser
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 36
   - type: Explosive
     explosionType: Cryo
@@ -30,14 +30,14 @@
   id: MedievalProjectileDisablerMiddle
   name: Disabler spell
   description: OH FUCK. WIZARD HAVE A STUNNER
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   components:
   - type: Sprite
     sprite: Objects/Weapons/Guns/Projectiles/projectiles_tg.rsi
     layers:
     - state: omnilaser
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 64
   - type: Explosive
     explosionType: Cryo

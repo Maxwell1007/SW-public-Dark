@@ -26,7 +26,7 @@
 
 - type: entity
   id: BloodArrow
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   name: blood arrow
   components:
   - type: Sprite
@@ -34,7 +34,7 @@
     layers:
     - state: blood-arrow
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 1
   - type: Explosive
     explosionType: Cryo

@@ -2,7 +2,7 @@
 
 - type: entity
   id: MedievalProjectileMagicArrowBeginner
-  parent: BulletRocket
+  parent: MedievalSpellBulletRocket
   name: fireball
   description: You better GITTAH WEIGH.
   components:
@@ -11,7 +11,7 @@
     layers:
     - state: kunai
       shader: unshaded
-  - type: StaminaDamageOnCollide
+  - type: MedievalStaminaDamageOnCollide
     damage: 1
   - type: Explosive
     explosionType: Cryo
