@@ -14,11 +14,14 @@
   components:
   - type: TimedDespawn
     lifetime: 9
+  - type: DamageAble
+    damageContainer: Inorganic
+    damageModifierSet: Metallic
   - type: Destructible
     thresholds:
       - trigger:
           !type:DamageTrigger
-          damage: 1415
+          damage: 200
         behaviors:
           - !type:DoActsBehavior
             acts: ["Destruction"]
