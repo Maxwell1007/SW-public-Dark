@@ -45,6 +45,8 @@
             <BoxContainer Orientation="Vertical" HorizontalExpand="True">
                 <Label Text="{Loc trading-ui-active-offers-title}" Margin="4" />
                 <BoxContainer Name="ManagedOffersContainer" Orientation="Vertical" HorizontalExpand="True" />
+                <Label Text="{Loc trading-ui-pending-sales-title}" Margin="4 12 4 4" />
+                <BoxContainer Name="PendingSalesContainer" Orientation="Vertical" HorizontalExpand="True" />
                 <Label Text="{Loc trading-ui-stored-items-title}" Margin="4 12 4 4" />
                 <BoxContainer Name="StoredItemsContainer" Orientation="Vertical" HorizontalExpand="True" />
             </BoxContainer>

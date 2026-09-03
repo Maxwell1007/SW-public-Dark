@@ -146,11 +146,29 @@ public sealed class TradingStoredItemState
 }
 
 [Serializable, NetSerializable]
+public sealed class TradingPendingSaleState
+{
+    public Guid Id;
+    public string ItemName;
+    public string BuyerName;
+    public int Price;
+
+    public TradingPendingSaleState(Guid id, string itemName, string buyerName, int price)
+    {
+        Id = id;
+        ItemName = itemName;
+        BuyerName = buyerName;
+        Price = price;
+    }
+}
+
+[Serializable, NetSerializable]
 public sealed class TradingUpdateState : BoundUserInterfaceState
 {
     public List<TradingMarketItemState> Items;
     public List<TradingMarketOfferState> Offers;
     public List<TradingStoredItemState> StoredItems;
+    public List<TradingPendingSaleState> PendingSales;
     public List<string> Archive;
     public int Balance;
     public ProtoId<CurrencyPrototype> Currency;
@@ -160,6 +178,7 @@ public sealed class TradingUpdateState : BoundUserInterfaceState
         List<TradingMarketItemState> items,
         List<TradingMarketOfferState> offers,
         List<TradingStoredItemState> storedItems,
+        List<TradingPendingSaleState> pendingSales,
         List<string> archive,
         int balance,
         ProtoId<CurrencyPrototype> currency,
@@ -168,6 +187,7 @@ public sealed class TradingUpdateState : BoundUserInterfaceState
         Items = items;
         Offers = offers;
         StoredItems = storedItems;
+        PendingSales = pendingSales;
         Archive = archive;
         Balance = balance;
         Currency = currency;
@@ -275,6 +295,12 @@ public sealed class TradingCancelOfferMessage(Guid offerId) : BoundUserInterface
 public sealed class TradingCollectStoredItemMessage(NetEntity item) : BoundUserInterfaceMessage
 {
     public NetEntity Item = item;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingCollectSaleRevenueMessage(Guid saleId) : BoundUserInterfaceMessage
+{
+    public Guid SaleId = saleId;
 }
 
 [Serializable, NetSerializable]

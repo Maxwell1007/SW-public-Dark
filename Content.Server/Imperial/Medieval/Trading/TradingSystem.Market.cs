@@ -373,13 +373,17 @@ public sealed partial class TradingSystem
         }
 
         var executionPrice = ask.Sequence < bid.Sequence ? ask.Price : bid.Price;
-        ArchiveTrade(commodity, ask, bid, executionPrice);
+        var sellerPayoutDeferred = ArchiveTrade(commodity, ask, bid, executionPrice);
 
         if (bid.Pit is { } buyerPit && TryComp<TradingComponent>(buyerPit, out var buyer))
             buyer.Balance += bid.Price - executionPrice;
 
-        if (ask.Pit is { } sellerPit && TryComp<TradingComponent>(sellerPit, out var seller))
+        if (!sellerPayoutDeferred &&
+            ask.Pit is { } sellerPit &&
+            TryComp<TradingComponent>(sellerPit, out var seller))
+        {
             seller.Balance += executionPrice;
+        }
 
         if (ask.Item is { } item)
         {
@@ -416,13 +420,14 @@ public sealed partial class TradingSystem
         return container.Owner == sellerPit && container.ID == TradingComponent.MarketContainerId;
     }
 
-    private void ArchiveTrade(
+    private bool ArchiveTrade(
         TradingCommodity commodity,
         TradingMarketOffer ask,
         TradingMarketOffer bid,
         int executionPrice)
     {
         var displayName = commodity.DisplayName;
+        var sellerPayoutDeferred = false;
         if (ask.Item is { } item && Exists(item))
         {
             var metadata = MetaData(item);
@@ -435,12 +440,14 @@ public sealed partial class TradingSystem
             ask.Pit is { } sellerPit &&
             TryComp<TradingComponent>(sellerPit, out var seller))
         {
-            seller.MarketArchive.Add(
-                Loc.GetString(
-                    "trading-ui-archive-sell-entry",
-                    ("item", displayName),
-                    ("trader", bid.ParticipantName),
-                    ("price", executionPrice)));
+            seller.PendingSales.Add(new TradingPendingSale
+            {
+                Id = ask.Id,
+                ItemName = displayName,
+                BuyerName = bid.ParticipantName,
+                Price = executionPrice,
+            });
+            sellerPayoutDeferred = true;
         }
 
         if (bid.ParticipantKind == TradingParticipantKind.Trader &&
@@ -455,6 +462,8 @@ public sealed partial class TradingSystem
                     ("trader", ask.ParticipantName),
                     ("price", executionPrice)));
         }
+
+        return sellerPayoutDeferred;
     }
 
     internal void RemoveOffer(

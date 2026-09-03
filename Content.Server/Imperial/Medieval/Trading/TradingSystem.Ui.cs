@@ -52,6 +52,7 @@ public sealed partial class TradingSystem
         SubscribeLocalEvent<TradingComponent, TradingCreateBuyOfferFromHeldMessage>(OnCreateBuyOfferFromHeld);
         SubscribeLocalEvent<TradingComponent, TradingCancelOfferMessage>(OnCancelOffer);
         SubscribeLocalEvent<TradingComponent, TradingCollectStoredItemMessage>(OnCollectStoredItem);
+        SubscribeLocalEvent<TradingComponent, TradingCollectSaleRevenueMessage>(OnCollectSaleRevenue);
         SubscribeLocalEvent<TradingComponent, TradingExamineItemMessage>(OnExamineItem);
         SubscribeLocalEvent<TradingComponent, TradingExecuteExamineVerbMessage>(OnExecuteExamineVerb);
         SubscribeLocalEvent<TradingComponent, TradingRequestWithdrawMessage>(OnRequestWithdraw);
@@ -162,6 +163,14 @@ public sealed partial class TradingSystem
             })
             .ToList();
 
+        var pendingSales = (isOwner ? component.PendingSales : [])
+            .Select(sale => new TradingPendingSaleState(
+                sale.Id,
+                sale.ItemName,
+                sale.BuyerName,
+                sale.Price))
+            .ToList();
+
         _ui.ServerSendUiMessage(
             store,
             TradingUiKey.Key,
@@ -170,6 +179,7 @@ public sealed partial class TradingSystem
                     items,
                     offers,
                     storedItems,
+                    pendingSales,
                     isOwner ? new List<string>(component.MarketArchive) : [],
                     isOwner ? component.Balance : 0,
                     component.Currency,
@@ -839,6 +849,31 @@ public sealed partial class TradingSystem
             return;
 
         DeliverItem(uid, component, item, msg.Actor);
+        UpdateUserInterface(msg.Actor, uid, component);
+    }
+
+    private void OnCollectSaleRevenue(
+        EntityUid uid,
+        TradingComponent component,
+        TradingCollectSaleRevenueMessage msg)
+    {
+        if (!IsTradingPitOwner(msg.Actor, component))
+            return;
+
+        var index = component.PendingSales.FindIndex(sale => sale.Id == msg.SaleId);
+        if (index < 0)
+            return;
+
+        var sale = component.PendingSales[index];
+        component.PendingSales.RemoveAt(index);
+        component.Balance += sale.Price;
+        component.MarketArchive.Add(
+            Loc.GetString(
+                "trading-ui-archive-sell-entry",
+                ("item", sale.ItemName),
+                ("trader", sale.BuyerName),
+                ("price", sale.Price)));
+        ShowTradingSuccess(msg.Actor, uid, component, "trading-ui-sale-revenue-collected");
         UpdateUserInterface(msg.Actor, uid, component);
     }
 

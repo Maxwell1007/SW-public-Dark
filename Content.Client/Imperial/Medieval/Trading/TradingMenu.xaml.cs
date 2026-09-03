@@ -46,6 +46,7 @@ public sealed partial class TradingMenu : DefaultWindow
     public event Action<int>? OnCreateBuyOfferFromHeld;
     public event Action<Guid>? OnCancelOffer;
     public event Action<NetEntity>? OnCollectStoredItem;
+    public event Action<Guid>? OnCollectSaleRevenue;
     public event Action<NetEntity>? OnExamineItem;
     public event Action<int>? OnWithdraw;
 
@@ -532,6 +533,7 @@ public sealed partial class TradingMenu : DefaultWindow
     private void RebuildManagement()
     {
         ManagedOffersContainer.DisposeAllChildren();
+        PendingSalesContainer.DisposeAllChildren();
         StoredItemsContainer.DisposeAllChildren();
         if (_state == null)
             return;
@@ -565,6 +567,45 @@ public sealed partial class TradingMenu : DefaultWindow
             cancel.OnPressed += _ => OnCancelOffer?.Invoke(offer.Id);
             row.AddChild(cancel);
             ManagedOffersContainer.AddChild(row);
+        }
+
+        if (_state.PendingSales.Count == 0)
+        {
+            PendingSalesContainer.AddChild(new Label
+            {
+                Text = Loc.GetString("trading-ui-no-pending-sales"),
+            });
+        }
+
+        foreach (var sale in _state.PendingSales)
+        {
+            var message = Loc.GetString(
+                "trading-ui-pending-sale-entry",
+                ("item", sale.ItemName),
+                ("trader", sale.BuyerName),
+                ("price", sale.Price));
+            var row = new BoxContainer
+            {
+                Orientation = BoxContainer.LayoutOrientation.Horizontal,
+                HorizontalExpand = true,
+                Margin = new Thickness(4),
+            };
+            row.AddChild(new Label
+            {
+                Text = message,
+                ToolTip = message,
+                HorizontalExpand = true,
+                ClipText = true,
+                VerticalAlignment = VAlignment.Center,
+            });
+            var collect = new Button
+            {
+                Text = Loc.GetString("trading-ui-collect-sale-revenue-button"),
+                MinWidth = 150,
+            };
+            collect.OnPressed += _ => OnCollectSaleRevenue?.Invoke(sale.Id);
+            row.AddChild(collect);
+            PendingSalesContainer.AddChild(row);
         }
 
         if (_state.StoredItems.Count == 0)

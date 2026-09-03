@@ -28,8 +28,18 @@ public sealed partial class TradingComponent : Component
 
     public List<EntityUid> StoredMarketItems = new();
 
+    public List<TradingPendingSale> PendingSales = new();
+
     public List<string> MarketArchive = new();
 
     [DataField]
     public SoundSpecifier BuySuccessSound = new SoundPathSpecifier("/Audio/Effects/kaching.ogg");
+}
+
+public sealed class TradingPendingSale
+{
+    public Guid Id;
+    public string ItemName = string.Empty;
+    public string BuyerName = string.Empty;
+    public int Price;
 }
