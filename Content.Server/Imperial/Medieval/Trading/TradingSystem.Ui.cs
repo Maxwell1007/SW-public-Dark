@@ -370,12 +370,13 @@ public sealed partial class TradingSystem
                 MetaData(msg.Actor).EntityName,
                 commodity,
                 ask.Price,
-                msg.Actor))
+                msg.Actor,
+                out var bid))
         {
             return;
         }
 
-        MatchCommodity(market, commodity, _prototypeManager.Index(market.Comp.Config));
+        CompleteTrade(market, commodity, ask, bid, _prototypeManager.Index(market.Comp.Config));
         ShowTradingSuccess(msg.Actor, uid, component, "trading-ui-purchase-success");
         UpdateAllInterfaces(market);
     }
