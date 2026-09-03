@@ -400,7 +400,17 @@ public sealed partial class TradingSystem
                  bid.Pit is { } destination &&
                  TryComp<TradingComponent>(destination, out var destinationPit))
         {
-            var spawnedItem = Spawn(ask.Product, MapCoordinates.Nullspace);
+            var productPrototype = _prototypeManager.Index(ask.Product);
+            var spawnCoordinates = MapCoordinates.Nullspace;
+            if (!productPrototype.HasComponent<ItemComponent>())
+            {
+                var spawnTarget = bid.ImmediateRecipient is { } recipient && Exists(recipient)
+                    ? recipient
+                    : destination;
+                spawnCoordinates = Transform(spawnTarget).MapPosition;
+            }
+
+            var spawnedItem = Spawn(ask.Product, spawnCoordinates);
             DeliverItem(destination, destinationPit, spawnedItem, bid.ImmediateRecipient);
         }
 
@@ -529,6 +539,7 @@ public sealed partial class TradingSystem
             TerminatingOrDeleted(item) ||
             EntityManager.IsQueuedForDeletion(item) ||
             MetaData(item).EntityPrototype is not { } prototype ||
+            !prototype.HasComponent<ItemComponent>() ||
             !CanTradeProduct(prototype, config) ||
             ContainsPlayerMind(item))
         {
@@ -547,8 +558,7 @@ public sealed partial class TradingSystem
 
     private bool CanTradeProduct(EntityPrototype prototype, TradingMarketConfigPrototype config)
     {
-        if (!prototype.HasComponent<ItemComponent>() ||
-            prototype.HasComponent<VirtualItemComponent>() ||
+        if (prototype.HasComponent<VirtualItemComponent>() ||
             prototype.HasComponent<MobStateComponent>() ||
             prototype.HasComponent<TimedDespawnComponent>() ||
             prototype.HasComponent<MedievalTimedDespawnComponent>() ||
