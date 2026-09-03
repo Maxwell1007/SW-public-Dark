@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server.Verbs;
 using Content.Shared.FixedPoint;
 using Content.Shared.Examine;
 using Content.Shared.Hands.EntitySystems;
@@ -10,6 +11,7 @@ using Content.Shared.Stacks;
 using Content.Shared.Store;
 using Content.Shared.Storage;
 using Content.Shared.UserInterface;
+using Content.Shared.Verbs;
 using Robust.Server.GameObjects;
 using Robust.Server.GameStates;
 using Robust.Shared.Audio.Systems;
@@ -27,6 +29,7 @@ public sealed partial class TradingSystem
     [Dependency] private readonly UserInterfaceSystem _ui = default!;
     [Dependency] private readonly PvsOverrideSystem _pvs = default!;
     [Dependency] private readonly ExamineSystemShared _examine = default!;
+    [Dependency] private readonly VerbSystem _verbSystem = default!;
 
     private void InitializeUi()
     {
@@ -48,6 +51,7 @@ public sealed partial class TradingSystem
         SubscribeLocalEvent<TradingComponent, TradingCancelOfferMessage>(OnCancelOffer);
         SubscribeLocalEvent<TradingComponent, TradingCollectStoredItemMessage>(OnCollectStoredItem);
         SubscribeLocalEvent<TradingComponent, TradingExamineItemMessage>(OnExamineItem);
+        SubscribeLocalEvent<TradingComponent, TradingExecuteExamineVerbMessage>(OnExecuteExamineVerb);
         SubscribeLocalEvent<TradingComponent, TradingRequestWithdrawMessage>(OnRequestWithdraw);
         SubscribeLocalEvent<TradingComponent, BoundUserInterfaceMessageAttempt>(OnUiMessageAttempt);
     }
@@ -180,7 +184,8 @@ public sealed partial class TradingSystem
                 TradingRequestUpdateInterfaceMessage or
                 TradingSelectCommodityMessage or
                 TradingSelectOfferMessage or
-                TradingExamineItemMessage)
+                TradingExamineItemMessage or
+                TradingExecuteExamineVerbMessage)
         {
             return;
         }
@@ -199,7 +204,30 @@ public sealed partial class TradingSystem
         }
 
         var message = _examine.GetExamineText(item.Value, args.Actor, true);
-        _examine.SendExamineTooltip(args.Actor, item.Value, message, false, true);
+        var verbs = _verbSystem.GetLocalVerbs(item.Value, args.Actor, typeof(ExamineVerb), true);
+        _ui.ServerSendUiMessage(
+            uid,
+            TradingUiKey.Key,
+            new TradingExamineInfoMessage(GetNetEntity(item.Value), message, verbs.ToList()),
+            args.Actor);
+    }
+
+    private void OnExecuteExamineVerb(
+        EntityUid uid,
+        TradingComponent component,
+        TradingExecuteExamineVerbMessage args)
+    {
+        if (!TryGetEntity(args.Item, out var item) ||
+            !Exists(item) ||
+            !TryComp<TradingMarketViewerComponent>(args.Actor, out var viewer) ||
+            !viewer.VisibleItems.Contains(item.Value))
+        {
+            return;
+        }
+
+        var verbs = _verbSystem.GetLocalVerbs(item.Value, args.Actor, typeof(ExamineVerb), true);
+        if (verbs.TryGetValue(args.RequestedVerb, out var verb))
+            _verbSystem.ExecuteVerb(verb, args.Actor, item.Value, true);
     }
 
     private TradingMarketOfferState CreateOfferState(

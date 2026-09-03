@@ -8,10 +8,12 @@ namespace Content.Client.Imperial.Medieval.Trading;
 public sealed class TradingBoundUserInterface : BoundUserInterface
 {
     private TradingMenu? _menu;
+    private readonly TradingExamineSystem _examineSystem;
     private bool _isOwner;
 
     public TradingBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
+        _examineSystem = EntMan.System<TradingExamineSystem>();
     }
 
     protected override void Open()
@@ -52,6 +54,24 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
             _isOwner = update.State.IsOwner;
             _menu?.UpdateState(update.State);
         }
+        else if (message is TradingExamineInfoMessage examine)
+        {
+            var target = EntMan.GetEntity(examine.Item);
+            _examineSystem.Open(
+                Owner,
+                target,
+                examine.Message,
+                examine.Verbs,
+                verb => SendMessage(new TradingExecuteExamineVerbMessage(examine.Item, verb)));
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+            _examineSystem.Close(Owner);
+
+        base.Dispose(disposing);
     }
 
     private void SendOwnerMessage(BoundUserInterfaceMessage message)

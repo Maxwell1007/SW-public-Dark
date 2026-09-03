@@ -1,7 +1,9 @@
 using Content.Shared.Imperial.Medieval.Trading.Prototypes;
 using Content.Shared.Store;
+using Content.Shared.Verbs;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
+using Robust.Shared.Utility;
 
 namespace Content.Shared.Imperial.Medieval.Trading;
 
@@ -253,6 +255,26 @@ public sealed class TradingCollectStoredItemMessage(NetEntity item) : BoundUserI
 public sealed class TradingExamineItemMessage(NetEntity item) : BoundUserInterfaceMessage
 {
     public NetEntity Item = item;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingExamineInfoMessage(
+    NetEntity item,
+    FormattedMessage message,
+    List<Verb> verbs) : BoundUserInterfaceMessage
+{
+    public NetEntity Item = item;
+    public FormattedMessage Message = message;
+    public List<Verb> Verbs = verbs;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingExecuteExamineVerbMessage(
+    NetEntity item,
+    ExamineVerb requestedVerb) : BoundUserInterfaceMessage
+{
+    public NetEntity Item = item;
+    public ExamineVerb RequestedVerb = requestedVerb;
 }
 
 [Serializable, NetSerializable]
