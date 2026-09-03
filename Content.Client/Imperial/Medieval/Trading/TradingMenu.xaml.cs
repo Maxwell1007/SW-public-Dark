@@ -88,7 +88,20 @@ public sealed partial class TradingMenu : DefaultWindow
     public void UpdateState(TradingUpdateState state)
     {
         _state = state;
-        if (!state.IsOwner)
+        Title = Loc.GetString(state.IsPublic
+            ? "trading-ui-public-window-title"
+            : "trading-ui-window-title");
+        if (state.IsPublic)
+        {
+            _section = TradingMarketSection.Common;
+            _category = null;
+            _management = false;
+            _archive = false;
+            _withdrawWindow?.Close();
+            _unitSellWindow?.Close();
+            _unitSellRequest = null;
+        }
+        else if (!state.IsOwner)
         {
             _section = TradingMarketSection.Unique;
             _category = null;
@@ -104,7 +117,10 @@ public sealed partial class TradingMenu : DefaultWindow
 
         var previousSelection = _selected;
         if (_selected == null || state.Items.All(item => item.CommodityId != _selected.Value))
-            _selected = state.Items.FirstOrDefault(item => HasSection(item, _section))?.CommodityId;
+        {
+            _selected = state.Items
+                .FirstOrDefault(item => state.IsPublic || HasSection(item, _section))?.CommodityId;
+        }
 
         if (_selected != previousSelection)
         {
@@ -163,7 +179,13 @@ public sealed partial class TradingMenu : DefaultWindow
 
     private void UpdateSectionVisibility()
     {
-        if (_state is not { IsOwner: true })
+        if (_state is { IsPublic: true })
+        {
+            _section = TradingMarketSection.Common;
+            _management = false;
+            _archive = false;
+        }
+        else if (_state is not { IsOwner: true })
         {
             _section = TradingMarketSection.Unique;
             _management = false;
@@ -175,8 +197,11 @@ public sealed partial class TradingMenu : DefaultWindow
         ManagementView.Visible = _management;
         ArchiveView.Visible = _archive;
         SearchBar.Visible = marketVisible;
-        BalancePanel.Visible = _state?.IsOwner == true;
+        BalancePanel.Visible = _state is { IsOwner: true } or { IsPublic: true };
+        HelpButton.Visible = _state?.IsOwner == true;
+        WithdrawButton.Visible = _state?.IsOwner == true;
         CommonButton.Visible = _state?.IsOwner == true;
+        UniqueButton.Visible = _state?.IsPublic != true;
         ManagementButton.Visible = _state?.IsOwner == true;
         ArchiveButton.Visible = _state?.IsOwner == true;
         OfferCreationPanel.Visible = marketVisible && _state?.IsOwner == true;
@@ -202,9 +227,18 @@ public sealed partial class TradingMenu : DefaultWindow
     private void RebuildCategories()
     {
         CategoryContainer.DisposeAllChildren();
-        CategoryContainer.Visible = !_management && !_archive && _section == TradingMarketSection.Common;
-        if (_management || _archive || _section != TradingMarketSection.Common || _state == null)
+        CategoryContainer.Visible = !_management &&
+                                    !_archive &&
+                                    _section == TradingMarketSection.Common &&
+                                    _state?.IsPublic != true;
+        if (_management ||
+            _archive ||
+            _section != TradingMarketSection.Common ||
+            _state == null ||
+            _state.IsPublic)
+        {
             return;
+        }
 
         var all = new Button
         {
@@ -253,7 +287,10 @@ public sealed partial class TradingMenu : DefaultWindow
 
         var search = SearchBar.Text.Trim();
         var filtered = _state.Items
-            .Where(item => string.IsNullOrEmpty(search)
+            .Where(item => _state.IsPublic
+                ? string.IsNullOrEmpty(search) ||
+                  item.DisplayName.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                : string.IsNullOrEmpty(search)
                 ? HasSection(item, _section) &&
                   (_section == TradingMarketSection.Unique || _category == null || item.Categories.Contains(_category.Value))
                 : item.DisplayName.Contains(search, StringComparison.CurrentCultureIgnoreCase))
@@ -352,7 +389,7 @@ public sealed partial class TradingMenu : DefaultWindow
         var buy = new Button
         {
             Text = item.LowestSellPrice?.ToString() ?? "—",
-            Disabled = !_state!.IsOwner ||
+            Disabled = (!_state!.IsOwner && !_state.IsPublic) ||
                        item.LowestSellPrice == null ||
                        item.LowestSellPrice > _state.Balance,
             HorizontalExpand = true,
@@ -361,7 +398,7 @@ public sealed partial class TradingMenu : DefaultWindow
         buy.Label.FontColorOverride = Color.White;
         buy.OnPressed += _ => OnBuy?.Invoke(item.CommodityId);
         actions.AddChild(buy);
-        if (HasSection(item, TradingMarketSection.Unique))
+        if (!_state.IsPublic && HasSection(item, TradingMarketSection.Unique))
         {
             var sell = new Button
             {
@@ -488,7 +525,8 @@ public sealed partial class TradingMenu : DefaultWindow
                 {
                     Text = offer.Price.ToString(),
                     MinWidth = 76,
-                    Disabled = !_state.IsOwner ||
+                    Disabled = (!_state.IsOwner &&
+                                !(_state.IsPublic && offer.Side == TradingOfferSide.Sell)) ||
                                offer.IsOwn ||
                                offer.Side == TradingOfferSide.Sell && offer.Price > _state.Balance,
                     StyleBoxOverride = offer.Side == TradingOfferSide.Sell

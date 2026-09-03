@@ -10,6 +10,7 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
     private TradingMenu? _menu;
     private readonly TradingExamineSystem _examineSystem;
     private bool _isOwner;
+    private bool _canBuy;
 
     public TradingBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
@@ -20,9 +21,9 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
     {
         base.Open();
         _menu = this.CreateWindow<TradingMenu>();
-        _menu.OnBuy += commodity => SendOwnerMessage(new TradingBuyMessage(commodity));
+        _menu.OnBuy += commodity => SendPurchaseMessage(new TradingBuyMessage(commodity));
         _menu.OnSell += commodity => SendOwnerMessage(new TradingSellMessage(commodity));
-        _menu.OnBuyOffer += offer => SendOwnerMessage(new TradingBuyOfferMessage(offer));
+        _menu.OnBuyOffer += offer => SendPurchaseMessage(new TradingBuyOfferMessage(offer));
         _menu.OnSellOffer += offer => SendOwnerMessage(new TradingSellOfferMessage(offer));
         _menu.OnSelectCommodity += commodity => SendMessage(new TradingSelectCommodityMessage(commodity));
         _menu.OnSelectOffer += offer => SendMessage(new TradingSelectOfferMessage(offer));
@@ -46,6 +47,7 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
         if (state is TradingUpdateState update)
         {
             _isOwner = update.IsOwner;
+            _canBuy = update.IsOwner || update.IsPublic;
             _menu?.UpdateState(update);
         }
     }
@@ -56,6 +58,7 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
         if (message is TradingUpdateInterfaceMessage update)
         {
             _isOwner = update.State.IsOwner;
+            _canBuy = update.State.IsOwner || update.State.IsPublic;
             _menu?.UpdateState(update.State);
         }
         else if (message is TradingExamineInfoMessage examine)
@@ -85,6 +88,12 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
     private void SendOwnerMessage(BoundUserInterfaceMessage message)
     {
         if (_isOwner)
+            SendMessage(message);
+    }
+
+    private void SendPurchaseMessage(BoundUserInterfaceMessage message)
+    {
+        if (_canBuy)
             SendMessage(message);
     }
 }

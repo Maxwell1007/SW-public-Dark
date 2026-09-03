@@ -38,6 +38,7 @@ ent-TradeTerminal = trade crystal
 trading-ui-invalid-offer-price = Invalid offer value
 
 trading-ui-window-title = Guild Market
+trading-ui-public-window-title = Public Trading Pit
 trading-ui-help-button = Help
 trading-ui-withdraw-button = Withdraw funds
 trading-ui-common-button = Common
@@ -100,9 +101,14 @@ trading-ui-unit-sell-offer-invalidated = The items were moved or changed. Try ag
 trading-ui-sale-revenue-collected = Revents collected
 trading-ui-buy-order-created = Order created successfully
 trading-ui-insufficient-order-funds = Insufficient funds for the order
+trading-ui-insufficient-purchase-funds = Not enough revents for the purchase
 trading-ui-purchase-success = Purchase completed successfully
 trading-ui-sale-success = Sale completed successfully
 trading-ui-archive-sell-entry = Your lot “{$item}” was bought by {$trader} for {$price} revents
 trading-ui-archive-buy-entry = Your order for “{$item}” was fulfilled by {$trader} for {$price} revents
 trading-personal-pit-name = personal trading pit
+
+ent-MedievalPublicShopHole = public trading pit
+    .desc = A shared market where anyone can buy lots listed by merchants.
+    .suffix = { "Medieval, public" }
 

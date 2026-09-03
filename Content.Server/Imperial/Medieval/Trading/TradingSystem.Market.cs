@@ -375,8 +375,12 @@ public sealed partial class TradingSystem
         var executionPrice = ask.Sequence < bid.Sequence ? ask.Price : bid.Price;
         var sellerPayoutDeferred = ArchiveTrade(commodity, ask, bid, executionPrice);
 
-        if (bid.Pit is { } buyerPit && TryComp<TradingComponent>(buyerPit, out var buyer))
+        if (!bid.UsesExternalFunds &&
+            bid.Pit is { } buyerPit &&
+            TryComp<TradingComponent>(buyerPit, out var buyer))
+        {
             buyer.Balance += bid.Price - executionPrice;
+        }
 
         if (!sellerPayoutDeferred &&
             ask.Pit is { } sellerPit &&
@@ -475,7 +479,7 @@ public sealed partial class TradingSystem
         if (!market.Comp.Offers.TryGetValue(id, out var offer))
             return;
 
-        if (offer.Side == TradingOfferSide.Buy)
+        if (offer.Side == TradingOfferSide.Buy && !offer.UsesExternalFunds)
         {
             if (offer.Pit is { } buyerId && TryComp<TradingComponent>(buyerId, out var buyer))
                 buyer.Balance += offer.Price;

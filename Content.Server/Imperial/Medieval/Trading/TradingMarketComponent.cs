@@ -70,6 +70,7 @@ public sealed class TradingMarketOffer
     public EntityUid? Item;
     public string ListedItemName = string.Empty;
     public bool IsImmediate;
+    public bool UsesExternalFunds;
     public int Sequence;
 }
 

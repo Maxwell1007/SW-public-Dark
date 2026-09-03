@@ -22,6 +22,7 @@ trading-ui-stats-entry = {$name}: {$reputation}
 trading-ui-invalid-offer-price = Недопустимое значение для заявки
 
 trading-ui-window-title = Рынок гильдий
+trading-ui-public-window-title = Общая торговая яма
 trading-ui-help-button = Помощь
 trading-ui-withdraw-button = Снять средства
 trading-ui-common-button = Общие
@@ -84,8 +85,13 @@ trading-ui-unit-sell-offer-invalidated = Предметы были переме�
 trading-ui-sale-revenue-collected = Ревенты получены
 trading-ui-buy-order-created = Заказ успешно создан
 trading-ui-insufficient-order-funds = Недостаточно средств для заказа
+trading-ui-insufficient-purchase-funds = Недостаточно ревентов для покупки
 trading-ui-purchase-success = Покупка успешно завершена
 trading-ui-sale-success = Продажа успешно завершена
 trading-ui-archive-sell-entry = Ваш лот «{$item}» был куплен торговцем {$trader} за {$price} ревентов
 trading-ui-archive-buy-entry = Ваш заказ «{$item}» был выполнен торговцем {$trader} за {$price} ревентов
 trading-personal-pit-name = личная торговая яма
+
+ent-MedievalPublicShopHole = общая торговая яма
+    .desc = Общий рынок, где любой желающий может покупать лоты, выставленные торговцами.
+    .suffix = { "Средневековье, общая" }

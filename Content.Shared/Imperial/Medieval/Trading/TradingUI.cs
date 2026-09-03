@@ -173,6 +173,7 @@ public sealed class TradingUpdateState : BoundUserInterfaceState
     public int Balance;
     public ProtoId<CurrencyPrototype> Currency;
     public bool IsOwner;
+    public bool IsPublic;
 
     public TradingUpdateState(
         List<TradingMarketItemState> items,
@@ -182,7 +183,8 @@ public sealed class TradingUpdateState : BoundUserInterfaceState
         List<string> archive,
         int balance,
         ProtoId<CurrencyPrototype> currency,
-        bool isOwner)
+        bool isOwner,
+        bool isPublic)
     {
         Items = items;
         Offers = offers;
@@ -192,6 +194,7 @@ public sealed class TradingUpdateState : BoundUserInterfaceState
         Balance = balance;
         Currency = currency;
         IsOwner = isOwner;
+        IsPublic = isPublic;
     }
 }
 

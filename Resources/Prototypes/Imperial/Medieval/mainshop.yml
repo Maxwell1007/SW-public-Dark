@@ -141,6 +141,19 @@
       - Structure
   - type: PointLight
 
+- type: entity
+  parent: MedievalShopHole
+  id: MedievalPublicShopHole
+  name: public trading pit
+  description: A shared market where anyone can buy lots listed by merchants.
+  suffix: Public
+  components:
+  - type: PublicTradingPit
+  - type: Trading
+    guildTypes: []
+    currency: Revent
+    balance: 0
+
 #- type: entity
 #  parent: MedievalShopHole
 #  id: MedievalShopHoleLockedLegion
