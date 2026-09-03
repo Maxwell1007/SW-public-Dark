@@ -79,9 +79,6 @@
     damage:
       types:
         Blunt: 6
-  - type: Currency
-    price:
-      Revent: 10
   - type: Food
     requiresSpecialDigestion: true
   - type: SolutionContainerManager
@@ -157,9 +154,6 @@
   - type: Stack
     stackType: MedievalRope
     count: 1
-  - type: Currency
-    price:
-      Revent: 4
 
 - type: entity
   name: MedievalRope10
@@ -948,9 +942,6 @@
   - type: Stack
     stackType: MedievalFireSerdolick
     count: 1
-  - type: Currency
-    price:
-      Revent: 10
   - type: Food
     requiresSpecialDigestion: true
   - type: SolutionContainerManager
@@ -1007,9 +998,6 @@
     damage:
       types:
         Blunt: 6
-  - type: Currency
-    price:
-      Revent: 30
 
 - type: entity
   name: MedievalIngotGold10
@@ -1048,9 +1036,6 @@
     damage:
       types:
         Blunt: 5
-  - type: Currency
-    price:
-      Revent: 10
   - type: Food
     requiresSpecialDigestion: true
   - type: SolutionContainerManager
