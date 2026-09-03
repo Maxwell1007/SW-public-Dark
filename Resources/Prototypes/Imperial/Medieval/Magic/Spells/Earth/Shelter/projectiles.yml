@@ -15,8 +15,8 @@
   - type: TimedDespawn
     lifetime: 9
   - type: DamageAble
-    damageContainer: Inorganic
-    damageModifierSet: Metallic
+    damageContainer: StructuralInorganic
+    damageModifierSet: Rock
   - type: Destructible
     thresholds:
       - trigger:
