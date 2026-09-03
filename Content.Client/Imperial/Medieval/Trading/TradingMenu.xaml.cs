@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Numerics;
-using Content.Client.Examine;
 using Content.Client.Hands.Systems;
 using Content.Client.Message;
 using Content.Client.Popups;
@@ -48,6 +47,7 @@ public sealed partial class TradingMenu : DefaultWindow
     public event Action<NetEntity>? OnCollectStoredItem;
     public event Action<Guid>? OnCollectSaleRevenue;
     public event Action<NetEntity>? OnExamineItem;
+    public event Action<Guid, EntProtoId>? OnExamineCommodity;
     public event Action<int>? OnWithdraw;
 
     private TradingUpdateState? _state;
@@ -91,6 +91,12 @@ public sealed partial class TradingMenu : DefaultWindow
         Title = Loc.GetString(state.IsPublic
             ? "trading-ui-public-window-title"
             : "trading-ui-window-title");
+        SearchBar.PlaceHolder = Loc.GetString(state.IsPublic
+            ? "trading-ui-public-search-placeholder"
+            : "trading-ui-market-search-placeholder");
+        MarketOffersTitle.Text = Loc.GetString(state.IsPublic
+            ? "trading-ui-public-market-offers-title"
+            : "trading-ui-market-offers-title");
         if (state.IsPublic)
         {
             _section = TradingMarketSection.Common;
@@ -216,8 +222,11 @@ public sealed partial class TradingMenu : DefaultWindow
         if (_state == null)
             return;
 
+        _prototypes.TryIndex(_state.Currency, out _currency);
         var text = _state.Balance.ToString();
-        if (_prototypes.TryIndex(_state.Currency, out _currency))
+        if (_state.IsPublic)
+            text = Loc.GetString("trading-ui-public-balance", ("amount", _state.Balance));
+        else if (_currency != null)
             text = $"{Loc.GetString(_currency.DisplayName, ("amount", _state.Balance))}: {_state.Balance}";
 
         BalanceInfo.SetMarkup(text);
@@ -464,14 +473,19 @@ public sealed partial class TradingMenu : DefaultWindow
         SelectedPreview.DisposeAllChildren();
         SelectedPreview.AddChild(selectedOffer == null
             ? CreateItemPreview(item, new Vector2(96, 96))
-            : CreateItemPreview(selectedOffer.ProductEntity, selectedOffer.PreviewEntity, new Vector2(96, 96)));
+            : CreateItemPreview(
+                selectedOffer.ProductEntity,
+                selectedOffer.PreviewEntity,
+                new Vector2(96, 96),
+                selectedOffer.CommodityId));
         if (_updateSelectedPrice)
         {
             BuyPrice.Text = (selectedOffer?.Price ?? item.LowestSellPrice)?.ToString() ?? string.Empty;
             _updateSelectedPrice = false;
         }
-        SelectedStats.SetMarkup(
-            Loc.GetString(
+        SelectedStats.SetMarkup(_state.IsPublic
+            ? Loc.GetString("trading-ui-public-offer-count", ("count", item.SellOfferCount))
+            : Loc.GetString(
                 "trading-ui-offer-counts",
                 ("sellCount", item.SellOfferCount),
                 ("buyCount", item.BuyOfferCount)));
@@ -590,6 +604,7 @@ public sealed partial class TradingMenu : DefaultWindow
             var row = CreateManagementRow(
                 offer.ProductEntity,
                 offer.PreviewEntity,
+                offer.CommodityId,
                 offer.DisplayName,
                 Loc.GetString(
                     "trading-ui-managed-offer-status",
@@ -659,6 +674,7 @@ public sealed partial class TradingMenu : DefaultWindow
             var row = CreateManagementRow(
                 stored.ProductEntity,
                 stored.Item,
+                null,
                 stored.DisplayName,
                 Loc.GetString("trading-ui-received-from-order"));
             var collect = new Button
@@ -704,6 +720,7 @@ public sealed partial class TradingMenu : DefaultWindow
     private BoxContainer CreateManagementRow(
         EntProtoId product,
         NetEntity? preview,
+        Guid? commodityId,
         string displayName,
         string status)
     {
@@ -713,7 +730,7 @@ public sealed partial class TradingMenu : DefaultWindow
             HorizontalExpand = true,
             Margin = new Thickness(4),
         };
-        row.AddChild(CreateItemPreview(product, preview, new Vector2(54, 54)));
+        row.AddChild(CreateItemPreview(product, preview, new Vector2(54, 54), commodityId));
         var labels = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Vertical,
@@ -752,10 +769,14 @@ public sealed partial class TradingMenu : DefaultWindow
 
     private Control CreateItemPreview(TradingMarketItemState item, Vector2 size)
     {
-        return CreateItemPreview(item.ProductEntity, item.PreviewEntity, size);
+        return CreateItemPreview(item.ProductEntity, item.PreviewEntity, size, item.CommodityId);
     }
 
-    private Control CreateItemPreview(EntProtoId product, NetEntity? preview, Vector2 size)
+    private Control CreateItemPreview(
+        EntProtoId product,
+        NetEntity? preview,
+        Vector2 size,
+        Guid? commodityId)
     {
         if (preview is { } netEntity)
         {
@@ -797,7 +818,8 @@ public sealed partial class TradingMenu : DefaultWindow
                 if (args.Function != ContentKeyFunctions.ExamineEntity)
                     return;
 
-                ExamineProduct(product);
+                if (commodityId is { } id)
+                    OnExamineCommodity?.Invoke(id, product);
                 args.Handle();
             };
             return icon;
@@ -810,13 +832,7 @@ public sealed partial class TradingMenu : DefaultWindow
         };
     }
 
-    private void ExamineProduct(EntProtoId product)
-    {
-        var entity = GetPrototypeExamineEntity(product);
-        _entities.System<ExamineSystem>().DoExamine(entity);
-    }
-
-    private EntityUid GetPrototypeExamineEntity(EntProtoId product)
+    public EntityUid GetPrototypeExamineEntity(EntProtoId product)
     {
         if (_prototypeExamineEntities.TryGetValue(product, out var entity) &&
             _entities.EntityExists(entity))

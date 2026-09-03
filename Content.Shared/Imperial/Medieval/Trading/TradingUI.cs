@@ -313,14 +313,24 @@ public sealed class TradingExamineItemMessage(NetEntity item) : BoundUserInterfa
 }
 
 [Serializable, NetSerializable]
+public sealed class TradingExamineCommodityMessage(Guid commodityId) : BoundUserInterfaceMessage
+{
+    public Guid CommodityId = commodityId;
+}
+
+[Serializable, NetSerializable]
 public sealed class TradingExamineInfoMessage(
     NetEntity item,
     FormattedMessage message,
-    List<Verb> verbs) : BoundUserInterfaceMessage
+    List<Verb> verbs,
+    EntProtoId? previewProduct = null,
+    Guid? commodityId = null) : BoundUserInterfaceMessage
 {
     public NetEntity Item = item;
     public FormattedMessage Message = message;
     public List<Verb> Verbs = verbs;
+    public EntProtoId? PreviewProduct = previewProduct;
+    public Guid? CommodityId = commodityId;
 }
 
 [Serializable, NetSerializable]

@@ -36,7 +36,16 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
         _menu.OnCancelOffer += id => SendOwnerMessage(new TradingCancelOfferMessage(id));
         _menu.OnCollectStoredItem += item => SendOwnerMessage(new TradingCollectStoredItemMessage(item));
         _menu.OnCollectSaleRevenue += sale => SendOwnerMessage(new TradingCollectSaleRevenueMessage(sale));
-        _menu.OnExamineItem += item => SendMessage(new TradingExamineItemMessage(item));
+        _menu.OnExamineItem += item =>
+        {
+            _examineSystem.Begin(Owner, EntMan.GetEntity(item));
+            SendMessage(new TradingExamineItemMessage(item));
+        };
+        _menu.OnExamineCommodity += (commodity, product) =>
+        {
+            _examineSystem.Begin(Owner, _menu.GetPrototypeExamineEntity(product), commodity);
+            SendMessage(new TradingExamineCommodityMessage(commodity));
+        };
         _menu.OnWithdraw += amount => SendOwnerMessage(new TradingRequestWithdrawMessage(amount));
         SendMessage(new TradingRequestUpdateInterfaceMessage());
     }
@@ -63,12 +72,18 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
         }
         else if (message is TradingExamineInfoMessage examine)
         {
-            var target = EntMan.GetEntity(examine.Item);
+            if (_menu == null)
+                return;
+
+            var target = examine.PreviewProduct is { } product
+                ? _menu.GetPrototypeExamineEntity(product)
+                : EntMan.GetEntity(examine.Item);
             _examineSystem.Open(
                 Owner,
                 target,
                 examine.Message,
                 examine.Verbs,
+                examine.CommodityId,
                 verb => SendMessage(new TradingExecuteExamineVerbMessage(examine.Item, verb)));
         }
         else if (message is TradingUnitSellOfferPreparedMessage prepared)

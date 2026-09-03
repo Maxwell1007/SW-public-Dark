@@ -39,7 +39,13 @@ public sealed class TradingItemDeliverySystem : EntitySystem
                     continue;
                 }
 
-                _storage.Insert(candidate, item, out _, recipient, storage);
+                _storage.Insert(
+                    candidate,
+                    item,
+                    out _,
+                    recipient,
+                    storage,
+                    stackAutomatically: !HasComp<TradingLotBlockedComponent>(item));
                 if (IsDeliveredTo(item, candidate))
                     return;
             }
@@ -66,7 +72,13 @@ public sealed class TradingItemDeliverySystem : EntitySystem
             if (!TryComp<StorageComponent>(equipped, out var storage))
                 continue;
 
-            _storage.Insert(equipped, item, out _, recipient, storage);
+            _storage.Insert(
+                equipped,
+                item,
+                out _,
+                recipient,
+                storage,
+                stackAutomatically: !HasComp<TradingLotBlockedComponent>(item));
             if (IsDeliveredTo(item, equipped))
                 return true;
         }
@@ -110,9 +122,18 @@ public sealed class TradingItemDeliverySystem : EntitySystem
 
     private bool TryMergeStacks(EntityUid item, EntityUid target)
     {
-        return TryComp<StackComponent>(item, out var itemStack) &&
-               TryComp<StackComponent>(target, out var targetStack) &&
-               _stack.TryAdd(item, target, itemStack, targetStack);
+        var blocksTradingLot = HasComp<TradingLotBlockedComponent>(item);
+        if (!TryComp<StackComponent>(item, out var itemStack) ||
+            !TryComp<StackComponent>(target, out var targetStack) ||
+            !_stack.TryAdd(item, target, itemStack, targetStack))
+        {
+            return false;
+        }
+
+        if (blocksTradingLot)
+            EnsureComp<TradingLotBlockedComponent>(target);
+
+        return true;
     }
 
     private bool IsDeliveredTo(EntityUid item, EntityUid containerOwner)

@@ -23,6 +23,10 @@ trading-ui-invalid-offer-price = Недопустимое значение дл�
 
 trading-ui-window-title = Рынок гильдий
 trading-ui-public-window-title = Общая торговая яма
+trading-ui-public-balance = Ваши ревенты: {$amount}
+trading-ui-public-search-placeholder = Поиск по лотам торговцев
+trading-ui-public-market-offers-title = Лоты торговцев
+trading-ui-public-offer-count = Доступно лотов: {$count}
 trading-ui-help-button = Помощь
 trading-ui-withdraw-button = Снять средства
 trading-ui-common-button = Общие
@@ -76,6 +80,7 @@ trading-ui-help-management-title = Управление
 trading-ui-help-management-text = В разделе управления заявок можно отменять свои лоты и заказы, получать выручку за проданные лоты, а также забирать доставленные после успешного заказа предметы. Архив хранит записи ваших завершённых сделок
 
 trading-ui-invalid-sell-offer = Этот предмет нельзя выставить как лот
+trading-lot-blocked-examine = [color=yellow]Этот предмет нельзя выставить как лот.[/color]
 trading-ui-sell-offer-created = Лот успешно выставлен
 trading-ui-unit-sell-window-title = Поштучное выставление
 trading-ui-unit-sell-question = Сколько штук {$item} вы хотите выставить по {$price} за штуку?

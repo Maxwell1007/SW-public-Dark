@@ -6,6 +6,7 @@ public sealed partial class TradingExamineComponent : Component
 {
     public EntityUid Pit;
     public EntityUid Target;
+    public Guid? CommodityId;
     public bool PreviousSkipChecks;
     public bool RestorePending;
 }

@@ -13,4 +13,5 @@ public sealed class TradingUnitSellCandidate
 {
     public EntityUid Item;
     public string Signature = string.Empty;
+    public int Amount;
 }

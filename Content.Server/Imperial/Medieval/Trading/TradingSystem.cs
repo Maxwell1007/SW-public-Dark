@@ -1,9 +1,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Content.Server.MedievalMoneyChecker.Components;
 using Content.Server.Popups;
 using Content.Server.Stack;
 using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Content.Shared.GameTicking;
 using Content.Shared.Imperial.Medieval.Trading;
@@ -40,6 +42,8 @@ public sealed partial class TradingSystem : EntitySystem
 
         SubscribeLocalEvent<TradingComponent, BeforeActivatableUIOpenEvent>(OnBeforeUiOpen);
         SubscribeLocalEvent<TradingComponent, EntityTerminatingEvent>(OnTradingPitTerminating);
+        SubscribeLocalEvent<TradingLotBlockedComponent, ExaminedEvent>(OnTradingLotBlockedExamined);
+        SubscribeLocalEvent<TradingLotBlockedComponent, StackSplitEvent>(OnTradingLotBlockedStackSplit);
         SubscribeLocalEvent<MedievalCurrencyComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<RoundStartedEvent>(OnRoundStart);
         SubscribeLocalEvent<RoundEndedEvent>(OnRoundEnd);

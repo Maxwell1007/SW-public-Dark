@@ -55,6 +55,7 @@ public sealed partial class TradingSystem
         SubscribeLocalEvent<TradingComponent, TradingCollectStoredItemMessage>(OnCollectStoredItem);
         SubscribeLocalEvent<TradingComponent, TradingCollectSaleRevenueMessage>(OnCollectSaleRevenue);
         SubscribeLocalEvent<TradingComponent, TradingExamineItemMessage>(OnExamineItem);
+        SubscribeLocalEvent<TradingComponent, TradingExamineCommodityMessage>(OnExamineCommodity);
         SubscribeLocalEvent<TradingComponent, TradingExecuteExamineVerbMessage>(OnExecuteExamineVerb);
         SubscribeLocalEvent<TradingComponent, TradingRequestWithdrawMessage>(OnRequestWithdraw);
         SubscribeLocalEvent<TradingComponent, BoundUserInterfaceMessageAttempt>(OnUiMessageAttempt);
@@ -233,6 +234,7 @@ public sealed partial class TradingSystem
                 TradingSelectCommodityMessage or
                 TradingSelectOfferMessage or
                 TradingExamineItemMessage or
+                TradingExamineCommodityMessage or
                 TradingExecuteExamineVerbMessage)
         {
             return;
@@ -251,13 +253,64 @@ public sealed partial class TradingSystem
             return;
         }
 
-        var message = _examine.GetExamineText(item.Value, args.Actor, true);
-        var verbs = _verbSystem.GetLocalVerbs(item.Value, args.Actor, typeof(ExamineVerb), true);
+        SendExamineInfo(uid, args.Actor, item.Value);
+    }
+
+    private void OnExamineCommodity(
+        EntityUid uid,
+        TradingComponent component,
+        TradingExamineCommodityMessage args)
+    {
+        if (!TryGetMarket(out var market) ||
+            !market.Comp.Commodities.TryGetValue(args.CommodityId, out var commodity) ||
+            !CanViewCommodity(uid, component, args.Actor, market, commodity))
+        {
+            return;
+        }
+
+        var viewer = EnsureComp<TradingMarketViewerComponent>(args.Actor);
+        if (!viewer.ExaminePreviewItems.TryGetValue(args.CommodityId, out var item) || !Exists(item))
+        {
+            item = Spawn(commodity.Product, doMapInit: false);
+            viewer.ExaminePreviewItems[args.CommodityId] = item;
+        }
+
+        SendExamineInfo(uid, args.Actor, item, commodity.Product, commodity.Id);
+    }
+
+    private bool CanViewCommodity(
+        EntityUid pit,
+        TradingComponent component,
+        EntityUid user,
+        Entity<TradingMarketComponent> market,
+        TradingCommodity commodity)
+    {
+        if (HasComp<PublicTradingPitComponent>(pit))
+            return GetLowestPublicSellOffer(market.Comp.Offers.Values, commodity.Id) != null;
+
+        return IsTradingPitOwner(user, component) ||
+               (commodity.Sections & TradingMarketSection.Unique) != 0;
+    }
+
+    private void SendExamineInfo(
+        EntityUid pit,
+        EntityUid user,
+        EntityUid item,
+        EntProtoId? previewProduct = null,
+        Guid? commodityId = null)
+    {
+        var message = _examine.GetExamineText(item, user, true);
+        var verbs = _verbSystem.GetLocalVerbs(item, user, typeof(ExamineVerb), true);
         _ui.ServerSendUiMessage(
-            uid,
+            pit,
             TradingUiKey.Key,
-            new TradingExamineInfoMessage(GetNetEntity(item.Value), message, verbs.ToList()),
-            args.Actor);
+            new TradingExamineInfoMessage(
+                GetNetEntity(item),
+                message,
+                verbs.ToList(),
+                previewProduct,
+                commodityId),
+            user);
     }
 
     private void OnExecuteExamineVerb(
@@ -268,7 +321,8 @@ public sealed partial class TradingSystem
         if (!TryGetEntity(args.Item, out var item) ||
             !Exists(item) ||
             !TryComp<TradingMarketViewerComponent>(args.Actor, out var viewer) ||
-            !viewer.VisibleItems.Contains(item.Value))
+            !viewer.VisibleItems.Contains(item.Value) &&
+            !viewer.ExaminePreviewItems.Values.Contains(item.Value))
         {
             return;
         }
@@ -624,7 +678,7 @@ public sealed partial class TradingSystem
         if (msg.Price < 0 ||
             !_hands.TryGetActiveItem(msg.Actor, out var held) ||
             held is not { } item ||
-            !TryGetTradingItemSignature(market, item, msg.Price, out var heldSignature))
+            !TryGetUnitSellCandidate(market, item, msg.Price, out var heldCandidate))
         {
             ShowInvalidSellOffer(msg.Actor);
             return;
@@ -632,30 +686,23 @@ public sealed partial class TradingSystem
 
         var candidates = new List<TradingUnitSellCandidate>
         {
-            new()
-            {
-                Item = item,
-                Signature = heldSignature,
-            },
+            heldCandidate,
         };
 
         foreach (var candidate in GetTraderInventoryItems(msg.Actor))
         {
             if (candidate == item ||
-                !TryGetTradingItemSignature(market, candidate, msg.Price, out var signature) ||
-                !string.Equals(signature, heldSignature, StringComparison.Ordinal))
+                !TryGetUnitSellCandidate(market, candidate, msg.Price, out var unitCandidate) ||
+                !string.Equals(unitCandidate.Signature, heldCandidate.Signature, StringComparison.Ordinal))
             {
                 continue;
             }
 
-            candidates.Add(new TradingUnitSellCandidate
-            {
-                Item = candidate,
-                Signature = signature,
-            });
+            candidates.Add(unitCandidate);
         }
 
-        if (candidates.Count == 1)
+        var maximumAmount = (int) Math.Min(int.MaxValue, candidates.Sum(candidate => (long) candidate.Amount));
+        if (maximumAmount == 1)
         {
             RemComp<TradingUnitSellRequestComponent>(msg.Actor);
             CreateSellOffer(market, (uid, component), msg.Actor, item, msg.Price);
@@ -675,7 +722,7 @@ public sealed partial class TradingSystem
                 request.RequestId,
                 MetaData(item).EntityName,
                 request.Price,
-                request.Candidates.Count),
+                maximumAmount),
             msg.Actor);
     }
 
@@ -693,11 +740,24 @@ public sealed partial class TradingSystem
             return;
         }
 
-        var amountIsValid = msg.Amount > 0 && msg.Amount <= request.Candidates.Count;
         var price = request.Price;
-        var candidates = amountIsValid
-            ? request.Candidates.Take(msg.Amount).ToList()
-            : [];
+        var remaining = msg.Amount;
+        var candidates = new List<(TradingUnitSellCandidate Candidate, int Amount)>();
+        if (remaining > 0)
+        {
+            foreach (var candidate in request.Candidates)
+            {
+                var amount = Math.Min(candidate.Amount, remaining);
+                if (amount > 0)
+                    candidates.Add((candidate, amount));
+
+                remaining -= amount;
+                if (remaining == 0)
+                    break;
+            }
+        }
+
+        var amountIsValid = msg.Amount > 0 && remaining == 0;
         RemComp<TradingUnitSellRequestComponent>(msg.Actor);
 
         if (!amountIsValid)
@@ -707,10 +767,16 @@ public sealed partial class TradingSystem
         }
 
         var inventoryItems = GetTraderInventoryItems(msg.Actor).ToHashSet();
-        foreach (var candidate in candidates)
+        foreach (var (candidate, amount) in candidates)
         {
             if (!inventoryItems.Contains(candidate.Item) ||
-                !TryGetTradingItemSignature(market, candidate.Item, price, out var signature) ||
+                GetUnitSellAmount(candidate.Item) < amount ||
+                !TryGetTradingItemSignature(
+                    market,
+                    candidate.Item,
+                    price,
+                    out var signature,
+                    HasComp<StackComponent>(candidate.Item) ? 1 : null) ||
                 !string.Equals(signature, candidate.Signature, StringComparison.Ordinal))
             {
                 ShowInvalidatedUnitSellOffer(msg.Actor);
@@ -721,30 +787,49 @@ public sealed partial class TradingSystem
         var participantName = MetaData(msg.Actor).EntityName;
         var createdOffers = new List<Guid>();
         var commodityIds = new HashSet<Guid>();
-        foreach (var candidate in candidates)
+        foreach (var (candidate, amount) in candidates)
         {
-            if (!TryCreateTraderSellOffer(
-                market,
-                (uid, component),
-                participantName,
-                candidate.Item,
-                msg.Actor,
-                price,
-                out var commodityId,
-                out var offer))
+            for (var index = 0; index < amount; index++)
             {
-                foreach (var offerId in createdOffers)
+                var tradeItem = candidate.Item;
+                var wasSplit = false;
+                if (TryComp<StackComponent>(candidate.Item, out var stack) && stack.Count > 1)
                 {
-                    RemoveOffer(market, offerId, true, msg.Actor);
+                    var splitItem = _stack.Split(candidate.Item, 1, Transform(uid).Coordinates, stack);
+                    if (splitItem == null)
+                    {
+                        RollbackUnitSellOffers(market, createdOffers, msg.Actor);
+                        ShowInvalidatedUnitSellOffer(msg.Actor);
+                        UpdateAllInterfaces(market);
+                        return;
+                    }
+
+                    tradeItem = splitItem.Value;
+                    wasSplit = true;
                 }
 
-                ShowInvalidatedUnitSellOffer(msg.Actor);
-                UpdateAllInterfaces(market);
-                return;
-            }
+                if (!TryCreateTraderSellOffer(
+                        market,
+                        (uid, component),
+                        participantName,
+                        tradeItem,
+                        msg.Actor,
+                        price,
+                        out var commodityId,
+                        out var offer))
+                {
+                    if (wasSplit)
+                        _delivery.Deliver(tradeItem, msg.Actor);
 
-            createdOffers.Add(offer.Id);
-            commodityIds.Add(commodityId);
+                    RollbackUnitSellOffers(market, createdOffers, msg.Actor);
+                    ShowInvalidatedUnitSellOffer(msg.Actor);
+                    UpdateAllInterfaces(market);
+                    return;
+                }
+
+                createdOffers.Add(offer.Id);
+                commodityIds.Add(commodityId);
+            }
         }
 
         var config = _prototypeManager.Index(market.Comp.Config);
@@ -756,6 +841,50 @@ public sealed partial class TradingSystem
 
         ShowTradingSuccess(msg.Actor, uid, component, "trading-ui-unit-sell-offers-created");
         UpdateAllInterfaces(market);
+    }
+
+    private void RollbackUnitSellOffers(
+        Entity<TradingMarketComponent> market,
+        List<Guid> createdOffers,
+        EntityUid actor)
+    {
+        foreach (var offerId in createdOffers)
+        {
+            RemoveOffer(market, offerId, true, actor);
+        }
+    }
+
+    private bool TryGetUnitSellCandidate(
+        Entity<TradingMarketComponent> market,
+        EntityUid item,
+        int price,
+        out TradingUnitSellCandidate candidate)
+    {
+        candidate = default!;
+        var amount = GetUnitSellAmount(item);
+        if (amount <= 0 ||
+            !TryGetTradingItemSignature(
+                market,
+                item,
+                price,
+                out var signature,
+                HasComp<StackComponent>(item) ? 1 : null))
+        {
+            return false;
+        }
+
+        candidate = new TradingUnitSellCandidate
+        {
+            Item = item,
+            Signature = signature,
+            Amount = amount,
+        };
+        return true;
+    }
+
+    private int GetUnitSellAmount(EntityUid item)
+    {
+        return TryComp<StackComponent>(item, out var stack) ? stack.Count : 1;
     }
 
     private bool CreateSellOffer(
@@ -1103,11 +1232,20 @@ public sealed partial class TradingSystem
         Entity<TradingMarketComponent> market,
         EntityUid item,
         int price,
-        out string signature)
+        out string signature,
+        int? stackCountOverride = null)
     {
         signature = string.Empty;
-        if (!TryResolveCommodityForItem(market, item, price, true, out var commodity))
+        if (!TryResolveCommodityForItem(
+                market,
+                item,
+                price,
+                true,
+                out var commodity,
+                stackCountOverride))
+        {
             return false;
+        }
 
         signature = commodity.Signature;
         TryRemoveCommodity(market, commodity);
@@ -1250,16 +1388,22 @@ public sealed partial class TradingSystem
 
     private void ClearVisibleMarketItems(EntityUid user)
     {
-        if (!TryComp<ActorComponent>(user, out var actor) ||
-            !TryComp<TradingMarketViewerComponent>(user, out var viewer))
-        {
+        if (!TryComp<TradingMarketViewerComponent>(user, out var viewer))
             return;
+
+        if (TryComp<ActorComponent>(user, out var actor))
+        {
+            foreach (var item in viewer.VisibleItems)
+            {
+                if (Exists(item))
+                    _pvs.RemoveForceSend(item, actor.PlayerSession);
+            }
         }
 
-        foreach (var item in viewer.VisibleItems)
+        foreach (var item in viewer.ExaminePreviewItems.Values)
         {
             if (Exists(item))
-                _pvs.RemoveForceSend(item, actor.PlayerSession);
+                QueueDel(item);
         }
 
         RemCompDeferred<TradingMarketViewerComponent>(user);

@@ -23,14 +23,18 @@ public sealed class TradingExamineSystem : EntitySystem
         EntityUid target,
         FormattedMessage message,
         List<Verb> verbs,
+        Guid? commodityId,
         Action<ExamineVerb> executeVerb)
     {
-        if (_player.LocalEntity is not { } player)
+        if (_player.LocalEntity is not { } player ||
+            !Exists(target) ||
+            !TryComp<TradingExamineComponent>(player, out var state) ||
+            state.Pit != pit ||
+            state.Target != target ||
+            state.CommodityId != commodityId)
+        {
             return;
-
-        var state = EnsureComp<TradingExamineComponent>(player);
-        state.Pit = pit;
-        state.Target = target;
+        }
 
         foreach (var verb in verbs)
         {
@@ -41,8 +45,19 @@ public sealed class TradingExamineSystem : EntitySystem
             examineVerb.Act = () => executeVerb(examineVerb);
         }
 
-        _examine.OpenTooltip(player, target);
         _examine.UpdateTooltipInfo(player, target, message, verbs, false);
+    }
+
+    public void Begin(EntityUid pit, EntityUid target, Guid? commodityId = null)
+    {
+        if (_player.LocalEntity is not { } player || !Exists(target))
+            return;
+
+        var state = EnsureComp<TradingExamineComponent>(player);
+        state.Pit = pit;
+        state.Target = target;
+        state.CommodityId = commodityId;
+        _examine.OpenTooltip(player, target, true, false);
     }
 
     public void Close(EntityUid pit)

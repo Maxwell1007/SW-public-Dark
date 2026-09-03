@@ -2,7 +2,9 @@ using System.Globalization;
 using System.Linq;
 using Content.Server.Imperial.Medieval.Courier;
 using Content.Server.Light.Components;
+using Content.Server.MedievalMoneyChecker.Components;
 using Content.Shared.Chemistry.Components.SolutionManager;
+using Content.Shared.Examine;
 using Content.Shared.Imperial.Medieval.Additions;
 using Content.Shared.Imperial.Medieval.ArmorIntegrity;
 using Content.Shared.Imperial.Medieval.Chemistry;
@@ -411,6 +413,7 @@ public sealed partial class TradingSystem
             }
 
             var spawnedItem = Spawn(ask.Product, spawnCoordinates);
+            EnsureComp<TradingLotBlockedComponent>(spawnedItem);
             DeliverItem(destination, destinationPit, spawnedItem, bid.ImmediateRecipient);
         }
 
@@ -538,6 +541,7 @@ public sealed partial class TradingSystem
         if (!Exists(item) ||
             TerminatingOrDeleted(item) ||
             EntityManager.IsQueuedForDeletion(item) ||
+            HasComp<TradingLotBlockedComponent>(item) ||
             MetaData(item).EntityPrototype is not { } prototype ||
             !prototype.HasComponent<ItemComponent>() ||
             !CanTradeProduct(prototype, config) ||
@@ -548,6 +552,25 @@ public sealed partial class TradingSystem
 
         return !TryComp<ExpendableLightComponent>(item, out var light) ||
                light.CurrentState == ExpendableLightState.BrandNew;
+    }
+
+    private void OnTradingLotBlockedStackSplit(
+        EntityUid uid,
+        TradingLotBlockedComponent component,
+        ref StackSplitEvent args)
+    {
+        EnsureComp<TradingLotBlockedComponent>(args.NewId);
+    }
+
+    private void OnTradingLotBlockedExamined(
+        EntityUid uid,
+        TradingLotBlockedComponent component,
+        ExaminedEvent args)
+    {
+        if (!HasComp<MedievalMoneyCheckerComponent>(args.Examiner))
+            return;
+
+        args.PushMarkup(Loc.GetString("trading-lot-blocked-examine"));
     }
 
     private bool CanTradeProduct(EntProtoId product, TradingMarketConfigPrototype config)

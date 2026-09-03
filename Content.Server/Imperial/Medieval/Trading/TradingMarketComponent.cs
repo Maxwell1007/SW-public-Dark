@@ -78,6 +78,7 @@ public sealed class TradingMarketOffer
 public sealed partial class TradingMarketViewerComponent : Component
 {
     public HashSet<EntityUid> VisibleItems = new();
+    public Dictionary<Guid, EntityUid> ExaminePreviewItems = new();
     public Guid? SelectedCommodity;
     public Guid? SelectedOffer;
 }

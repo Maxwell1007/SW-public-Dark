@@ -39,6 +39,10 @@ trading-ui-invalid-offer-price = Invalid offer value
 
 trading-ui-window-title = Guild Market
 trading-ui-public-window-title = Public Trading Pit
+trading-ui-public-balance = Your revents: {$amount}
+trading-ui-public-search-placeholder = Search merchant lots
+trading-ui-public-market-offers-title = Merchant lots
+trading-ui-public-offer-count = Available lots: {$count}
 trading-ui-help-button = Help
 trading-ui-withdraw-button = Withdraw funds
 trading-ui-common-button = Common
@@ -92,6 +96,7 @@ trading-ui-help-management-title = Management
 trading-ui-help-management-text = The offer management section lets you cancel your lots and orders, collect revenue from sold lots, and collect items delivered after a successful order. The archive stores records of your completed trades.
 
 trading-ui-invalid-sell-offer = This item cannot be listed as a lot
+trading-lot-blocked-examine = [color=yellow]This item cannot be listed as a lot.[/color]
 trading-ui-sell-offer-created = Lot listed successfully
 trading-ui-unit-sell-window-title = Individual lot listing
 trading-ui-unit-sell-question = How many {$item} do you want to list at {$price} each?

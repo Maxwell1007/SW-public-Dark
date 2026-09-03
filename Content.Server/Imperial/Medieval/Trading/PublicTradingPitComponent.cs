@@ -11,5 +11,12 @@ public sealed partial class PublicTradingBalanceComponent : Component
 {
     public HashSet<EntityUid> OpenPits = new();
     public Dictionary<ProtoId<CurrencyPrototype>, int> Balances = new();
+    public HashSet<EntityUid> TrackedCurrencyStacks = new();
     public bool BalanceDirty;
+}
+
+[RegisterComponent]
+public sealed partial class PublicTradingCurrencyTrackerComponent : Component
+{
+    public EntityUid User;
 }

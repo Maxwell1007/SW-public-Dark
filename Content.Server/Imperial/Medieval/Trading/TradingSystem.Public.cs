@@ -14,7 +14,8 @@ public sealed partial class TradingSystem
     {
         SubscribeLocalEvent<ContainerManagerComponent, EntInsertedIntoContainerMessage>(OnPublicContainerInserted);
         SubscribeLocalEvent<ContainerManagerComponent, EntRemovedFromContainerMessage>(OnPublicContainerRemoved);
-        SubscribeLocalEvent<StackComponent, StackCountChangedEvent>(OnPublicStackCountChanged);
+        SubscribeLocalEvent<PublicTradingBalanceComponent, ComponentShutdown>(OnPublicTradingBalanceShutdown);
+        SubscribeLocalEvent<PublicTradingCurrencyTrackerComponent, StackCountChangedEvent>(OnPublicStackCountChanged);
     }
 
     private void UpdatePublicTrading()
@@ -100,6 +101,7 @@ public sealed partial class TradingSystem
     {
         component.OpenPits.RemoveWhere(pit => !Exists(pit) || !HasComp<PublicTradingPitComponent>(pit));
         var balances = new Dictionary<ProtoId<CurrencyPrototype>, int>();
+        var trackedCurrencyStacks = new HashSet<EntityUid>();
         foreach (var pit in component.OpenPits)
         {
             if (!TryComp<TradingComponent>(pit, out var trading) ||
@@ -108,8 +110,10 @@ public sealed partial class TradingSystem
                 continue;
             }
 
-            balances[trading.Currency] = CountInventoryCurrency(user, trading.Currency);
+            balances[trading.Currency] = CountInventoryCurrency(user, trading.Currency, trackedCurrencyStacks);
         }
+
+        UpdatePublicCurrencyTrackers(user, component, trackedCurrencyStacks);
 
         var changed = component.Balances.Count != balances.Count ||
                       component.Balances.Any(entry =>
@@ -119,7 +123,10 @@ public sealed partial class TradingSystem
         return changed;
     }
 
-    private int CountInventoryCurrency(EntityUid user, ProtoId<CurrencyPrototype> currency)
+    private int CountInventoryCurrency(
+        EntityUid user,
+        ProtoId<CurrencyPrototype> currency,
+        HashSet<EntityUid> trackedCurrencyStacks)
     {
         long total = 0;
         foreach (var item in GetPublicInventoryItems(user))
@@ -127,10 +134,15 @@ public sealed partial class TradingSystem
             if (!TryGetCurrencyUnitValue(item, currency, out var unitValue))
                 continue;
 
-            var count = TryComp<StackComponent>(item, out var stack) ? stack.Count : 1;
-            total += (long) unitValue * count;
-            if (total >= int.MaxValue)
-                return int.MaxValue;
+            var count = 1;
+            if (TryComp<StackComponent>(item, out var stack))
+            {
+                count = stack.Count;
+                trackedCurrencyStacks.Add(item);
+                EnsureComp<PublicTradingCurrencyTrackerComponent>(item).User = user;
+            }
+
+            total = Math.Min(int.MaxValue, total + (long) unitValue * count);
         }
 
         return (int) total;
@@ -228,6 +240,40 @@ public sealed partial class TradingSystem
         return items;
     }
 
+    private void UpdatePublicCurrencyTrackers(
+        EntityUid user,
+        PublicTradingBalanceComponent component,
+        HashSet<EntityUid> trackedCurrencyStacks)
+    {
+        foreach (var stack in component.TrackedCurrencyStacks)
+        {
+            if (trackedCurrencyStacks.Contains(stack) ||
+                !TryComp<PublicTradingCurrencyTrackerComponent>(stack, out var tracker) ||
+                tracker.User != user)
+            {
+                continue;
+            }
+
+            RemComp<PublicTradingCurrencyTrackerComponent>(stack);
+        }
+
+        component.TrackedCurrencyStacks = trackedCurrencyStacks;
+    }
+
+    private void OnPublicTradingBalanceShutdown(
+        Entity<PublicTradingBalanceComponent> entity,
+        ref ComponentShutdown args)
+    {
+        foreach (var stack in entity.Comp.TrackedCurrencyStacks)
+        {
+            if (TryComp<PublicTradingCurrencyTrackerComponent>(stack, out var tracker) &&
+                tracker.User == entity.Owner)
+            {
+                RemComp<PublicTradingCurrencyTrackerComponent>(stack);
+            }
+        }
+    }
+
     private void OnPublicContainerInserted(
         Entity<ContainerManagerComponent> entity,
         ref EntInsertedIntoContainerMessage args)
@@ -243,10 +289,11 @@ public sealed partial class TradingSystem
     }
 
     private void OnPublicStackCountChanged(
-        Entity<StackComponent> entity,
+        Entity<PublicTradingCurrencyTrackerComponent> entity,
         ref StackCountChangedEvent args)
     {
-        MarkPublicTradingBalanceDirty(entity.Owner);
+        if (TryComp<PublicTradingBalanceComponent>(entity.Comp.User, out var balance))
+            balance.BalanceDirty = true;
     }
 
     private void MarkPublicTradingBalanceDirty(EntityUid item)

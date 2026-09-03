@@ -34,7 +34,7 @@
                         <LineEdit Name="BuyPrice" PlaceHolder="{Loc trading-ui-buy-price-placeholder}" HorizontalExpand="True" />
                         <Button Name="CreateBuyOrderButton" Text="{Loc trading-ui-create-buy-order-button}" MinWidth="76" Margin="4 0 0 0" />
                     </BoxContainer>
-                    <Label Text="{Loc trading-ui-market-offers-title}" Margin="0 4" />
+                    <Label Name="MarketOffersTitle" Text="{Loc trading-ui-market-offers-title}" Margin="0 4" />
                     <ScrollContainer HScrollEnabled="False" VerticalExpand="True">
                         <BoxContainer Name="OffersContainer" Orientation="Vertical" HorizontalExpand="True" />
                     </ScrollContainer>
