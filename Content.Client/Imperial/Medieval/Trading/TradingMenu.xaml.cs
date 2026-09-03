@@ -40,6 +40,8 @@ public sealed partial class TradingMenu : DefaultWindow
     public event Action<Guid>? OnSelectCommodity;
     public event Action<Guid>? OnSelectOffer;
     public event Action<int>? OnCreateSellOffer;
+    public event Action<int>? OnPrepareUnitSellOffer;
+    public event Action<Guid, int>? OnCreateUnitSellOffers;
     public event Action<Guid, int>? OnCreateBuyOffer;
     public event Action<int>? OnCreateBuyOfferFromHeld;
     public event Action<Guid>? OnCancelOffer;
@@ -55,6 +57,8 @@ public sealed partial class TradingMenu : DefaultWindow
     private bool _updateSelectedPrice = true;
     private CurrencyPrototype? _currency;
     private StoreWithdrawWindow? _withdrawWindow;
+    private TradingUnitSellWindow? _unitSellWindow;
+    private Guid? _unitSellRequest;
     private TradingHelpWindow? _helpWindow;
     private bool _management;
     private bool _archive;
@@ -75,6 +79,7 @@ public sealed partial class TradingMenu : DefaultWindow
         WithdrawButton.OnPressed += _ => OpenWithdrawWindow();
         CreateBuyOrderButton.OnPressed += _ => CreateSelectedBuyOrder();
         CreateSellOfferButton.OnPressed += _ => SubmitPrice(HeldPrice.Text, OnCreateSellOffer, true);
+        CreateUnitSellOfferButton.OnPressed += _ => SubmitPrice(HeldPrice.Text, OnPrepareUnitSellOffer, true);
         CreateHeldBuyOrderButton.OnPressed += _ => SubmitPrice(HeldPrice.Text, OnCreateBuyOfferFromHeld);
         OnResized += UpdateColumns;
     }
@@ -89,6 +94,8 @@ public sealed partial class TradingMenu : DefaultWindow
             _management = false;
             _archive = false;
             _withdrawWindow?.Close();
+            _unitSellWindow?.Close();
+            _unitSellRequest = null;
         }
 
         UpdateBalance();
@@ -787,7 +794,30 @@ public sealed partial class TradingMenu : DefaultWindow
     private void UpdateHeldItemAvailability(bool canOffer)
     {
         CreateSellOfferButton.Disabled = !canOffer;
+        CreateUnitSellOfferButton.Disabled = !canOffer;
         CreateHeldBuyOrderButton.Disabled = !canOffer;
+    }
+
+    public void OpenUnitSellWindow(TradingUnitSellOfferPreparedMessage message)
+    {
+        if (_state is not { IsOwner: true })
+            return;
+
+        _unitSellWindow?.Close();
+        _unitSellRequest = message.RequestId;
+        _unitSellWindow = new TradingUnitSellWindow(
+            message.ItemName,
+            message.Price,
+            message.MaximumAmount);
+        _unitSellWindow.OnConfirm += amount =>
+        {
+            if (_unitSellRequest is not { } requestId)
+                return;
+
+            _unitSellRequest = null;
+            OnCreateUnitSellOffers?.Invoke(requestId, amount);
+        };
+        _unitSellWindow.OpenCentered();
     }
 
     private void OpenWithdrawWindow()
@@ -838,6 +868,7 @@ public sealed partial class TradingMenu : DefaultWindow
     {
         base.Close();
         _withdrawWindow?.Close();
+        _unitSellWindow?.Close();
         _helpWindow?.Close();
 
         foreach (var entity in _prototypeExamineEntities.Values)

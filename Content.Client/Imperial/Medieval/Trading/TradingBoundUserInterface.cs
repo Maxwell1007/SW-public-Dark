@@ -27,6 +27,9 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
         _menu.OnSelectCommodity += commodity => SendMessage(new TradingSelectCommodityMessage(commodity));
         _menu.OnSelectOffer += offer => SendMessage(new TradingSelectOfferMessage(offer));
         _menu.OnCreateSellOffer += price => SendOwnerMessage(new TradingCreateSellOfferMessage(price));
+        _menu.OnPrepareUnitSellOffer += price => SendOwnerMessage(new TradingPrepareUnitSellOfferMessage(price));
+        _menu.OnCreateUnitSellOffers += (request, amount) =>
+            SendOwnerMessage(new TradingCreateUnitSellOffersMessage(request, amount));
         _menu.OnCreateBuyOffer += (commodity, price) => SendOwnerMessage(new TradingCreateBuyOfferMessage(commodity, price));
         _menu.OnCreateBuyOfferFromHeld += price => SendOwnerMessage(new TradingCreateBuyOfferFromHeldMessage(price));
         _menu.OnCancelOffer += id => SendOwnerMessage(new TradingCancelOfferMessage(id));
@@ -63,6 +66,10 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
                 examine.Message,
                 examine.Verbs,
                 verb => SendMessage(new TradingExecuteExamineVerbMessage(examine.Item, verb)));
+        }
+        else if (message is TradingUnitSellOfferPreparedMessage prepared)
+        {
+            _menu?.OpenUnitSellWindow(prepared);
         }
     }
 

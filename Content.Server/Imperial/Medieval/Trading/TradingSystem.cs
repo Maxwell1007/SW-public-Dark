@@ -29,6 +29,7 @@ public sealed partial class TradingSystem : EntitySystem
     [Dependency] private readonly StackSystem _stack = default!;
     [Dependency] private readonly TagSystem _tags = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
+    [Dependency] private readonly MetaDataSystem _metadata = default!;
 
     private EntityUid? _market;
     private CancellationTokenSource? _marketUpdateCancellation;
@@ -157,6 +158,7 @@ public sealed partial class TradingSystem : EntitySystem
         }
 
         pit.Comp.AccountOwner = mindId;
+        _metadata.SetEntityName(pit.Owner, Loc.GetString("trading-personal-pit-name"));
         return true;
     }
 

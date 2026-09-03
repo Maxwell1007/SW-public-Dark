@@ -227,6 +227,32 @@ public sealed class TradingCreateSellOfferMessage(int price) : BoundUserInterfac
 }
 
 [Serializable, NetSerializable]
+public sealed class TradingPrepareUnitSellOfferMessage(int price) : BoundUserInterfaceMessage
+{
+    public int Price = price;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingUnitSellOfferPreparedMessage(
+    Guid requestId,
+    string itemName,
+    int price,
+    int maximumAmount) : BoundUserInterfaceMessage
+{
+    public Guid RequestId = requestId;
+    public string ItemName = itemName;
+    public int Price = price;
+    public int MaximumAmount = maximumAmount;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingCreateUnitSellOffersMessage(Guid requestId, int amount) : BoundUserInterfaceMessage
+{
+    public Guid RequestId = requestId;
+    public int Amount = amount;
+}
+
+[Serializable, NetSerializable]
 public sealed class TradingCreateBuyOfferMessage(Guid commodityId, int price) : BoundUserInterfaceMessage
 {
     public Guid CommodityId = commodityId;

@@ -55,6 +55,7 @@ trading-ui-archive-title = Trade archive
 trading-ui-held-item-none = Selected: —
 trading-ui-price-placeholder = Price
 trading-ui-create-sell-offer-button = List lot
+trading-ui-create-unit-sell-offer-button = List lots individually
 trading-ui-create-sample-order-button = Create order from sample
 trading-ui-all-categories = All categories
 trading-ui-offer-counts = Lots: {$sellCount} · Orders: {$buyCount}
@@ -87,10 +88,16 @@ trading-ui-help-management-text = The offer management section lets you cancel y
 
 trading-ui-invalid-sell-offer = This item cannot be listed as a lot
 trading-ui-sell-offer-created = Lot listed successfully
+trading-ui-unit-sell-window-title = Individual lot listing
+trading-ui-unit-sell-question = How many {$item} do you want to list at {$price} each?
+trading-ui-unit-sell-confirm-button = List lots
+trading-ui-unit-sell-offers-created = Lots listed successfully
+trading-ui-unit-sell-offer-invalidated = The items were moved or changed. Try again
 trading-ui-buy-order-created = Order created successfully
 trading-ui-insufficient-order-funds = Insufficient funds for the order
 trading-ui-purchase-success = Purchase completed successfully
 trading-ui-sale-success = Sale completed successfully
 trading-ui-archive-sell-entry = Your lot “{$item}” was bought by {$trader} for {$price} revents
 trading-ui-archive-buy-entry = Your order for “{$item}” was fulfilled by {$trader} for {$price} revents
+trading-personal-pit-name = personal trading pit
 
