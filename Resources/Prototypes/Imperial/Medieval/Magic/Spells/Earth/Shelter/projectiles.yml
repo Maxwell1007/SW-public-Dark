@@ -14,7 +14,7 @@
   components:
   - type: TimedDespawn
     lifetime: 9
-  - type: DamageAble
+  - type: Damageable
     damageContainer: StructuralInorganic
     damageModifierSet: Rock
   - type: Destructible
