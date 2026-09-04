@@ -84,6 +84,7 @@
 
 - type: entity
   id: MedievalShopHole
+  categories: [ HideSpawnMenu ]
   name: MedievalShopHole
   description: Suspiciously looking old radio...
   suffix: Empty
@@ -146,7 +147,7 @@
   id: MedievalPublicShopHole
   name: public trading pit
   description: A shared market where anyone can buy lots listed by merchants.
-  suffix: Public
+  suffix: Medieval
   components:
   - type: PublicTradingPit
   - type: Trading

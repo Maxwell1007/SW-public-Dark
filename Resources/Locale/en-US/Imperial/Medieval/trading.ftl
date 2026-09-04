@@ -115,5 +115,5 @@ trading-personal-pit-name = personal trading pit
 
 ent-MedievalPublicShopHole = public trading pit
     .desc = A shared market where anyone can buy lots listed by merchants.
-    .suffix = { "Medieval, public" }
+    .suffix = { "Medieval" }
 
