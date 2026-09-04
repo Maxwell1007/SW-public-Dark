@@ -16,40 +16,32 @@ public sealed partial class TradingSystem
         SubscribeLocalEvent<ContainerManagerComponent, EntRemovedFromContainerMessage>(OnPublicContainerRemoved);
         SubscribeLocalEvent<PublicTradingBalanceComponent, ComponentShutdown>(OnPublicTradingBalanceShutdown);
         SubscribeLocalEvent<PublicTradingCurrencyTrackerComponent, StackCountChangedEvent>(OnPublicStackCountChanged);
+        SubscribeLocalEvent<PublicTradingBalanceRefreshEvent>(OnPublicTradingBalanceRefresh);
     }
 
-    private void UpdatePublicTrading()
+    private void OnPublicTradingBalanceRefresh(PublicTradingBalanceRefreshEvent args)
     {
-        var query = EntityQueryEnumerator<PublicTradingBalanceComponent>();
-        while (query.MoveNext(out var user, out var component))
+        if (!TryComp<PublicTradingBalanceComponent>(args.User, out var component))
+            return;
+
+        component.RefreshQueued = false;
+        component.OpenPits.RemoveWhere(pit =>
+            !Exists(pit) ||
+            !HasComp<PublicTradingPitComponent>(pit) ||
+            !_ui.IsUiOpen(pit, TradingUiKey.Key, args.User));
+        if (component.OpenPits.Count == 0)
         {
-            foreach (var pit in component.OpenPits.ToList())
-            {
-                if (!Exists(pit) ||
-                    !HasComp<PublicTradingPitComponent>(pit) ||
-                    !_ui.IsUiOpen(pit, TradingUiKey.Key, user))
-                {
-                    component.OpenPits.Remove(pit);
-                }
-            }
+            RemCompDeferred<PublicTradingBalanceComponent>(args.User);
+            return;
+        }
 
-            if (component.OpenPits.Count == 0)
-            {
-                RemCompDeferred<PublicTradingBalanceComponent>(user);
-                continue;
-            }
+        if (!component.BalanceDirty || !RefreshPublicTradingBalances(args.User, component))
+            return;
 
-            if (!component.BalanceDirty)
-                continue;
-
-            if (!RefreshPublicTradingBalances(user, component))
-                continue;
-
-            foreach (var pit in component.OpenPits)
-            {
-                if (TryComp<TradingComponent>(pit, out var trading))
-                    UpdateUserInterface(user, pit, trading);
-            }
+        foreach (var pit in component.OpenPits)
+        {
+            if (TryComp<TradingComponent>(pit, out var trading))
+                UpdateUserInterface(args.User, pit, trading);
         }
     }
 
@@ -293,7 +285,7 @@ public sealed partial class TradingSystem
         ref StackCountChangedEvent args)
     {
         if (TryComp<PublicTradingBalanceComponent>(entity.Comp.User, out var balance))
-            balance.BalanceDirty = true;
+            QueuePublicTradingBalanceRefresh(entity.Comp.User, balance);
     }
 
     private void MarkPublicTradingBalanceDirty(EntityUid item)
@@ -301,7 +293,7 @@ public sealed partial class TradingSystem
         var current = item;
         if (TryComp<PublicTradingBalanceComponent>(current, out var direct))
         {
-            direct.BalanceDirty = true;
+            QueuePublicTradingBalanceRefresh(current, direct);
             return;
         }
 
@@ -311,9 +303,21 @@ public sealed partial class TradingSystem
             if (!TryComp<PublicTradingBalanceComponent>(current, out var balance))
                 continue;
 
-            balance.BalanceDirty = true;
+            QueuePublicTradingBalanceRefresh(current, balance);
             return;
         }
+    }
+
+    private void QueuePublicTradingBalanceRefresh(
+        EntityUid user,
+        PublicTradingBalanceComponent component)
+    {
+        component.BalanceDirty = true;
+        if (component.RefreshQueued)
+            return;
+
+        component.RefreshQueued = true;
+        QueueLocalEvent(new PublicTradingBalanceRefreshEvent(user));
     }
 
     private void BuyPublicCommodity(
@@ -422,4 +426,9 @@ public sealed partial class TradingSystem
             actor,
             PopupType.SmallCaution);
     }
+}
+
+internal sealed class PublicTradingBalanceRefreshEvent(EntityUid user) : EntityEventArgs
+{
+    public readonly EntityUid User = user;
 }

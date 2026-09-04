@@ -5,6 +5,7 @@ using Content.Client.Message;
 using Content.Client.Popups;
 using Content.Client.Store.Ui;
 using Content.Shared.FixedPoint;
+using Content.Shared.Hands.Components;
 using Content.Shared.Imperial.Medieval.Trading;
 using Content.Shared.Imperial.Medieval.Trading.Prototypes;
 using Content.Shared.Input;
@@ -22,7 +23,6 @@ using Robust.Client.UserInterface.XAML;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Timing;
 
 namespace Content.Client.Imperial.Medieval.Trading;
 
@@ -31,6 +31,8 @@ public sealed partial class TradingMenu : DefaultWindow
 {
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
     [Dependency] private readonly IEntityManager _entities = default!;
+
+    private readonly HandsSystem _hands;
 
     public event Action<Guid>? OnBuy;
     public event Action<Guid>? OnSell;
@@ -64,12 +66,20 @@ public sealed partial class TradingMenu : DefaultWindow
     private bool _management;
     private bool _archive;
     private string? _heldItemName;
+    private bool _trackingHands = true;
     private readonly Dictionary<EntProtoId, EntityUid> _prototypeExamineEntities = new();
 
     public TradingMenu()
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
+
+        _hands = _entities.System<HandsSystem>();
+        _hands.OnPlayerSetActiveHand += OnActiveHandChanged;
+        _hands.OnPlayerItemAdded += OnHeldItemChanged;
+        _hands.OnPlayerItemRemoved += OnHeldItemChanged;
+        _hands.OnPlayerHandsAdded += OnHandsAdded;
+        _hands.OnPlayerHandsRemoved += OnHandsRemoved;
 
         CommonButton.OnPressed += _ => SelectSection(TradingMarketSection.Common);
         UniqueButton.OnPressed += _ => SelectSection(TradingMarketSection.Unique);
@@ -148,6 +158,7 @@ public sealed partial class TradingMenu : DefaultWindow
         RebuildManagement();
         RebuildArchive();
         UpdateSectionVisibility();
+        UpdateHeldItem();
     }
 
     private void SelectSection(TradingMarketSection section)
@@ -850,9 +861,23 @@ public sealed partial class TradingMenu : DefaultWindow
         return (item.Sections & section) != 0;
     }
 
-    protected override void FrameUpdate(FrameEventArgs args)
+    private void OnActiveHandChanged(string? _)
     {
-        base.FrameUpdate(args);
+        UpdateHeldItem();
+    }
+
+    private void OnHeldItemChanged(string _, EntityUid __)
+    {
+        UpdateHeldItem();
+    }
+
+    private void OnHandsAdded(Entity<HandsComponent> _)
+    {
+        UpdateHeldItem();
+    }
+
+    private void OnHandsRemoved()
+    {
         UpdateHeldItem();
     }
 
@@ -861,7 +886,7 @@ public sealed partial class TradingMenu : DefaultWindow
         var itemName = "—";
         var canOffer = false;
         if (_state is { IsOwner: true } &&
-            _entities.System<HandsSystem>().GetActiveHandEntity() is { } held &&
+            _hands.GetActiveHandEntity() is { } held &&
             _entities.EntityExists(held) &&
             !_entities.HasComponent<VirtualItemComponent>(held) &&
             _entities.TryGetComponent<MetaDataComponent>(held, out var metadata))
@@ -961,6 +986,8 @@ public sealed partial class TradingMenu : DefaultWindow
 
     public override void Close()
     {
+        StopTrackingHands();
+
         base.Close();
         _withdrawWindow?.Close();
         _unitSellWindow?.Close();
@@ -973,5 +1000,18 @@ public sealed partial class TradingMenu : DefaultWindow
         }
 
         _prototypeExamineEntities.Clear();
+    }
+
+    public void StopTrackingHands()
+    {
+        if (!_trackingHands)
+            return;
+
+        _trackingHands = false;
+        _hands.OnPlayerSetActiveHand -= OnActiveHandChanged;
+        _hands.OnPlayerItemAdded -= OnHeldItemChanged;
+        _hands.OnPlayerItemRemoved -= OnHeldItemChanged;
+        _hands.OnPlayerHandsAdded -= OnHandsAdded;
+        _hands.OnPlayerHandsRemoved -= OnHandsRemoved;
     }
 }

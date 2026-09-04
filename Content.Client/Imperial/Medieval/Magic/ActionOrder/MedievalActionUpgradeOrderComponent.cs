@@ -6,6 +6,8 @@ namespace Content.Client.Imperial.Medieval.Magic.ActionOrder;
 public sealed partial class MedievalActionUpgradeOrderComponent : Component
 {
     public bool OrderInitialized;
+    public bool OrderUpdateQueued;
+    public bool ApplyingReplacements;
     public int RemovedOrderLimit = 16;
     public List<EntityUid> Actions = [];
     public HashSet<EntityUid> AvailableActions = [];

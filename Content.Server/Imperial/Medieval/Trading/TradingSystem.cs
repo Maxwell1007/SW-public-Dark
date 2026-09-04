@@ -53,12 +53,6 @@ public sealed partial class TradingSystem : EntitySystem
         InitializePublicTrading();
     }
 
-    public override void Update(float frameTime)
-    {
-        base.Update(frameTime);
-        UpdatePublicTrading();
-    }
-
     public override void Shutdown()
     {
         StopMarketUpdates();

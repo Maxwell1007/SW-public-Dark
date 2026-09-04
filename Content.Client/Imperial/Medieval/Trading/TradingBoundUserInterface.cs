@@ -95,7 +95,10 @@ public sealed class TradingBoundUserInterface : BoundUserInterface
     protected override void Dispose(bool disposing)
     {
         if (disposing)
+        {
             _examineSystem.Close(Owner);
+            _menu?.StopTrackingHands();
+        }
 
         base.Dispose(disposing);
     }

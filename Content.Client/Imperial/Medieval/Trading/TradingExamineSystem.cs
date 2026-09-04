@@ -1,21 +1,43 @@
+using System.Linq;
+using System.Numerics;
 using Content.Client.Examine;
-using Content.Shared.Examine;
+using Content.Client.Verbs;
 using Content.Shared.Verbs;
+using Robust.Client.GameObjects;
 using Robust.Client.Player;
+using Robust.Client.UserInterface;
+using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Utility;
+using static Robust.Client.UserInterface.Controls.BoxContainer;
+using Direction = Robust.Shared.Maths.Direction;
+using SharedIdentity = Content.Shared.IdentityManagement.Identity;
 
 namespace Content.Client.Imperial.Medieval.Trading;
 
 public sealed class TradingExamineSystem : EntitySystem
 {
     [Dependency] private readonly IPlayerManager _player = default!;
-    [Dependency] private readonly ExamineSystem _examine = default!;
+    [Dependency] private readonly IUserInterfaceManager _ui = default!;
+    [Dependency] private readonly VerbSystem _verbs = default!;
+    [Dependency] private readonly SpriteSystem _sprites = default!;
+
+    private Popup? _popup;
+    private BoxContainer? _details;
+    private bool _closing;
 
     public override void Initialize()
     {
         base.Initialize();
-        UpdatesBefore.Add(typeof(ExamineSystem));
+
         SubscribeLocalEvent<ClientExaminedEvent>(OnClientExamined);
+        SubscribeLocalEvent<TradingExamineComponent, EntityTerminatingEvent>(OnExaminerTerminating);
+        SubscribeLocalEvent<TradingExamineTargetComponent, EntityTerminatingEvent>(OnTargetTerminating);
+    }
+
+    public override void Shutdown()
+    {
+        CloseActive();
+        base.Shutdown();
     }
 
     public void Open(
@@ -31,7 +53,8 @@ public sealed class TradingExamineSystem : EntitySystem
             !TryComp<TradingExamineComponent>(player, out var state) ||
             state.Pit != pit ||
             state.Target != target ||
-            state.CommodityId != commodityId)
+            state.CommodityId != commodityId ||
+            _details == null)
         {
             return;
         }
@@ -45,7 +68,7 @@ public sealed class TradingExamineSystem : EntitySystem
             examineVerb.Act = () => executeVerb(examineVerb);
         }
 
-        _examine.UpdateTooltipInfo(player, target, message, verbs, false);
+        UpdatePopup(player, target, message, verbs);
     }
 
     public void Begin(EntityUid pit, EntityUid target, Guid? commodityId = null)
@@ -53,11 +76,14 @@ public sealed class TradingExamineSystem : EntitySystem
         if (_player.LocalEntity is not { } player || !Exists(target))
             return;
 
+        CloseActive();
+
         var state = EnsureComp<TradingExamineComponent>(player);
         state.Pit = pit;
         state.Target = target;
         state.CommodityId = commodityId;
-        _examine.OpenTooltip(player, target, true, false);
+        EnsureComp<TradingExamineTargetComponent>(target).Examiner = player;
+        OpenPopup(player, target);
     }
 
     public void Close(EntityUid pit)
@@ -69,52 +95,155 @@ public sealed class TradingExamineSystem : EntitySystem
             return;
         }
 
-        RestoreChecks(player, state);
-        RemComp<TradingExamineComponent>(player);
+        CloseActive(player, state);
     }
 
-    public override void Update(float frameTime)
+    private void OpenPopup(EntityUid player, EntityUid target)
     {
-        if (_player.LocalEntity is not { } player ||
-            !TryComp<TradingExamineComponent>(player, out var state))
+        const float minWidth = 300;
+
+        var popup = new Popup { MaxWidth = 400 };
+        popup.OnPopupHide += OnPopupHidden;
+        _ui.ModalRoot.AddChild(popup);
+
+        var panel = new PanelContainer { Name = "TradingExaminePopupPanel" };
+        panel.AddStyleClass(ExamineSystem.StyleClassEntityTooltip);
+        panel.ModulateSelfOverride = Color.LightGray.WithAlpha(0.90f);
+        popup.AddChild(panel);
+
+        var content = new BoxContainer
         {
-            return;
+            Name = "TradingExaminePopupVbox",
+            Orientation = LayoutOrientation.Vertical,
+            MaxWidth = popup.MaxWidth,
+        };
+        panel.AddChild(content);
+
+        var header = new BoxContainer
+        {
+            Orientation = LayoutOrientation.Horizontal,
+            SeparationOverride = 5,
+            Margin = new Thickness(6, 0, 6, 0),
+        };
+        content.AddChild(header);
+
+        if (HasComp<SpriteComponent>(target))
+        {
+            var spriteView = new SpriteView
+            {
+                OverrideDirection = Direction.South,
+                SetSize = new Vector2(32, 32),
+            };
+            spriteView.SetEntity(target);
+            header.AddChild(spriteView);
         }
 
-        if (!Exists(state.Target))
+        var itemName = FormattedMessage.EscapeText(SharedIdentity.Name(target, EntityManager, player));
+        var label = new RichTextLabel();
+        label.SetMessage(FormattedMessage.FromMarkupPermissive($"[bold]{itemName}[/bold]"));
+        header.AddChild(label);
+
+        _details = new BoxContainer
         {
-            Close(state.Pit);
-            return;
-        }
+            Orientation = LayoutOrientation.Vertical,
+        };
+        content.AddChild(_details);
 
-        if (state.RestorePending || !TryComp<ExaminerComponent>(player, out var examiner))
-            return;
+        panel.Measure(Vector2Helpers.Infinity);
+        var size = Vector2.Max(new Vector2(minWidth, 0), panel.DesiredSize);
 
-        state.PreviousSkipChecks = examiner.SkipChecks;
-        state.RestorePending = true;
-        examiner.SkipChecks = true;
+        _popup = popup;
+        popup.Open(UIBox2.FromDimensions(_ui.MousePositionScaled.Position, size));
     }
 
-    public void RestoreChecks()
+    private void UpdatePopup(
+        EntityUid player,
+        EntityUid target,
+        FormattedMessage message,
+        List<Verb> verbs)
     {
-        if (_player.LocalEntity is not { } player ||
-            !TryComp<TradingExamineComponent>(player, out var state))
-        {
+        if (_details == null)
             return;
+
+        _details.RemoveAllChildren();
+        foreach (var node in message.Nodes)
+        {
+            if (node.Name != null || string.IsNullOrWhiteSpace(node.Value.StringValue ?? string.Empty))
+                continue;
+
+            var richLabel = new RichTextLabel { Margin = new Thickness(4, 4, 0, 4) };
+            richLabel.SetMessage(message);
+            _details.AddChild(richLabel);
+            break;
         }
 
-        RestoreChecks(player, state);
+        var totalVerbs = _verbs.GetLocalVerbs(target, player, typeof(ExamineVerb));
+        foreach (var verb in totalVerbs.Where(verb => !verb.ClientExclusive).ToList())
+        {
+            totalVerbs.Remove(verb);
+        }
+
+        totalVerbs.UnionWith(verbs);
+        AddVerbs(target, totalVerbs);
     }
 
-    private void RestoreChecks(EntityUid player, TradingExamineComponent state)
+    private void AddVerbs(EntityUid target, IEnumerable<Verb> verbs)
     {
-        if (!state.RestorePending)
+        if (_details == null)
             return;
 
-        if (TryComp<ExaminerComponent>(player, out var examiner))
-            examiner.SkipChecks = state.PreviousSkipChecks;
+        var buttons = new BoxContainer
+        {
+            Name = "TradingExamineButtonsHBox",
+            Orientation = LayoutOrientation.Horizontal,
+            HorizontalAlignment = Control.HAlignment.Stretch,
+            VerticalAlignment = Control.VAlignment.Bottom,
+        };
+        var hoverButtons = new BoxContainer
+        {
+            Orientation = LayoutOrientation.Horizontal,
+            HorizontalAlignment = Control.HAlignment.Left,
+            VerticalAlignment = Control.VAlignment.Center,
+            HorizontalExpand = true,
+        };
+        var clickButtons = new BoxContainer
+        {
+            Orientation = LayoutOrientation.Horizontal,
+            HorizontalAlignment = Control.HAlignment.Right,
+            VerticalAlignment = Control.VAlignment.Center,
+            HorizontalExpand = true,
+        };
 
-        state.RestorePending = false;
+        foreach (var verb in verbs)
+        {
+            if (verb is not ExamineVerb examine || examine.Icon == null || !examine.ShowOnExamineTooltip)
+                continue;
+
+            var button = new ExamineButton(examine, _sprites);
+            if (examine.HoverVerb)
+            {
+                hoverButtons.AddChild(button);
+                continue;
+            }
+
+            button.OnPressed += _ =>
+            {
+                _verbs.ExecuteVerb(target, button.Verb);
+                if (button.Verb.CloseMenu ?? button.Verb.CloseMenuDefault)
+                    CloseActive();
+            };
+            clickButtons.AddChild(button);
+        }
+
+        buttons.AddChild(hoverButtons);
+        buttons.AddChild(clickButtons);
+        _details.AddChild(buttons);
+    }
+
+    private void OnPopupHidden()
+    {
+        if (!_closing)
+            CloseActive();
     }
 
     private void OnClientExamined(ClientExaminedEvent args)
@@ -125,24 +254,71 @@ public sealed class TradingExamineSystem : EntitySystem
             return;
         }
 
-        RestoreChecks(args.Examiner, state);
-        RemComp<TradingExamineComponent>(args.Examiner);
-    }
-}
-
-public sealed class TradingExamineRestoreSystem : EntitySystem
-{
-    [Dependency] private readonly TradingExamineSystem _tradingExamine = default!;
-
-    public override void Initialize()
-    {
-        base.Initialize();
-        UpdatesAfter.Add(typeof(ExamineSystem));
-        UpdatesAfter.Add(typeof(TradingExamineSystem));
+        CloseActive(args.Examiner, state);
     }
 
-    public override void Update(float frameTime)
+    private void OnExaminerTerminating(
+        Entity<TradingExamineComponent> entity,
+        ref EntityTerminatingEvent args)
     {
-        _tradingExamine.RestoreChecks();
+        CloseActive(entity.Owner, entity.Comp);
+    }
+
+    private void OnTargetTerminating(
+        Entity<TradingExamineTargetComponent> entity,
+        ref EntityTerminatingEvent args)
+    {
+        if (!TryComp<TradingExamineComponent>(entity.Comp.Examiner, out var state) ||
+            state.Target != entity.Owner)
+        {
+            return;
+        }
+
+        CloseActive(entity.Comp.Examiner, state);
+    }
+
+    private void CloseActive()
+    {
+        if (_player.LocalEntity is { } player &&
+            TryComp<TradingExamineComponent>(player, out var state))
+        {
+            CloseActive(player, state);
+            return;
+        }
+
+        DisposePopup();
+    }
+
+    private void CloseActive(EntityUid player, TradingExamineComponent state)
+    {
+        if (_closing)
+            return;
+
+        _closing = true;
+        if (!TerminatingOrDeleted(state.Target) &&
+            TryComp<TradingExamineTargetComponent>(state.Target, out var target) &&
+            target.Examiner == player)
+        {
+            RemComp<TradingExamineTargetComponent>(state.Target);
+        }
+
+        if (!TerminatingOrDeleted(player))
+            RemComp<TradingExamineComponent>(player);
+
+        DisposePopup();
+        _closing = false;
+    }
+
+    private void DisposePopup()
+    {
+        if (_popup != null)
+        {
+            _popup.OnPopupHide -= OnPopupHidden;
+            _popup.Close();
+            _popup.Orphan();
+            _popup = null;
+        }
+
+        _details = null;
     }
 }

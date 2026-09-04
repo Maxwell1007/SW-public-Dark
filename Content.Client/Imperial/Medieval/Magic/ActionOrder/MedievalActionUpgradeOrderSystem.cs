@@ -22,30 +22,54 @@ public sealed class MedievalActionUpgradeOrderSystem : EntitySystem
         base.Initialize();
 
         SubscribeNetworkEvent<MedievalActionReplacedEvent>(OnActionReplaced);
+        SubscribeLocalEvent<MedievalActionOrderUpdateEvent>(OnOrderUpdate);
+        _actions.OnActionAdded += OnActionAdded;
         _actions.OnActionRemoved += OnActionRemoved;
+        _actions.LinkActions += OnActionsLinked;
     }
 
     public override void Shutdown()
     {
+        _actions.OnActionAdded -= OnActionAdded;
         _actions.OnActionRemoved -= OnActionRemoved;
+        _actions.LinkActions -= OnActionsLinked;
 
         base.Shutdown();
     }
 
-    public override void FrameUpdate(float frameTime)
+    private void OnActionAdded(EntityUid _)
     {
-        base.FrameUpdate(frameTime);
-
-        if (!TryGetOrderState(out var state))
+        if (!TryGetOrderState(out var stateUid, out var state))
             return;
 
-        if (state.Replacements.Count == 0)
+        QueueOrderUpdate(stateUid, state);
+    }
+
+    private void OnActionsLinked(ActionsComponent _)
+    {
+        if (!TryGetOrderState(out var stateUid, out var state))
+            return;
+
+        QueueOrderUpdate(stateUid, state);
+    }
+
+    private void OnOrderUpdate(MedievalActionOrderUpdateEvent args)
+    {
+        if (!TryComp<MedievalActionUpgradeOrderComponent>(args.State, out var state))
+            return;
+
+        state.OrderUpdateQueued = false;
+        if (!TryGetOrderState(out var currentStateUid, out _) ||
+            currentStateUid != args.State ||
+            state.ApplyingReplacements)
         {
-            CaptureOrder(state);
             return;
         }
 
-        TryApplyReplacements(state);
+        if (state.Replacements.Count == 0)
+            CaptureOrder(state);
+        else
+            TryApplyReplacements(state);
     }
 
     private void OnActionRemoved(EntityUid action)
@@ -89,7 +113,7 @@ public sealed class MedievalActionUpgradeOrderSystem : EntitySystem
 
     private void OnActionReplaced(MedievalActionReplacedEvent message)
     {
-        if (!TryGetOrderState(out var state))
+        if (!TryGetOrderState(out var stateUid, out var state))
             return;
 
         if (!state.OrderInitialized)
@@ -112,10 +136,30 @@ public sealed class MedievalActionUpgradeOrderSystem : EntitySystem
         }
 
         state.Replacements[message.OldAction] = message.NewAction;
+        QueueOrderUpdate(stateUid, state);
+    }
+
+    private void QueueOrderUpdate(
+        EntityUid stateUid,
+        MedievalActionUpgradeOrderComponent state)
+    {
+        if (state.OrderUpdateQueued || state.ApplyingReplacements)
+            return;
+
+        state.OrderUpdateQueued = true;
+        QueueLocalEvent(new MedievalActionOrderUpdateEvent(stateUid));
     }
 
     private bool TryGetOrderState(out MedievalActionUpgradeOrderComponent state)
     {
+        return TryGetOrderState(out _, out state);
+    }
+
+    private bool TryGetOrderState(
+        out EntityUid stateUid,
+        out MedievalActionUpgradeOrderComponent state)
+    {
+        stateUid = default;
         state = default!;
 
         if (_player.LocalUser is not { } user ||
@@ -124,7 +168,8 @@ public sealed class MedievalActionUpgradeOrderSystem : EntitySystem
             return false;
         }
 
-        state = EnsureComp<MedievalActionUpgradeOrderComponent>(mind.Value);
+        stateUid = mind.Value;
+        state = EnsureComp<MedievalActionUpgradeOrderComponent>(stateUid);
         return true;
     }
 
@@ -234,18 +279,26 @@ public sealed class MedievalActionUpgradeOrderSystem : EntitySystem
             action.Comp.AutoPopulate = false;
         }
 
-        for (var i = 0; i < ordered.Count; i++)
+        state.ApplyingReplacements = true;
+        try
         {
-            ordered[i].Comp.Priority = i;
-            ordered[i].Comp.AutoPopulate = true;
+            for (var i = 0; i < ordered.Count; i++)
+            {
+                ordered[i].Comp.Priority = i;
+                ordered[i].Comp.AutoPopulate = true;
+            }
+
+            _actions.LinkAllActions();
         }
-
-        _actions.LinkAllActions();
-
-        foreach (var (component, priority, autoPopulate) in originalSettings)
+        finally
         {
-            component.Priority = priority;
-            component.AutoPopulate = autoPopulate;
+            foreach (var (component, priority, autoPopulate) in originalSettings)
+            {
+                component.Priority = priority;
+                component.AutoPopulate = autoPopulate;
+            }
+
+            state.ApplyingReplacements = false;
         }
 
         foreach (var replaced in state.Replacements.Keys)
@@ -269,4 +322,9 @@ public sealed class MedievalActionUpgradeOrderSystem : EntitySystem
 
         return action;
     }
+}
+
+internal sealed class MedievalActionOrderUpdateEvent(EntityUid state) : EntityEventArgs
+{
+    public readonly EntityUid State = state;
 }
