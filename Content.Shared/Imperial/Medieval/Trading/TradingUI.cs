@@ -1,7 +1,9 @@
 using Content.Shared.Imperial.Medieval.Trading.Prototypes;
 using Content.Shared.Store;
+using Content.Shared.Verbs;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
+using Robust.Shared.Utility;
 
 namespace Content.Shared.Imperial.Medieval.Trading;
 
@@ -144,32 +146,55 @@ public sealed class TradingStoredItemState
 }
 
 [Serializable, NetSerializable]
+public sealed class TradingPendingSaleState
+{
+    public Guid Id;
+    public string ItemName;
+    public string BuyerName;
+    public int Price;
+
+    public TradingPendingSaleState(Guid id, string itemName, string buyerName, int price)
+    {
+        Id = id;
+        ItemName = itemName;
+        BuyerName = buyerName;
+        Price = price;
+    }
+}
+
+[Serializable, NetSerializable]
 public sealed class TradingUpdateState : BoundUserInterfaceState
 {
     public List<TradingMarketItemState> Items;
     public List<TradingMarketOfferState> Offers;
     public List<TradingStoredItemState> StoredItems;
+    public List<TradingPendingSaleState> PendingSales;
     public List<string> Archive;
     public int Balance;
     public ProtoId<CurrencyPrototype> Currency;
     public bool IsOwner;
+    public bool IsPublic;
 
     public TradingUpdateState(
         List<TradingMarketItemState> items,
         List<TradingMarketOfferState> offers,
         List<TradingStoredItemState> storedItems,
+        List<TradingPendingSaleState> pendingSales,
         List<string> archive,
         int balance,
         ProtoId<CurrencyPrototype> currency,
-        bool isOwner)
+        bool isOwner,
+        bool isPublic)
     {
         Items = items;
         Offers = offers;
         StoredItems = storedItems;
+        PendingSales = pendingSales;
         Archive = archive;
         Balance = balance;
         Currency = currency;
         IsOwner = isOwner;
+        IsPublic = isPublic;
     }
 }
 
@@ -225,6 +250,32 @@ public sealed class TradingCreateSellOfferMessage(int price) : BoundUserInterfac
 }
 
 [Serializable, NetSerializable]
+public sealed class TradingPrepareUnitSellOfferMessage(int price) : BoundUserInterfaceMessage
+{
+    public int Price = price;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingUnitSellOfferPreparedMessage(
+    Guid requestId,
+    string itemName,
+    int price,
+    int maximumAmount) : BoundUserInterfaceMessage
+{
+    public Guid RequestId = requestId;
+    public string ItemName = itemName;
+    public int Price = price;
+    public int MaximumAmount = maximumAmount;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingCreateUnitSellOffersMessage(Guid requestId, int amount) : BoundUserInterfaceMessage
+{
+    public Guid RequestId = requestId;
+    public int Amount = amount;
+}
+
+[Serializable, NetSerializable]
 public sealed class TradingCreateBuyOfferMessage(Guid commodityId, int price) : BoundUserInterfaceMessage
 {
     public Guid CommodityId = commodityId;
@@ -250,9 +301,45 @@ public sealed class TradingCollectStoredItemMessage(NetEntity item) : BoundUserI
 }
 
 [Serializable, NetSerializable]
+public sealed class TradingCollectSaleRevenueMessage(Guid saleId) : BoundUserInterfaceMessage
+{
+    public Guid SaleId = saleId;
+}
+
+[Serializable, NetSerializable]
 public sealed class TradingExamineItemMessage(NetEntity item) : BoundUserInterfaceMessage
 {
     public NetEntity Item = item;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingExamineCommodityMessage(Guid commodityId) : BoundUserInterfaceMessage
+{
+    public Guid CommodityId = commodityId;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingExamineInfoMessage(
+    NetEntity item,
+    FormattedMessage message,
+    List<Verb> verbs,
+    EntProtoId? previewProduct = null,
+    Guid? commodityId = null) : BoundUserInterfaceMessage
+{
+    public NetEntity Item = item;
+    public FormattedMessage Message = message;
+    public List<Verb> Verbs = verbs;
+    public EntProtoId? PreviewProduct = previewProduct;
+    public Guid? CommodityId = commodityId;
+}
+
+[Serializable, NetSerializable]
+public sealed class TradingExecuteExamineVerbMessage(
+    NetEntity item,
+    ExamineVerb requestedVerb) : BoundUserInterfaceMessage
+{
+    public NetEntity Item = item;
+    public ExamineVerb RequestedVerb = requestedVerb;
 }
 
 [Serializable, NetSerializable]

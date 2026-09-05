@@ -70,6 +70,7 @@ public sealed class TradingMarketOffer
     public EntityUid? Item;
     public string ListedItemName = string.Empty;
     public bool IsImmediate;
+    public bool UsesExternalFunds;
     public int Sequence;
 }
 
@@ -77,6 +78,7 @@ public sealed class TradingMarketOffer
 public sealed partial class TradingMarketViewerComponent : Component
 {
     public HashSet<EntityUid> VisibleItems = new();
+    public Dictionary<Guid, EntityUid> ExaminePreviewItems = new();
     public Guid? SelectedCommodity;
     public Guid? SelectedOffer;
 }

@@ -1,9 +1,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Content.Server.MedievalMoneyChecker.Components;
 using Content.Server.Popups;
 using Content.Server.Stack;
 using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Content.Shared.GameTicking;
 using Content.Shared.Imperial.Medieval.Trading;
@@ -29,6 +31,7 @@ public sealed partial class TradingSystem : EntitySystem
     [Dependency] private readonly StackSystem _stack = default!;
     [Dependency] private readonly TagSystem _tags = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
+    [Dependency] private readonly MetaDataSystem _metadata = default!;
 
     private EntityUid? _market;
     private CancellationTokenSource? _marketUpdateCancellation;
@@ -39,12 +42,15 @@ public sealed partial class TradingSystem : EntitySystem
 
         SubscribeLocalEvent<TradingComponent, BeforeActivatableUIOpenEvent>(OnBeforeUiOpen);
         SubscribeLocalEvent<TradingComponent, EntityTerminatingEvent>(OnTradingPitTerminating);
+        SubscribeLocalEvent<TradingLotBlockedComponent, ExaminedEvent>(OnTradingLotBlockedExamined);
+        SubscribeLocalEvent<TradingLotBlockedComponent, StackSplitEvent>(OnTradingLotBlockedStackSplit);
         SubscribeLocalEvent<MedievalCurrencyComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<RoundStartedEvent>(OnRoundStart);
         SubscribeLocalEvent<RoundEndedEvent>(OnRoundEnd);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
 
         InitializeUi();
+        InitializePublicTrading();
     }
 
     public override void Shutdown()
@@ -57,6 +63,9 @@ public sealed partial class TradingSystem : EntitySystem
         Entity<TradingComponent> pit,
         ref EntityTerminatingEvent args)
     {
+        if (HasComp<PublicTradingPitComponent>(pit.Owner))
+            RemovePublicTradingSessions(pit.Owner);
+
         if (TryGetMarket(out var market))
         {
             var offers = market.Comp.Offers.Values
@@ -139,6 +148,7 @@ public sealed partial class TradingSystem : EntitySystem
     private void OnBeforeUiOpen(EntityUid uid, TradingComponent component, BeforeActivatableUIOpenEvent args)
     {
         _containers.EnsureContainer<Robust.Shared.Containers.Container>(uid, TradingComponent.MarketContainerId);
+        OpenPublicTradingSession(uid, args.User);
     }
 
     internal bool IsTradingPitOwner(EntityUid user, TradingComponent component)
@@ -150,13 +160,15 @@ public sealed partial class TradingSystem : EntitySystem
 
     public bool BindTradingPit(Entity<TradingComponent?> pit, EntityUid trader)
     {
-        if (!Resolve(pit.Owner, ref pit.Comp) ||
+        if (HasComp<PublicTradingPitComponent>(pit.Owner) ||
+            !Resolve(pit.Owner, ref pit.Comp) ||
             !_mind.TryGetMind(trader, out var mindId, out _))
         {
             return false;
         }
 
         pit.Comp.AccountOwner = mindId;
+        _metadata.SetEntityName(pit.Owner, Loc.GetString("trading-personal-pit-name"));
         return true;
     }
 
@@ -164,6 +176,7 @@ public sealed partial class TradingSystem : EntitySystem
     {
         if (args.Handled ||
             !args.CanReach ||
+            HasComp<PublicTradingPitComponent>(args.Target) ||
             !TryComp<TradingComponent>(args.Target, out var store))
             return;
 
@@ -181,7 +194,9 @@ public sealed partial class TradingSystem : EntitySystem
         Entity<MedievalCurrencyComponent?> currency,
         Entity<TradingComponent?> store)
     {
-        if (!Resolve(currency.Owner, ref currency.Comp) || !Resolve(store.Owner, ref store.Comp))
+        if (HasComp<PublicTradingPitComponent>(store.Owner) ||
+            !Resolve(currency.Owner, ref currency.Comp) ||
+            !Resolve(store.Owner, ref store.Comp))
             return false;
 
         var value = currency.Comp.Price;
@@ -206,7 +221,7 @@ public sealed partial class TradingSystem : EntitySystem
         EntityUid uid,
         TradingComponent? store = null)
     {
-        if (!Resolve(uid, ref store))
+        if (HasComp<PublicTradingPitComponent>(uid) || !Resolve(uid, ref store))
             return false;
 
         foreach (var type in currency.Keys)

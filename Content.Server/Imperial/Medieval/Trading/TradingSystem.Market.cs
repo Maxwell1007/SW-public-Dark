@@ -2,7 +2,9 @@ using System.Globalization;
 using System.Linq;
 using Content.Server.Imperial.Medieval.Courier;
 using Content.Server.Light.Components;
+using Content.Server.MedievalMoneyChecker.Components;
 using Content.Shared.Chemistry.Components.SolutionManager;
+using Content.Shared.Examine;
 using Content.Shared.Imperial.Medieval.Additions;
 using Content.Shared.Imperial.Medieval.ArmorIntegrity;
 using Content.Shared.Imperial.Medieval.Chemistry;
@@ -373,13 +375,21 @@ public sealed partial class TradingSystem
         }
 
         var executionPrice = ask.Sequence < bid.Sequence ? ask.Price : bid.Price;
-        ArchiveTrade(commodity, ask, bid, executionPrice);
+        var sellerPayoutDeferred = ArchiveTrade(commodity, ask, bid, executionPrice);
 
-        if (bid.Pit is { } buyerPit && TryComp<TradingComponent>(buyerPit, out var buyer))
+        if (!bid.UsesExternalFunds &&
+            bid.Pit is { } buyerPit &&
+            TryComp<TradingComponent>(buyerPit, out var buyer))
+        {
             buyer.Balance += bid.Price - executionPrice;
+        }
 
-        if (ask.Pit is { } sellerPit && TryComp<TradingComponent>(sellerPit, out var seller))
+        if (!sellerPayoutDeferred &&
+            ask.Pit is { } sellerPit &&
+            TryComp<TradingComponent>(sellerPit, out var seller))
+        {
             seller.Balance += executionPrice;
+        }
 
         if (ask.Item is { } item)
         {
@@ -392,7 +402,18 @@ public sealed partial class TradingSystem
                  bid.Pit is { } destination &&
                  TryComp<TradingComponent>(destination, out var destinationPit))
         {
-            var spawnedItem = Spawn(ask.Product, MapCoordinates.Nullspace);
+            var productPrototype = _prototypeManager.Index(ask.Product);
+            var spawnCoordinates = MapCoordinates.Nullspace;
+            if (!productPrototype.HasComponent<ItemComponent>())
+            {
+                var spawnTarget = bid.ImmediateRecipient is { } recipient && Exists(recipient)
+                    ? recipient
+                    : destination;
+                spawnCoordinates = Transform(spawnTarget).MapPosition;
+            }
+
+            var spawnedItem = Spawn(ask.Product, spawnCoordinates);
+            EnsureComp<TradingLotBlockedComponent>(spawnedItem);
             DeliverItem(destination, destinationPit, spawnedItem, bid.ImmediateRecipient);
         }
 
@@ -416,13 +437,14 @@ public sealed partial class TradingSystem
         return container.Owner == sellerPit && container.ID == TradingComponent.MarketContainerId;
     }
 
-    private void ArchiveTrade(
+    private bool ArchiveTrade(
         TradingCommodity commodity,
         TradingMarketOffer ask,
         TradingMarketOffer bid,
         int executionPrice)
     {
         var displayName = commodity.DisplayName;
+        var sellerPayoutDeferred = false;
         if (ask.Item is { } item && Exists(item))
         {
             var metadata = MetaData(item);
@@ -435,12 +457,14 @@ public sealed partial class TradingSystem
             ask.Pit is { } sellerPit &&
             TryComp<TradingComponent>(sellerPit, out var seller))
         {
-            seller.MarketArchive.Add(
-                Loc.GetString(
-                    "trading-ui-archive-sell-entry",
-                    ("item", displayName),
-                    ("trader", bid.ParticipantName),
-                    ("price", executionPrice)));
+            seller.PendingSales.Add(new TradingPendingSale
+            {
+                Id = ask.Id,
+                ItemName = displayName,
+                BuyerName = bid.ParticipantName,
+                Price = executionPrice,
+            });
+            sellerPayoutDeferred = true;
         }
 
         if (bid.ParticipantKind == TradingParticipantKind.Trader &&
@@ -455,6 +479,8 @@ public sealed partial class TradingSystem
                     ("trader", ask.ParticipantName),
                     ("price", executionPrice)));
         }
+
+        return sellerPayoutDeferred;
     }
 
     internal void RemoveOffer(
@@ -466,7 +492,7 @@ public sealed partial class TradingSystem
         if (!market.Comp.Offers.TryGetValue(id, out var offer))
             return;
 
-        if (offer.Side == TradingOfferSide.Buy)
+        if (offer.Side == TradingOfferSide.Buy && !offer.UsesExternalFunds)
         {
             if (offer.Pit is { } buyerId && TryComp<TradingComponent>(buyerId, out var buyer))
                 buyer.Balance += offer.Price;
@@ -515,7 +541,9 @@ public sealed partial class TradingSystem
         if (!Exists(item) ||
             TerminatingOrDeleted(item) ||
             EntityManager.IsQueuedForDeletion(item) ||
+            HasComp<TradingLotBlockedComponent>(item) ||
             MetaData(item).EntityPrototype is not { } prototype ||
+            !prototype.HasComponent<ItemComponent>() ||
             !CanTradeProduct(prototype, config) ||
             ContainsPlayerMind(item))
         {
@@ -526,6 +554,25 @@ public sealed partial class TradingSystem
                light.CurrentState == ExpendableLightState.BrandNew;
     }
 
+    private void OnTradingLotBlockedStackSplit(
+        EntityUid uid,
+        TradingLotBlockedComponent component,
+        ref StackSplitEvent args)
+    {
+        EnsureComp<TradingLotBlockedComponent>(args.NewId);
+    }
+
+    private void OnTradingLotBlockedExamined(
+        EntityUid uid,
+        TradingLotBlockedComponent component,
+        ExaminedEvent args)
+    {
+        if (!HasComp<MedievalMoneyCheckerComponent>(args.Examiner))
+            return;
+
+        args.PushMarkup(Loc.GetString("trading-lot-blocked-examine"));
+    }
+
     private bool CanTradeProduct(EntProtoId product, TradingMarketConfigPrototype config)
     {
         return _prototypeManager.TryIndex(product, out var prototype) &&
@@ -534,8 +581,7 @@ public sealed partial class TradingSystem
 
     private bool CanTradeProduct(EntityPrototype prototype, TradingMarketConfigPrototype config)
     {
-        if (!prototype.HasComponent<ItemComponent>() ||
-            prototype.HasComponent<VirtualItemComponent>() ||
+        if (prototype.HasComponent<VirtualItemComponent>() ||
             prototype.HasComponent<MobStateComponent>() ||
             prototype.HasComponent<TimedDespawnComponent>() ||
             prototype.HasComponent<MedievalTimedDespawnComponent>() ||

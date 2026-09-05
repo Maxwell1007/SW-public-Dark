@@ -34,7 +34,7 @@
                         <LineEdit Name="BuyPrice" PlaceHolder="{Loc trading-ui-buy-price-placeholder}" HorizontalExpand="True" />
                         <Button Name="CreateBuyOrderButton" Text="{Loc trading-ui-create-buy-order-button}" MinWidth="76" Margin="4 0 0 0" />
                     </BoxContainer>
-                    <Label Text="{Loc trading-ui-market-offers-title}" Margin="0 4" />
+                    <Label Name="MarketOffersTitle" Text="{Loc trading-ui-market-offers-title}" Margin="0 4" />
                     <ScrollContainer HScrollEnabled="False" VerticalExpand="True">
                         <BoxContainer Name="OffersContainer" Orientation="Vertical" HorizontalExpand="True" />
                     </ScrollContainer>
@@ -45,6 +45,8 @@
             <BoxContainer Orientation="Vertical" HorizontalExpand="True">
                 <Label Text="{Loc trading-ui-active-offers-title}" Margin="4" />
                 <BoxContainer Name="ManagedOffersContainer" Orientation="Vertical" HorizontalExpand="True" />
+                <Label Text="{Loc trading-ui-pending-sales-title}" Margin="4 12 4 4" />
+                <BoxContainer Name="PendingSalesContainer" Orientation="Vertical" HorizontalExpand="True" />
                 <Label Text="{Loc trading-ui-stored-items-title}" Margin="4 12 4 4" />
                 <BoxContainer Name="StoredItemsContainer" Orientation="Vertical" HorizontalExpand="True" />
             </BoxContainer>
@@ -60,6 +62,7 @@
                 <RichTextLabel Name="HeldItemName" Text="{Loc trading-ui-held-item-none}" VerticalAlignment="Center" MinSize="260 42" SetSize="260 42" RectClipContent="True" Margin="0 0 6 0" />
                 <LineEdit Name="HeldPrice" PlaceHolder="{Loc trading-ui-price-placeholder}" HorizontalExpand="True" MinWidth="130" />
                 <Button Name="CreateSellOfferButton" Text="{Loc trading-ui-create-sell-offer-button}" MinWidth="130" />
+                <Button Name="CreateUnitSellOfferButton" Text="{Loc trading-ui-create-unit-sell-offer-button}" MinWidth="185" Margin="6 0 0 0" />
                 <Button Name="CreateHeldBuyOrderButton" Text="{Loc trading-ui-create-sample-order-button}" MinWidth="190" Margin="6 0 0 0" />
             </BoxContainer>
         </PanelContainer>
