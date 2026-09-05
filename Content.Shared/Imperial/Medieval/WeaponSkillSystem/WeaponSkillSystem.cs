@@ -27,7 +27,6 @@ public sealed class WeaponSkillSystem : EntitySystem
 
         SubscribeLocalEvent<CrossbowSkillComponent, GetWeaponSkillProjectileHitBonusEvent>(OnProjectileHit_Crossbow);
         SubscribeLocalEvent<BowSkillComponent, AttemptBowAutoLoadEvent>(OnBowAutoLoad_Bow);
-        SubscribeLocalEvent<BowSkillComponent, GetWeaponSkillProjectileHitBonusEvent>(OnProjectileHit_Bow);
     }
 
     private static bool WeaponMatches(MedievalWeaponSkillId current, MedievalWeaponSkillId expected)
@@ -135,15 +134,6 @@ public sealed class WeaponSkillSystem : EntitySystem
         ev = ev with { Handled = true };
     }
 
-    private void OnProjectileHit_Bow(EntityUid uid, BowSkillComponent comp, ref GetWeaponSkillProjectileHitBonusEvent ev)
-    {
-        if (!WeaponMatches(ev.WeaponSkill, MedievalWeaponSkillId.Bow)) return;
-
-        ev = ev with
-        {
-            BypassDamage = AddDamage(ev.BypassDamage, comp.BypassType, comp.BypassAmount),
-        };
-    }
 #endregion
 
             #region Helpers

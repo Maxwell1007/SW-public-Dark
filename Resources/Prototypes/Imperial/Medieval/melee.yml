@@ -1914,7 +1914,7 @@
 
 - type: entity
   name: mace
-  parent: [ BaseItem, BaseCrushingCharged ]
+  parent: [ BaseItem, BaseCrushingLightCharged ]
   id: MedievalMaceT3
   description: An ancient war blade.
   components:
@@ -1981,7 +1981,7 @@
 
 - type: entity
   name: mace
-  parent: [ BaseItem, BaseCrushingCharged ]
+  parent: [ BaseItem, BaseCrushingLightCharged ]
   id: MedievalMaceRusty
   description: An ancient war blade.
   components:
@@ -3478,7 +3478,7 @@
 
 - type: entity
   name: mace
-  parent: [ BaseItem, BaseCrushingCharged ]
+  parent: [ BaseItem, BaseCrushingLightCharged ]
   id: MedievalMaceT3Steel
   description: An ancient war blade.
   components:
