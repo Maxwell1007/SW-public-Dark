@@ -98,6 +98,10 @@ namespace Content.Client.Input
 
             human.AddFunction(ContentKeyFunctions.MedievalDash);
 
+            // #mediaval region edit
+            human.AddFunction(ContentKeyFunctions.MedievalHandTransfer);
+            // #mediaval region edit end
+
             human.AddFunction(ContentKeyFunctions.MedievalMeleeParry);
             // Imperial Options End
 
