@@ -667,11 +667,11 @@ binds:
   type: State
   key: Space
 
-#mediaval region edit
+#medieval region edit
 - function: MedievalHandTransfer
   type: State
   key: N
-#mediaval region edit end
+#medieval region edit end
 
 # Medieval Melee System
 - function: MeleeParry

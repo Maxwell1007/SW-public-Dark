@@ -152,9 +152,9 @@ namespace Content.Shared.Input
         #region Medieval
 
         public static readonly BoundKeyFunction MedievalDash = "MedievalDash";
-        // #mediaval region edit
+        // #medieval region edit
         public static readonly BoundKeyFunction MedievalHandTransfer = "MedievalHandTransfer";
-        // #mediaval region edit end
+        // #medieval region edit end
 
         #endregion
 

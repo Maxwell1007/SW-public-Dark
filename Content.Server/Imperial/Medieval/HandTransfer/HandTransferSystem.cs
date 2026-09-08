@@ -31,7 +31,9 @@ public sealed class HandTransferSystem : EntitySystem
 
         SubscribeAllEvent<HandTransferOfferEvent>(OnOffer);
         SubscribeAllEvent<HandTransferAcceptEvent>(OnAccept);
+        SubscribeAllEvent<HandTransferCancelEvent>(OnCancel);
         SubscribeLocalEvent<HandTransferRequestComponent, AcceptHandTransferAlertEvent>(OnAcceptAlert);
+        SubscribeLocalEvent<HandTransferOutgoingComponent, CancelHandTransferAlertEvent>(OnCancelAlert);
     }
 
     public override void Update(float frameTime)
@@ -43,6 +45,13 @@ public sealed class HandTransferSystem : EntitySystem
         {
             if (!IsRequestCurrent(receiver, request))
                 ClearRequest(receiver, deferred: true);
+        }
+
+        var outgoingQuery = EntityQueryEnumerator<HandTransferOutgoingComponent>();
+        while (outgoingQuery.MoveNext(out var offerer, out var outgoing))
+        {
+            if (!IsOutgoingCurrent(offerer, outgoing))
+                ClearOutgoing(offerer, outgoing, deferred: true);
         }
     }
 
@@ -57,18 +66,32 @@ public sealed class HandTransferSystem : EntitySystem
             return;
         }
 
+        if (TryComp<HandTransferOutgoingComponent>(offerer, out var existingOutgoing))
+        {
+            if (IsOutgoingCurrent(offerer, existingOutgoing))
+                return;
+
+            ClearOutgoing(offerer, existingOutgoing);
+        }
+
         if (!CanCreateRequest(offerer, itemUid, receiver))
             return;
 
-        if (TryComp<HandTransferRequestComponent>(receiver, out var existing) &&
-            IsRequestCurrent(receiver, existing))
+        HandTransferRequestComponent? existing = null;
+        if (TryComp(receiver, out existing))
         {
-            _popup.PopupEntity(
-                Loc.GetString("hand-transfer-recipient-busy", ("target", Identity.Entity(receiver, EntityManager))),
-                receiver,
-                offerer,
-                PopupType.SmallCaution);
-            return;
+            if (IsRequestCurrent(receiver, existing))
+            {
+                _popup.PopupEntity(
+                    Loc.GetString("hand-transfer-recipient-busy", ("target", Identity.Entity(receiver, EntityManager))),
+                    receiver,
+                    offerer,
+                    PopupType.SmallCaution);
+                return;
+            }
+
+            ClearRequest(receiver);
+            existing = null;
         }
 
         var request = existing ?? EnsureComp<HandTransferRequestComponent>(receiver);
@@ -76,8 +99,15 @@ public sealed class HandTransferSystem : EntitySystem
         request.Item = itemUid;
         Dirty(receiver, request);
 
+        var outgoing = EnsureComp<HandTransferOutgoingComponent>(offerer);
+        outgoing.Receiver = receiver;
+        outgoing.Item = itemUid;
+        Dirty(offerer, outgoing);
+
         EnsureComp<AlertsComponent>(receiver);
         _alerts.ShowAlert(receiver, TransferAlert);
+        EnsureComp<AlertsComponent>(offerer);
+        _alerts.ShowAlert(offerer, outgoing.Alert);
 
         _popup.PopupEntity(
             Loc.GetString(
@@ -102,6 +132,26 @@ public sealed class HandTransferSystem : EntitySystem
     {
         if (args.SenderSession.AttachedEntity is { } receiver)
             TryAccept(receiver);
+    }
+
+    private void OnCancel(HandTransferCancelEvent message, EntitySessionEventArgs args)
+    {
+        if (args.SenderSession.AttachedEntity is { } offerer &&
+            TryComp<HandTransferOutgoingComponent>(offerer, out var outgoing))
+        {
+            ClearOutgoing(offerer, outgoing);
+        }
+    }
+
+    private void OnCancelAlert(
+        Entity<HandTransferOutgoingComponent> ent,
+        ref CancelHandTransferAlertEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        args.Handled = true;
+        ClearOutgoing(ent.Owner, ent.Comp);
     }
 
     private void OnAcceptAlert(
@@ -185,10 +235,18 @@ public sealed class HandTransferSystem : EntitySystem
     {
         return Exists(receiver) &&
                HasComp<HandsComponent>(receiver) &&
-               Exists(request.Offerer) &&
+               TryComp<HandsComponent>(request.Offerer, out var offererHands) &&
                IsTransferable(request.Item) &&
-               _hands.GetActiveItem(request.Offerer) == request.Item &&
+               _hands.IsHolding((request.Offerer, offererHands), request.Item) &&
                _interaction.InRangeUnobstructed(request.Offerer, receiver);
+    }
+
+    private bool IsOutgoingCurrent(EntityUid offerer, HandTransferOutgoingComponent outgoing)
+    {
+        return TryComp<HandTransferRequestComponent>(outgoing.Receiver, out var request) &&
+               request.Offerer == offerer &&
+               request.Item == outgoing.Item &&
+               IsRequestCurrent(outgoing.Receiver, request);
     }
 
     private bool IsTransferable(EntityUid item)
@@ -208,9 +266,47 @@ public sealed class HandTransferSystem : EntitySystem
     {
         _alerts.ClearAlert(receiver, TransferAlert);
 
+        if (TryComp<HandTransferRequestComponent>(receiver, out var request) &&
+            TryComp<HandTransferOutgoingComponent>(request.Offerer, out var outgoing) &&
+            outgoing.Receiver == receiver &&
+            outgoing.Item == request.Item)
+        {
+            _alerts.ClearAlert(request.Offerer, outgoing.Alert);
+
+            if (deferred)
+                RemCompDeferred<HandTransferOutgoingComponent>(request.Offerer);
+            else
+                RemComp<HandTransferOutgoingComponent>(request.Offerer);
+        }
+
         if (deferred)
             RemCompDeferred<HandTransferRequestComponent>(receiver);
         else
             RemComp<HandTransferRequestComponent>(receiver);
+    }
+
+    private void ClearOutgoing(
+        EntityUid offerer,
+        HandTransferOutgoingComponent outgoing,
+        bool deferred = false)
+    {
+        _alerts.ClearAlert(offerer, outgoing.Alert);
+
+        if (TryComp<HandTransferRequestComponent>(outgoing.Receiver, out var request) &&
+            request.Offerer == offerer &&
+            request.Item == outgoing.Item)
+        {
+            _alerts.ClearAlert(outgoing.Receiver, TransferAlert);
+
+            if (deferred)
+                RemCompDeferred<HandTransferRequestComponent>(outgoing.Receiver);
+            else
+                RemComp<HandTransferRequestComponent>(outgoing.Receiver);
+        }
+
+        if (deferred)
+            RemCompDeferred<HandTransferOutgoingComponent>(offerer);
+        else
+            RemComp<HandTransferOutgoingComponent>(offerer);
     }
 }

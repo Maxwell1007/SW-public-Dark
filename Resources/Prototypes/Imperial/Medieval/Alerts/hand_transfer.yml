@@ -6,3 +6,12 @@
   clickEvent: !type:AcceptHandTransferAlertEvent
   name: hand-transfer-alert-name
   description: hand-transfer-alert-description
+
+- type: alert
+  id: MedievalHandTransferOutgoing
+  icons:
+  - sprite: /Textures/Imperial/Medieval/Interface/Alerts/grabbing.rsi
+    state: icon
+  clickEvent: !type:CancelHandTransferAlertEvent
+  name: hand-transfer-outgoing-alert-name
+  description: hand-transfer-outgoing-alert-description

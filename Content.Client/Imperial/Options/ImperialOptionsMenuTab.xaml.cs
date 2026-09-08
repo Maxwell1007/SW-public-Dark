@@ -174,6 +174,10 @@ public sealed partial class ImperialOptionsMenuTab : Control
         AddSubHeader("ui-options-imperial-controls-medieval");
         AddButton(ContentKeyFunctions.MedievalDash);
 
+        // #medieval region edit
+        AddButton(ContentKeyFunctions.MedievalHandTransfer);
+        // #medieval region edit end
+
         AddButton(ContentKeyFunctions.MedievalMeleeParry);
         AddOptionButton(
             "ui-options-medieval-parry-sound-label",

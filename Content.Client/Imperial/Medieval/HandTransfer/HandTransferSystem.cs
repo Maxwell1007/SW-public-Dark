@@ -34,15 +34,13 @@ public sealed class HandTransferSystem : EntitySystem
         _overlays.AddOverlay(_overlay);
 
         SubscribeLocalEvent<HandTransferRequestComponent, ComponentStartup>(OnRequestStarted);
+        SubscribeLocalEvent<HandTransferOutgoingComponent, ComponentStartup>(OnOutgoingStarted);
 
         CommandBinds.Builder
             .Bind(ContentKeyFunctions.MedievalHandTransfer,
                 InputCmdHandler.FromDelegate(OnTransferPressed, handle: true, outsidePrediction: true))
             .BindBefore(EngineKeyFunctions.Use,
                 new PointerInputCmdHandler(OnTargetSelected, outsidePrediction: true),
-                typeof(ActionUIController))
-            .BindBefore(EngineKeyFunctions.UIRightClick,
-                new PointerInputCmdHandler(OnTargetingCancelled, outsidePrediction: true),
                 typeof(ActionUIController))
             .Register<HandTransferSystem>();
     }
@@ -79,15 +77,34 @@ public sealed class HandTransferSystem : EntitySystem
             StopTargeting(ent.Owner);
     }
 
+    private void OnOutgoingStarted(Entity<HandTransferOutgoingComponent> ent, ref ComponentStartup args)
+    {
+        if (_player.LocalEntity == ent.Owner)
+            StopTargeting(ent.Owner);
+    }
+
     private void OnTransferPressed(ICommonSession? session)
     {
         if (session?.AttachedEntity is not { } user || !TryComp<HandsComponent>(user, out var hands))
             return;
 
+        if (HasComp<HandTransferOutgoingComponent>(user))
+        {
+            StopTargeting(user);
+            RaiseNetworkEvent(new HandTransferCancelEvent());
+            return;
+        }
+
         if (HasComp<HandTransferRequestComponent>(user))
         {
             StopTargeting(user);
             RaiseNetworkEvent(new HandTransferAcceptEvent());
+            return;
+        }
+
+        if (HasComp<HandTransferTargetingComponent>(user))
+        {
+            StopTargeting(user);
             return;
         }
 
@@ -128,15 +145,6 @@ public sealed class HandTransferSystem : EntitySystem
             return true;
 
         RaiseNetworkEvent(new HandTransferOfferEvent(GetNetEntity(targeting.Item), GetNetEntity(target)));
-        StopTargeting(user);
-        return true;
-    }
-
-    private bool OnTargetingCancelled(ICommonSession? session, EntityCoordinates coordinates, EntityUid target)
-    {
-        if (session?.AttachedEntity is not { } user || !HasComp<HandTransferTargetingComponent>(user))
-            return false;
-
         StopTargeting(user);
         return true;
     }
