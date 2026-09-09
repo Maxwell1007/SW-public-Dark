@@ -104,6 +104,14 @@ public partial class ImperialListingData : IEquatable<ImperialListingData>, IClo
     [NonSerialized]
     public EntityUid? ProductActionEntity;
 
+    [DataField, NonSerialized]
+    public EntityUid? PurchasedActionEntity;
+
+    public bool CanManageMemory;
+    public bool Forgotten;
+    public bool MemoryBlocked;
+    public bool PurchaseBlocked;
+
     /// <summary>
     /// The event that is broadcast when the listing is purchased.
     /// </summary>
@@ -180,6 +188,11 @@ public partial class ImperialListingData : IEquatable<ImperialListingData>, IClo
             ProductAction = ProductAction,
             ProductUpgradeId = ProductUpgradeId,
             ProductActionEntity = ProductActionEntity,
+            PurchasedActionEntity = PurchasedActionEntity,
+            CanManageMemory = CanManageMemory,
+            Forgotten = Forgotten,
+            MemoryBlocked = MemoryBlocked,
+            PurchaseBlocked = PurchaseBlocked,
             ProductEvent = ProductEvent,
             PurchaseAmount = PurchaseAmount,
             RestockTime = RestockTime,

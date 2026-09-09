@@ -3,6 +3,8 @@
   name: Blood arrow
   description: Shape an arrow from your own blood and release it from your hand. Cost 8 blood units.
   components:
+  - type: SpellMemory
+    cost: 0
   - type: NocturnBloodDrainSpell
     bloodDrain: 8
   - type: SpellCastEffect

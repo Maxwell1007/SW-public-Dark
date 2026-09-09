@@ -5,6 +5,8 @@
   name: medieval-store-spells-vodka-water-sphere-beginner-name
   description: medieval-store-spells-vodka-water-sphere-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 42
@@ -64,6 +66,8 @@
   name: medieval-store-spells-vodka-water-sphere-middle-name
   description: medieval-store-spells-vodka-water-sphere-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 35
@@ -108,6 +112,8 @@
   name: medieval-store-spells-vodka-water-sphere-senior-name
   description: medieval-store-spells-vodka-water-sphere-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 30

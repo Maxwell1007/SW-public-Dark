@@ -3,6 +3,12 @@
         <BoxContainer Orientation="Horizontal">
             <Label Name="StoreItemName" HorizontalExpand="True" />
             <Button
+                Name="StoreItemMemoryButton"
+                MinWidth="64"
+                Margin="0 0 4 0"
+                Visible="False"
+                Access="Public" />
+            <Button
                 Name="StoreItemBuyButton"
                 MinWidth="64"
                 HorizontalAlignment="Right"

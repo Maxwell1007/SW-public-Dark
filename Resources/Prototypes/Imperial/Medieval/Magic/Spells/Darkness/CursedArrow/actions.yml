@@ -5,6 +5,8 @@
   name: medieval-store-spells-darkness-cursed-arrow-beginner-name
   description: medieval-store-spells-darkness-cursed-arrow-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence

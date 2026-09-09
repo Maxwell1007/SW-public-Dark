@@ -3,6 +3,8 @@
   name: medieval-store-spells-darkness-spawn-skelet-beginner-name
   description: medieval-store-spells-darkness-spawn-skelet-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence
@@ -58,6 +60,8 @@
   name: medieval-store-spells-darkness-spawn-skelet-middle-name
   description: medieval-store-spells-darkness-spawn-skelet-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 30
@@ -99,6 +103,8 @@
   name: medieval-store-spells-darkness-spawn-skelet-senior-name
   description: medieval-store-spells-darkness-spawn-skelet-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 30

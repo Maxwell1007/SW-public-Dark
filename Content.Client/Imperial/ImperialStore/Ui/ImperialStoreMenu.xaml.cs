@@ -30,6 +30,7 @@ public sealed partial class ImperialStoreMenu : DefaultWindow
 
     public event EventHandler<string>? SearchTextUpdated;
     public event Action<BaseButton.ButtonEventArgs, ImperialListingData>? OnListingButtonPressed;
+    public event Action<string>? OnSpellMemoryPressed;
     public event Action<BaseButton.ButtonEventArgs, string>? OnCategoryButtonPressed;
     public event Action<BaseButton.ButtonEventArgs, string, int>? OnWithdrawAttempt;
     public event Action<BaseButton.ButtonEventArgs>? OnRefundAttempt;
@@ -139,6 +140,13 @@ public sealed partial class ImperialStoreMenu : DefaultWindow
         UpdateListing();
     }
 
+    public void UpdateMemory(int? current, int? maximum)
+    {
+        MemoryLabel.Visible = current != null && maximum != null;
+        if (current is { } used && maximum is { } capacity)
+            MemoryLabel.Text = Loc.GetString("magic-memory-counter", ("current", used), ("maximum", capacity));
+    }
+
     public void UpdateListing()
     {
         var sorted = _cachedListings.OrderBy(l => l.Priority).ThenBy(l => l.Cost.Values.Sum());
@@ -218,6 +226,7 @@ public sealed partial class ImperialStoreMenu : DefaultWindow
         var newListing = new ImperialStoreListingControl(listing, GetListingPriceString(listing), hasBalance, texture);
         newListing.StoreItemBuyButton.OnButtonDown += args
             => OnListingButtonPressed?.Invoke(args, listing);
+        newListing.StoreItemMemoryButton.OnButtonDown += _ => OnSpellMemoryPressed?.Invoke(listing.ID);
 
         StoreListingsContainer.AddChild(newListing);
     }

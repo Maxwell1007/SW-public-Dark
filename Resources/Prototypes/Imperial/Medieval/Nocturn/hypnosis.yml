@@ -3,6 +3,8 @@
   name: Hypnosis
   description: Attempt to bend the victim to your will and put them to sleep.
   components:
+  - type: SpellMemory
+    cost: 0
   - type: NocturnBloodDrainSpell
     bloodDrain: 40
   - type: SpellCastEffect

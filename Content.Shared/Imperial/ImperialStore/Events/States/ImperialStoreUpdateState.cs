@@ -15,4 +15,7 @@ public sealed class ImperialStoreUpdateState(HashSet<ImperialListingData> listin
     public readonly bool ShowFooter = showFooter;
 
     public readonly bool AllowRefund = allowRefund;
+
+    public int? CurrentMemory;
+    public int? MaxMemory;
 }

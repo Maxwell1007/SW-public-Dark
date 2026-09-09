@@ -87,6 +87,19 @@ public sealed class ActionUpgradeSystem : EntitySystem
         return true;
     }
 
+    public bool TryGetUpgradePrototype(EntityUid actionId, int newLevel, out EntProtoId? prototype)
+    {
+        prototype = null;
+        if (!TryComp<ActionUpgradeComponent>(actionId, out var upgrade) ||
+            !CanLevelUp(newLevel, upgrade.EffectedLevels))
+        {
+            return false;
+        }
+
+        CanUpgrade(newLevel, upgrade.EffectedLevels, out prototype);
+        return true;
+    }
+
     private bool CanLevelUp(int newLevel, Dictionary<int, EntProtoId> levelDict)
     {
         if (levelDict.Count < 1)

@@ -5,6 +5,8 @@
   name: medieval-store-spells-earth-shelter-senior-name
   description: medieval-store-spells-earth-shelter-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalInstantSpell
   - type: Action
     useDelay: 20

@@ -5,6 +5,8 @@
   name: medieval-store-spells-fire-spark-beginner-name
   description: medieval-store-spells-fire-spark-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence

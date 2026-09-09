@@ -5,6 +5,8 @@
   name: medieval-store-spells-vodka-ice-barrier-beginner-name
   description: medieval-store-spells-vodka-ice-barrier-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence
@@ -70,6 +72,8 @@
   name: medieval-store-spells-vodka-ice-barrier-middle-name
   description: medieval-store-spells-vodka-ice-barrier-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: ManaDrainSpell
     manaDrain: 40
     canUseWithoutMana: true
@@ -119,6 +123,8 @@
   name: medieval-store-spells-vodka-ice-barrier-senior-name
   description: medieval-store-spells-vodka-ice-barrier-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: ManaDrainSpell
     manaDrain: 55
     canUseWithoutMana: true

@@ -5,6 +5,8 @@
   name: medieval-store-spells-earth-seedlings-beginner-name
   description: medieval-store-spells-earth-seedlings-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: ManaDrainSpell
     manaDrain: 20
     canUseWithoutMana: false
@@ -55,6 +57,8 @@
   description: medieval-store-spells-earth-seedlings-middle-desc
   parent: MedievalActionSeedlingsBeginner
   components:
+  - type: SpellMemory
+    cost: 2
   - type: ManaDrainSpell
     manaDrain: 50
     canUseWithoutMana: false
@@ -99,6 +103,8 @@
   description: medieval-store-spells-earth-seedlings-senior-desc
   parent: MedievalActionSeedlingsBeginner
   components:
+  - type: SpellMemory
+    cost: 3
   - type: ManaDrainSpell
     manaDrain: 85
     canUseWithoutMana: true

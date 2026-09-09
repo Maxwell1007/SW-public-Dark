@@ -5,6 +5,8 @@
   name: medieval-store-spells-fire-magic-arrow-beginner-name
   description: medieval-store-spells-fire-magic-arrow-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: ManaDrainSpell
     manaDrain: 15
     canUseWithoutMana: true

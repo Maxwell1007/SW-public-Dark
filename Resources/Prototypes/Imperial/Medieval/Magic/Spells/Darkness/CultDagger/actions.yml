@@ -3,6 +3,8 @@
   name: medieval-store-spells-darkness-cult-dagger-name
   description: medieval-store-spells-darkness-cult-dagger-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence

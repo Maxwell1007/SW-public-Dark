@@ -8,6 +8,7 @@ using Content.Shared.Database;
 using Content.Shared.FixedPoint;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Imperial.ImperialStore;
+using Content.Shared.Imperial.Medieval.Magic.Memory;
 using Content.Shared.Mind;
 using Content.Shared.PDA.Ringer;
 using Content.Shared.UserInterface;
@@ -34,6 +35,7 @@ public sealed partial class ImperialStoreSystem
     {
         SubscribeLocalEvent<ImperialStoreComponent, ImperialStoreRequestUpdateInterfaceMessage>(OnRequestUpdate);
         SubscribeLocalEvent<ImperialStoreComponent, ImperialStoreBuyListingMessage>(OnBuyRequest);
+        SubscribeLocalEvent<ImperialStoreComponent, ImperialStoreToggleSpellMemoryMessage>(OnToggleSpellMemory);
         SubscribeLocalEvent<ImperialStoreComponent, ImperialStoreRequestWithdrawMessage>(OnRequestWithdraw);
         SubscribeLocalEvent<ImperialStoreComponent, ImperialStoreRequestRefundMessage>(OnRequestRefund);
         SubscribeLocalEvent<ImperialStoreComponent, ImperialRefundEntityDeletedEvent>(OnRefundEntityDeleted);
@@ -87,9 +89,11 @@ public sealed partial class ImperialStoreSystem
             return;
 
         //this is the person who will be passed into logic for all listing filtering.
-        if (user != null) //if we have no "buyer" for this update, then don't update the listings
+        user ??= component.AccountOwner;
+        if (user != null)
         {
             component.LastAvailableListings = GetAvailableListings(component.AccountOwner ?? user.Value, store, component).ToHashSet();
+            UpdateMemoryListings(component.AccountOwner ?? user.Value, store, component);
         }
 
         //dictionary for all currencies, including 0 values for currencies on the whitelist
@@ -108,6 +112,12 @@ public sealed partial class ImperialStoreSystem
         // only tell operatives to lock their uplink if it can be locked
         var showFooter = HasComp<RingerUplinkComponent>(store);
         var state = new ImperialStoreUpdateState(component.LastAvailableListings, allCurrency, showFooter, component.RefundAllowed);
+        if (IsMemoryStore(store) && (component.AccountOwner ?? user) is { } memoryOwner)
+        {
+            var memory = _memory.Refresh(memoryOwner);
+            state.CurrentMemory = memory.CurrentMemory;
+            state.MaxMemory = memory.MaxMemory;
+        }
         _ui.SetUiState(store, ImperialStoreUiKey.Key, state);
     }
 
@@ -126,7 +136,7 @@ public sealed partial class ImperialStoreSystem
     /// </summary>
     private void OnBuyRequest(EntityUid uid, ImperialStoreComponent component, ImperialStoreBuyListingMessage msg)
     {
-        var listing = component.Listings.FirstOrDefault(x => x.Equals(msg.Listing));
+        var listing = component.Listings.FirstOrDefault(x => x.ID == msg.Listing.ID);
 
         if (listing == null) //make sure this listing actually exists
         {
@@ -135,6 +145,9 @@ public sealed partial class ImperialStoreSystem
         }
 
         var buyer = msg.Actor;
+
+        if (IsMemoryStore(uid) && component.AccountOwner != buyer)
+            return;
 
         //verify that we can actually buy this listing and it wasn't added
         if (!ListingHasCategory(listing, component.Categories))
@@ -157,6 +170,13 @@ public sealed partial class ImperialStoreSystem
             {
                 return;
             }
+        }
+
+        if (IsMemoryStore(uid) && !CanBuySpell(buyer, listing))
+        {
+            _popup.PopupEntity(Loc.GetString("magic-memory-not-enough"), buyer, buyer);
+            UpdateUserInterface(buyer, uid, component);
+            return;
         }
 
         if (!IsOnStartingMap(uid, component))
@@ -206,6 +226,7 @@ public sealed partial class ImperialStoreSystem
             // And then add that action entity to the relevant product upgrade listing, if applicable
             if (actionId != null)
             {
+                listing.PurchasedActionEntity = actionId;
                 HandleRefundComp(uid, component, actionId.Value);
 
                 foreach (var upgradeId in listing.ProductUpgradeId)
@@ -223,6 +244,10 @@ public sealed partial class ImperialStoreSystem
 
         if (listing is { ProductUpgradeId: not null, ProductActionEntity: not null })
         {
+            var previousAction = listing.ProductActionEntity.Value;
+            if (IsMemoryStore(uid) && TryComp<SpellMemoryComponent>(previousAction, out var forgottenSpell) && forgottenSpell.Forgotten)
+                _memory.TryRemember(buyer, previousAction);
+
             if (!TryComp<ActionUpgradeComponent>(listing.ProductActionEntity, out var actionUpgradeComponent))
             {
                 if (listing.ProductActionEntity != null) HandleRefundComp(uid, component, listing.ProductActionEntity.Value);
@@ -248,6 +273,14 @@ public sealed partial class ImperialStoreSystem
             }
 
             listing.ProductActionEntity = upgradeActionId;
+            foreach (var previousListing in component.Listings)
+            {
+                if (previousListing.PurchasedActionEntity == previousAction)
+                    previousListing.PurchasedActionEntity = null;
+                if (previousListing.ProductActionEntity == previousAction)
+                    previousListing.ProductActionEntity = upgradeActionId;
+            }
+            listing.PurchasedActionEntity = upgradeActionId;
 
             if (upgradeActionId != null)
                 HandleRefundComp(uid, component, upgradeActionId.Value);

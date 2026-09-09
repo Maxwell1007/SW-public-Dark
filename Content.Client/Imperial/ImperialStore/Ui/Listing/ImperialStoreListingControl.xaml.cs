@@ -40,12 +40,16 @@ public sealed partial class ImperialStoreListingControl : Control
         UpdateBuyButtonText();
         StoreItemBuyButton.Disabled = !CanBuy();
 
+        StoreItemMemoryButton.Visible = data.CanManageMemory;
+        StoreItemMemoryButton.Text = Loc.GetString(data.Forgotten ? "magic-memory-remember" : "magic-memory-forget");
+        StoreItemMemoryButton.Disabled = data.MemoryBlocked;
+
         StoreItemTexture.Texture = texture;
     }
 
     private bool CanBuy()
     {
-        if (!_hasBalance)
+        if (!_hasBalance || _data.PurchaseBlocked)
             return false;
 
         var stationTime = _timing.CurTime.Subtract(_ticker.RoundStartTimeSpan);

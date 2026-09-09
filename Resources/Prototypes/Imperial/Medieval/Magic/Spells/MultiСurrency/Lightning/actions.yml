@@ -5,6 +5,8 @@
   name: medieval-store-spells-light-lightning-middle-name
   description: medieval-store-spells-light-lightning-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: MedievalTargetSpell
   - type: CastTraining
     trainingResults:
@@ -81,6 +83,8 @@
   description: medieval-store-spells-light-lightning-senior-desc
   parent: MedievalActionLightningMiddle
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 20

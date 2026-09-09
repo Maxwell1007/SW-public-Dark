@@ -5,6 +5,8 @@
   name: medieval-store-spells-fire-fireball-beginner-name
   description: medieval-store-spells-fire-fireball-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 180
@@ -85,6 +87,8 @@
   name: medieval-store-spells-fire-fireball-middle-name
   description: medieval-store-spells-fire-fireball-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: ManaDrainSpell
     manaDrain: 85
     canUseWithoutMana: true
@@ -132,6 +136,8 @@
   name: medieval-store-spells-fire-fireball-senior-name
   description: medieval-store-spells-fire-fireball-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: ManaDrainSpell
     manaDrain: 90
     canUseWithoutMana: true

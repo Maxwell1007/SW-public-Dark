@@ -6,6 +6,8 @@
   name: medieval-store-spells-fire-critical-mass-middle-name
   description: medieval-store-spells-fire-critical-mass-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence
@@ -64,6 +66,8 @@
   name: medieval-store-spells-fire-critical-mass-senior-name
   description: medieval-store-spells-fire-critical-mass-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: ManaDrainSpell
     manaDrain: 60
     canUseWithoutMana: true

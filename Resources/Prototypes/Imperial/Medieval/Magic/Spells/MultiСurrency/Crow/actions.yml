@@ -3,6 +3,8 @@
   name: medieval-store-spells-magic-crow-name
   description: medieval-store-spells-magic-crow-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: MedievalInstantSpell
   - type: Action
     useDelay: 40

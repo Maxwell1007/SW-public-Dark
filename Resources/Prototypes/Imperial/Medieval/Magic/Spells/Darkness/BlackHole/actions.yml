@@ -5,6 +5,8 @@
   name: medieval-store-spells-darkness-black-hole-beginner-name
   description: medieval-store-spells-darkness-black-hole-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence
@@ -69,6 +71,8 @@
   name: medieval-store-spells-darkness-black-hole-middle-name
   description: medieval-store-spells-darkness-black-hole-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 60
@@ -111,6 +115,8 @@
   name: medieval-store-spells-darkness-black-hole-senior-name
   description: medieval-store-spells-darkness-black-hole-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 60

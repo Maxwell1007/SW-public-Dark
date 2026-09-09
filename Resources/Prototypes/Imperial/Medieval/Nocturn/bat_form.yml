@@ -3,6 +3,8 @@
   name: Transform into a bat
   description: Transform into a bat for 20 seconds. Cost 20 blood units.
   components:
+  - type: SpellMemory
+    cost: 0
   - type: NocturnBloodDrainSpell
     bloodDrain: 20
   - type: Action
@@ -18,6 +20,8 @@
   name: Transform into a nocturne
   description: Return to your original form early.
   components:
+  - type: SpellMemory
+    cost: 0
   - type: Action
     itemIconStyle: BigAction
     icon:

@@ -6,6 +6,8 @@
   name: medieval-store-spells-fire-magic-arrow-player-follover-beginner-name
   description: medieval-store-spells-fire-magic-arrow-player-follover-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 8
@@ -79,6 +81,8 @@
   name: medieval-store-spells-fire-magic-arrow-player-follover-middle-name
   description: medieval-store-spells-fire-magic-arrow-player-follover-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 10
@@ -153,6 +157,8 @@
   name: medieval-store-spells-fire-magic-arrow-player-follover-senior-name
   description: medieval-store-spells-fire--magic-arrow-player-follover-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalTargetSpell
   - type: Action
     useDelay: 13

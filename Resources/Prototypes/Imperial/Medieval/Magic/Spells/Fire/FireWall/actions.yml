@@ -5,6 +5,8 @@
   name: medieval-store-spells-fire-wall-beginner-name
   description: medieval-store-spells-fire-wall-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence
@@ -77,6 +79,8 @@
   name: medieval-store-spells-fire-wall-middle-name
   description: medieval-store-spells-fire-wall-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: ManaDrainSpell
     manaDrain: 40
     canUseWithoutMana: true
@@ -135,6 +139,8 @@
   name: medieval-store-spells-fire-wall-senior-name
   description: medieval-store-spells-fire-wall-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: ManaDrainSpell
     manaDrain: 55
     canUseWithoutMana: true

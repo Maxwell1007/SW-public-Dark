@@ -6,6 +6,8 @@
   name: medieval-store-spells-darkness-cursed-arrow-cursor-follover-beginner-name
   description: medieval-store-spells-darkness-cursed-arrow-cursor-follover-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: ManaDrainSpell
     manaDrain: 25
     canUseWithoutMana: true
@@ -78,6 +80,8 @@
   name: medieval-store-spells-darkness-cursed-arrow-cursor-follover-middle-name
   description: medieval-store-spells-darkness-cursed-arrow-cursor-follover-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: ManaDrainSpell
     manaDrain: 35
     canUseWithoutMana: true
@@ -151,6 +155,8 @@
   name: medieval-store-spells-darkness-cursed-arrow-cursor-follover-senior-name
   description: medieval-store-spells-darkness--cursed-arrow-cursor-follover-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence

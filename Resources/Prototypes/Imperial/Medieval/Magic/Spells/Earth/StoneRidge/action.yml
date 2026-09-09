@@ -5,6 +5,8 @@
   name: medieval-store-spells-earth-stone-ridge-beginner-name
   description: medieval-store-spells-earth-stone-ridge-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence
@@ -63,6 +65,8 @@
   description: medieval-store-spells-earth-stone-ridge-middle-desc
   parent: MedievalActionStoneRidgeBeginner
   components:
+  - type: SpellMemory
+    cost: 2
   - type: ManaDrainSpell
     manaDrain: 50
     canUseWithoutMana: true

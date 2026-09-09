@@ -5,6 +5,8 @@
   name: medieval-store-spells-magic-light-flash-beginner-name
   description: medieval-store-spells-light-magic-light-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: MedievalInstantSpell
   - type: Action
     useDelay: 20
@@ -55,6 +57,8 @@
   name: medieval-store-spells-light-magic-light-middle-name
   description: medieval-store-spells-light-magic-light-middle-desc
   components:
+  - type: SpellMemory
+    cost: 2
   - type: Action
     useDelay: 20
     itemIconStyle: BigAction

@@ -5,6 +5,8 @@
   name: medieval-store-spells-magic-light-summon-foliant-beginner-name
   description: medieval-store-spells-light-summon-foliant-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: MedievalInstantSpell
   - type: Action
     useDelay: 60

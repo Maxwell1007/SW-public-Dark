@@ -3,6 +3,8 @@
   name: Emergency teleport
   description: After a short cast, teleports you to your blood ruby. Cost 15 blood units.
   components:
+  - type: SpellMemory
+    cost: 0
   - type: NocturnBloodDrainSpell
     bloodDrain: 15
   - type: Action

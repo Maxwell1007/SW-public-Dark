@@ -3,6 +3,8 @@
   name: medieval-store-spells-light-lightning-rune-name
   description: medieval-store-spells-light-lightning-rune-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence

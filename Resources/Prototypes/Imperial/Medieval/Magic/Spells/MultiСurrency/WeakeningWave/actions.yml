@@ -5,6 +5,8 @@
   name: medieval-store-spells-multi-currency-weakening-wave-senior-name
   description: medieval-store-spells-multi-currency-weakening-wave-senior-desc
   components:
+  - type: SpellMemory
+    cost: 3
   - type: MedievalInstantSpell
   - type: Action
     useDelay: 185

@@ -3,6 +3,8 @@
   name: Turn into a nocturne
   description: Turn a human into a young nocturne.
   components:
+  - type: SpellMemory
+    cost: 0
   - type: Action
     itemIconStyle: BigAction
     icon:

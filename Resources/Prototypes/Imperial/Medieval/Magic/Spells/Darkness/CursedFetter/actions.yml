@@ -3,6 +3,8 @@
   name: medieval-spell-speach-cursed-fetter-beginner-name
   description: medieval-spell-speach-cursed-fetter-beginner-desc
   components:
+  - type: SpellMemory
+    cost: 1
   - type: CastTraining
     trainingResults:
       - !type:AddMagicEssence

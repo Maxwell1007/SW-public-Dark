@@ -48,6 +48,8 @@ public sealed class ImperialStoreBoundUserInterface : BoundUserInterface
             _menu?.UpdateListing();
         };
 
+        _menu.OnSpellMemoryPressed += listingId => SendMessage(new ImperialStoreToggleSpellMemoryMessage(listingId));
+
         _menu.OnWithdrawAttempt += (_, type, amount) =>
         {
             SendMessage(new ImperialStoreRequestWithdrawMessage(type, amount));
@@ -74,6 +76,7 @@ public sealed class ImperialStoreBoundUserInterface : BoundUserInterface
                 _listings = msg.Listings;
 
                 _menu?.UpdateBalance(msg.Balance);
+                _menu?.UpdateMemory(msg.CurrentMemory, msg.MaxMemory);
                 UpdateListingsWithSearchFilter();
                 _menu?.SetFooterVisibility(msg.ShowFooter);
                 _menu?.UpdateRefund(msg.AllowRefund);
