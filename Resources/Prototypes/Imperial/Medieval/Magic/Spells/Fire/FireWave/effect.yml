@@ -1,0 +1,47 @@
+- type: entity
+  id: MedievalFireWave
+  name: medieval-store-spells-fire-wave-name
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Magic/Fire/FireWall/projectiles.rsi
+    state: beginner
+    drawdepth: Effects
+    scale: 2, 1
+    color: "#FF9C24"
+  - type: PointLight
+    radius: 2
+    energy: 2
+    color: "#FF9C24"
+  - type: MedievalFireWave
+    checkCount: 10
+    initialRadius: 0.5
+    radiusIncrement: 0.4
+    checkInterval: 0.1
+    sectorAngle: 90
+    damage:
+      types:
+        Heat: 3
+    fireStacks: 0.05
+
+- type: entity
+  id: MedievalFireWaveMiddle
+  parent: MedievalFireWave
+  name: medieval-store-spells-fire-wave-middle-name
+  components:
+  - type: MedievalFireWave
+    damage:
+      types:
+        Heat: 4.5
+    fireStacks: 0.1
+
+- type: entity
+  id: MedievalFireWaveSenior
+  parent: MedievalFireWave
+  name: medieval-store-spells-fire-wave-senior-name
+  components:
+  - type: MedievalFireWave
+    damage:
+      types:
+        Heat: 6
+    fireStacks: 0.15

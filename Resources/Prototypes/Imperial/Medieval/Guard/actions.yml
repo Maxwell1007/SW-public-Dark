@@ -1,0 +1,34 @@
+- type: entity
+  parent: BaseAction
+  id: MedievalActionGuardAttack
+  name: Натравить
+  description: Приказать всем стражам атаковать выбранное существо.
+  components:
+  - type: Action
+    useDelay: 0.25
+    icon:
+      sprite: Interface/Actions/actions_rat_king.rsi
+      state: attackOff
+  - type: TargetAction
+    range: 60
+    checkCanAccess: false
+  - type: EntityTargetAction
+    canTargetSelf: false
+    whitelist:
+      components:
+      - MobState
+    event: !type:MedievalGuardAttackActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: MedievalActionGuardRelease
+  name: Вольно
+  description: Прекратить атаку и приказать всем стражам следовать за вами.
+  components:
+  - type: Action
+    useDelay: 0.25
+    icon:
+      sprite: Interface/Actions/actions_rat_king.rsi
+      state: looseOff
+  - type: InstantAction
+    event: !type:MedievalGuardReleaseActionEvent

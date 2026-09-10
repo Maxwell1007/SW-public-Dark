@@ -1,0 +1,32 @@
+- type: entity
+  id: MedievalActionFireSalamander
+  name: medieval-spell-fire-salamander-name
+  description: medieval-spell-fire-salamander-desc
+  components:
+  - type: SpellMemory
+    cost: 2
+  - type: MedievalInstantSpell
+  - type: Action
+    useDelay: 120
+    itemIconStyle: BigAction
+    icon:
+      sprite: Mobs/Animals/lizard.rsi
+      state: lizard
+  - type: InstantAction
+    event: !type:MedievalInstantSpawnEvent
+      spawnedEntityPrototype: MedievalMobFireSalamander
+      speechPoints:
+        0:
+          speech: medieval-spell-fire-salamander-speech
+          color: "#FF8C32"
+          hideChat: true
+  - type: MedievalGuardSummon
+    minSpawnRadius: 1
+    maxSpawnRadius: 2
+  - type: ManaDrainSpell
+    manaDrain: 40
+    canUseWithoutMana: true
+    manaLowMessage: medieval-spell-speach-not-enough-mana-fire-spell
+    damageOnUseWithoutMana:
+      groups:
+        Burn: 5

@@ -1,0 +1,61 @@
+- type: imperialListing
+  id: MedievalSpellFireWave
+  name: medieval-store-spells-fire-wave-name
+  description: medieval-store-spells-fire-wave-desc
+  productAction: MedievalActionFireWave
+  priority: 2
+  productUpgradeId:
+    - MedievalSpellFireWaveMiddle
+  icon:
+    sprite: Imperial/Medieval/Magic/Fire/FireWall/icons.rsi
+    state: beginner
+  cost:
+    MagicMedievalFire: 25
+  categories:
+  - MedievalFireSpells
+  conditions:
+  - !type:ImperialListingLimitedStockCondition
+    stock: 1
+
+- type: imperialListing
+  id: MedievalSpellFireWaveMiddle
+  name: medieval-store-spells-fire-wave-middle-name
+  description: medieval-store-spells-fire-wave-middle-desc
+  priority: 2
+  productUpgradeId:
+    - MedievalSpellFireWaveSenior
+  icon:
+    sprite: Imperial/Medieval/Magic/Fire/FireWall/icons.rsi
+    state: middle
+  cost:
+    MagicMedievalFire: 55
+  categories:
+  - MedievalFireSpells
+  conditions:
+  - !type:ImperialListingLimitedStockCondition
+    stock: 1
+  - !type:ImperialBuyBeforeCondition
+    whitelist:
+      - MedievalSpellFireWave
+
+- type: imperialListing
+  id: MedievalSpellFireWaveSenior
+  name: medieval-store-spells-fire-wave-senior-name
+  description: medieval-store-spells-fire-wave-senior-desc
+  priority: 2
+  productUpgradeId:
+    - MedievalSpellFireWaveSenior
+  icon:
+    sprite: Imperial/Medieval/Magic/Fire/FireWall/icons.rsi
+    state: senior
+  cost:
+    MagicMedievalFire: 80
+    ArchmagePoints: 1
+  categories:
+  - MedievalFireSpells
+  conditions:
+  - !type:ImperialListingLimitedStockCondition
+    stock: 1
+  - !type:ImperialBuyBeforeCondition
+    whitelist:
+      - MedievalSpellFireWaveMiddle

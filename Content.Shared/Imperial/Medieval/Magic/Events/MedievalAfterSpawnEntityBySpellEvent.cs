@@ -1,3 +1,5 @@
+using Robust.Shared.Map;
+
 namespace Content.Shared.Imperial.Medieval.Magic;
 
 
@@ -12,6 +14,8 @@ public class MedievalAfterSpawnEntityBySpellEvent : EntityEventArgs
     public EntityUid Performer;
 
     public EntityUid SpawnedEntity;
+
+    public MapCoordinates? TargetCoordinates;
 
     public Angle Rotation = Angle.FromDegrees(0);
 }

@@ -1,0 +1,60 @@
+- type: entity
+  id: MedievalMobFireSalamander
+  parent:
+  - BaseSimpleMob
+  - MobCombat
+  name: огненная саламандра
+  description: Призванный огненный страж, преданно защищающий своего мага.
+  components:
+  - type: MedievalGuard
+    followDistance: 3
+    maxDistance: 60
+    thinkInterval: 0.25
+  - type: TimedDespawn
+    lifetime: 120
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 2
+    baseSprintSpeed: 4
+  - type: Sprite
+    color: "#FF8C32"
+    layers:
+    - map: ["enum.DamageStateVisualLayers.Base"]
+      sprite: Mobs/Animals/lizard.rsi
+      state: lizard
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.2
+        density: 50
+        mask:
+        - MobMask
+        layer:
+        - MobLayer
+  - type: DamageStateVisuals
+    states:
+      Alive:
+        Base: lizard
+      Critical:
+        Base: dead
+      Dead:
+        Base: dead
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      60: Critical
+      100: Dead
+  - type: MeleeWeapon
+    hidden: true
+    angle: 0
+    animation: WeaponArcBite
+    attackRate: 1
+    damage:
+      types:
+        Slash: 4
+        Heat: 6
+  - type: PointLight
+    color: "#FF8C32"
+    energy: 1
+    radius: 2

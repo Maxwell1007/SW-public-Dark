@@ -126,7 +126,8 @@ public sealed partial class MedievalMagicSystem
             Action = action,
             Performer = performer,
             Rotation = rotation,
-            SpawnedEntity = ent
+            SpawnedEntity = ent,
+            TargetCoordinates = _transformSystem.ToMapCoordinates(args.Coordinates)
         };
 
         RaiseLocalEvent(ent, ev);

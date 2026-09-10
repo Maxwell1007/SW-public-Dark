@@ -1,0 +1,16 @@
+- type: imperialListing
+  id: MedievalSpellFireSalamander
+  name: medieval-spell-fire-salamander-name
+  description: medieval-spell-fire-salamander-desc
+  productAction: MedievalActionFireSalamander
+  priority: 11
+  icon:
+    sprite: Mobs/Animals/lizard.rsi
+    state: lizard
+  cost:
+    MagicMedievalFire: 35
+  categories:
+  - MedievalFireSpells
+  conditions:
+  - !type:ImperialListingLimitedStockCondition
+    stock: 1
