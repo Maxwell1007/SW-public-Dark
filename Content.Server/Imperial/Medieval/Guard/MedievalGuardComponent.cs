@@ -17,9 +17,6 @@ public sealed partial class MedievalGuardComponent : Component
     [DataField]
     public TimeSpan ThinkInterval = TimeSpan.FromSeconds(0.25);
 
-    [DataField]
-    public float ObstacleRadius = 0.25f;
-
     [ViewVariables]
     public EntityUid? AttackTarget;
 
@@ -27,8 +24,6 @@ public sealed partial class MedievalGuardComponent : Component
     public MedievalGuardState State;
 
     public CancellationTokenSource? ThinkCancellation;
-
-    public readonly HashSet<EntityUid> Obstacles = new();
 }
 
 public enum MedievalGuardState : byte

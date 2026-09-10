@@ -12,6 +12,8 @@
     thinkInterval: 0.25
   - type: TimedDespawn
     lifetime: 120
+  - type: MedievalNavigation
+  - type: Climbing
   - type: MovementSpeedModifier
     baseWalkSpeed: 2
     baseSprintSpeed: 4

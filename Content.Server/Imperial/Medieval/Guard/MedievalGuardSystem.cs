@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using System.Threading;
+using Content.Server.Imperial.Medieval.Navigation;
 using Content.Shared.Actions;
 using Content.Shared.CombatMode;
 using Content.Shared.Damage;
@@ -8,7 +9,6 @@ using Content.Shared.Imperial.Medieval.Guard;
 using Content.Shared.Interaction;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
-using Content.Shared.Movement.Systems;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Melee;
 using Content.Shared.Weapons.Melee.Events;
@@ -25,9 +25,8 @@ public sealed partial class MedievalGuardSystem : EntitySystem
     [Dependency] private readonly SharedCombatModeSystem _combat = default!;
     [Dependency] private readonly SharedContainerSystem _containers = default!;
     [Dependency] private readonly SharedInteractionSystem _interaction = default!;
-    [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly SharedMeleeWeaponSystem _melee = default!;
-    [Dependency] private readonly SharedMoverController _mover = default!;
+    [Dependency] private readonly MedievalNavigationSystem _navigation = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
 
@@ -213,7 +212,9 @@ public sealed partial class MedievalGuardSystem : EntitySystem
 
         var state = component.AttackTarget != null
             ? MedievalGuardState.Attack
-            : InRange(uid, owner, component.FollowDistance) ? MedievalGuardState.Idle : MedievalGuardState.Follow;
+            : InRange(uid, owner, component.FollowDistance) &&
+              _interaction.InRangeUnobstructed(uid, Transform(owner).Coordinates, component.FollowDistance)
+                ? MedievalGuardState.Idle : MedievalGuardState.Follow;
         SetState(uid, component, state);
         var behavior = new MedievalGuardBehaviorEvent(state, component.AttackTarget ?? owner);
         RaiseLocalEvent(uid, ref behavior);
