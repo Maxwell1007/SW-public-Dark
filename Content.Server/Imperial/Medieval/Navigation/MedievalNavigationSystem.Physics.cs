@@ -5,8 +5,6 @@ using Robust.Shared.Map;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Collision.Shapes;
 using Robust.Shared.Physics.Components;
-using Robust.Shared.Physics.Dynamics;
-using Robust.Shared.Physics.Systems;
 using PhysicsTransform = Robust.Shared.Physics.Transform;
 
 namespace Content.Server.Imperial.Medieval.Navigation;
@@ -19,7 +17,6 @@ public sealed partial class MedievalNavigationSystem
     private int _queryMask;
     private int _queryLayer;
     private BodyType _queryBodyType;
-    private PhysShapeCircle _queryShape = new(0.2f);
 
     private bool RefreshBody(EntityUid uid, MedievalNavigationComponent component)
     {
@@ -63,7 +60,9 @@ public sealed partial class MedievalNavigationSystem
             mask != component.CollisionMask || layer != component.CollisionLayer)
         {
             component.Radius = radius;
-            component.Shape = new PhysShapeCircle(radius);
+            component.SweepShape = new PolygonShape(radius);
+            component.EscapeSweepShape = new PolygonShape(Math.Max(0.001f,
+                radius - Math.Clamp(component.Clearance, 0f, 0.1f) - PhysicsConstants.LinearSlop));
             component.CollisionMask = mask;
             component.CollisionLayer = layer;
             component.Search = null;
@@ -82,7 +81,6 @@ public sealed partial class MedievalNavigationSystem
         _queryMask = climbing ? component.CollisionMask & ~ClimbMask : component.CollisionMask;
         _queryLayer = component.CollisionLayer;
         _queryBodyType = Comp<PhysicsComponent>(uid).BodyType;
-        _queryShape = component.Shape;
     }
 
     private bool IgnoreBody(EntityUid uid)
@@ -94,21 +92,6 @@ public sealed partial class MedievalNavigationSystem
             return true;
 
         return false;
-    }
-
-    private float OnShapeHit(FixtureProxy proxy, Vector2 point, Vector2 normal, float fraction, ref RayResult result)
-    {
-        if (IgnoreBody(proxy.Entity) || !proxy.Fixture.Hard ||
-            (proxy.Fixture.CollisionLayer & _queryMask) == 0 && (proxy.Fixture.CollisionMask & _queryLayer) == 0)
-            return -1f;
-
-        if (!result.Hit || fraction < result.Results[0].Fraction)
-        {
-            result.Results.Clear();
-            result.Results.Add(new RayHit(proxy.Entity, normal, fraction) { Point = point });
-        }
-
-        return fraction;
     }
 
     private MapCoordinates MapPosition(MedievalNavigationComponent component, Vector2 point)
@@ -144,28 +127,81 @@ public sealed partial class MedievalNavigationSystem
         out EntityUid? obstacle, bool climbing = false)
     {
         PrepareQuery(uid, component, climbing);
-        obstacle = null;
         var start = MapPosition(component, from);
         var end = MapPosition(component, to);
+        var offset = end.Position - start.Position;
+        obstacle = null;
+        if (offset.LengthSquared() < 0.000001f)
+            return IsFree(component, to, component.Radius);
+
+        obstacle = FindSweepObstacle(component, start, end, component.SweepShape);
+        if (obstacle == null)
+            return true;
+
+        if (!IsFree(component, from, component.Radius) &&
+            IsFree(component, from, component.EscapeSweepShape.Radius) &&
+            IsFree(component, to, component.Radius))
+            obstacle = FindSweepObstacle(component, start, end, component.EscapeSweepShape);
+
+        return obstacle == null;
+    }
+
+    private EntityUid? FindSweepObstacle(MedievalNavigationComponent component, MapCoordinates start,
+        MapCoordinates end, PolygonShape shape)
+    {
+        var offset = end.Position - start.Position;
+        shape.SetAsBox(offset.Length() / 2, 0.001f);
+        var transform = new PhysicsTransform((start.Position + end.Position) / 2,
+            new Angle(MathF.Atan2(offset.Y, offset.X)));
         _physicsQueries++;
-        var hit = _rays.CastShape(start.MapId, _queryShape, new PhysicsTransform(start.Position, Angle.Zero),
-            end.Position - start.Position, new QueryFilter { MaskBits = uint.MaxValue, LayerBits = uint.MaxValue }, OnShapeHit);
-        if (hit.Hit)
+        component.Overlaps.Clear();
+        _lookup.GetEntitiesIntersecting(start.MapId, shape, transform, component.Overlaps,
+            LookupFlags.Dynamic | LookupFlags.Static);
+        EntityUid? obstacle = null;
+        var nearest = float.MaxValue;
+        var direction = Vector2.Normalize(offset);
+        foreach (var entity in component.Overlaps)
         {
-            obstacle = hit.Results[0].Entity;
-            return false;
+            if (IgnoreBody(entity) || !TryComp<PhysicsComponent>(entity, out var body) || !body.Hard ||
+                (body.CollisionLayer & _queryMask) == 0 && (body.CollisionMask & _queryLayer) == 0)
+                continue;
+
+            var bounds = _physics.GetHardAABB(entity);
+            var distance = Vector2.Dot(bounds.Center - start.Position, direction) -
+                           Math.Abs(direction.X) * bounds.Width / 2 - Math.Abs(direction.Y) * bounds.Height / 2;
+            if (distance >= nearest)
+                continue;
+
+            nearest = distance;
+            obstacle = entity;
         }
 
-        return IsFree(component, from, component.Radius - component.Clearance - 0.01f) &&
-               IsFree(component, to, component.Radius);
+        return obstacle;
+    }
+
+    private bool CanReachGoal(EntityUid uid, MedievalNavigationComponent component, Vector2 from, Vector2 goal,
+        float range)
+    {
+        return Vector2.DistanceSquared(from, goal) <= range * range + 0.0001f &&
+               _interaction.InRangeUnobstructed(MapPosition(component, from), MapPosition(component, goal),
+                   range + 0.01f, predicate: entity => entity == uid || entity == component.Target);
+    }
+
+    private bool CanTraverseClimb(EntityUid uid, MedievalNavigationComponent component, EntityUid obstacle,
+        Vector2 entry, Vector2 exit)
+    {
+        var center = Position(obstacle, component);
+        return Trace(uid, component, entry, center, out _, true) &&
+               Trace(uid, component, center, exit, out _, true);
     }
 
     private LocalNavigationEdge? Probe(EntityUid uid, MedievalNavigationComponent component, Vector2 from, Vector2 to)
     {
+        var segmentTolerance = MathF.Pow(Math.Max(0.05f, component.SampleSpacing / 4), 2);
         foreach (var segment in component.FailedSegments)
         {
-            if (segment.Until > _timing.CurTime && Vector2.DistanceSquared(segment.From, from) < 0.25f &&
-                Vector2.DistanceSquared(segment.To, to) < 0.25f)
+            if (segment.Until > _timing.CurTime && Vector2.DistanceSquared(segment.From, from) < segmentTolerance &&
+                Vector2.DistanceSquared(segment.To, to) < segmentTolerance)
                 return null;
         }
 
@@ -192,13 +228,15 @@ public sealed partial class MedievalNavigationSystem
                      Math.Abs(worldDirection.X) * bounds.Width / 2 + Math.Abs(worldDirection.Y) * bounds.Height / 2;
         var exit = LocalNavigationPathfinder.Snap(search, from + direction * (extent + component.Radius + search.Spacing));
         if (Vector2.DistanceSquared(from, exit) > component.MaxClimbDistance * component.MaxClimbDistance ||
-            !Trace(uid, component, from, exit, out _, true))
+            !CanTraverseClimb(uid, component, climbable, from, exit) ||
+            !_interaction.InRangeUnobstructed(MapPosition(component, from), climbable, climb.Range,
+                predicate: entity => entity == uid))
             return null;
 
         PrepareQuery(uid, component);
         if (!IsFree(component, exit, component.Radius))
             return null;
 
-        return new LocalNavigationEdge(exit, climbable, climb.ClimbDelay * MoveSpeed(uid));
+        return new LocalNavigationEdge(exit, climbable, climb.ClimbDelay * MoveSpeed(uid), from);
     }
 }

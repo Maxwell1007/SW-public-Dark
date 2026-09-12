@@ -221,6 +221,14 @@ public sealed partial class MedievalGuardSystem : EntitySystem
         if (behavior.Handled)
             return;
 
+        if (TryComp<MedievalNavigationComponent>(uid, out var navigation) &&
+            navigation.ClimbObstacle != null && navigation.Target is { } climbTarget &&
+            !TerminatingOrDeleted(climbTarget))
+        {
+            _navigation.Navigate(uid, climbTarget, navigation.StopDistance);
+            return;
+        }
+
         switch (state)
         {
             case MedievalGuardState.Attack:

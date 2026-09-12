@@ -11,7 +11,7 @@ public static class LocalNavigationPathfinder
     };
 
     public static LocalNavigationSearch Create(Vector2 start, Vector2 goal, float spacing,
-        float visionRange, float radius, int limit)
+        float visionRange, float radius, int limit, float stopDistance = 0f)
     {
         var search = new LocalNavigationSearch
         {
@@ -20,11 +20,12 @@ public static class LocalNavigationPathfinder
             Spacing = Math.Clamp(spacing, 0.2f, 1f),
             VisionRange = Math.Clamp(visionRange, 1f, 12f),
             Radius = Math.Clamp(radius, 2f, 64f),
-            Limit = Math.Clamp(limit, 16, 4096),
+            Limit = Math.Clamp(limit, 16, 16384),
+            StopDistance = Math.Max(0f, stopDistance),
         };
         search.Nodes.Add(new LocalNavigationNode { Position = start });
         search.Samples.Add(Vector2i.Zero, 0);
-        search.Frontier.Enqueue(0, Vector2.Distance(start, goal));
+        search.Frontier.Enqueue(0, Math.Max(0f, Vector2.Distance(start, goal) - search.StopDistance));
         return search;
     }
 
@@ -40,7 +41,8 @@ public static class LocalNavigationPathfinder
         return new Vector2i((int) MathF.Round(relative.X), (int) MathF.Round(relative.Y));
     }
 
-    public static void Step(LocalNavigationSearch search, Func<Vector2, Vector2, LocalNavigationEdge?> probe)
+    public static void Step(LocalNavigationSearch search, Func<Vector2, Vector2, LocalNavigationEdge?> probe,
+        Func<Vector2, bool>? canFinish = null)
     {
         if (search.Status != LocalNavigationSearchStatus.Searching)
             return;
@@ -64,13 +66,27 @@ public static class LocalNavigationPathfinder
         var parent = search.Expanding;
         var node = search.Nodes[parent];
         var direct = search.Direction == -1;
+        if (direct && search.StopDistance > 0f &&
+            Vector2.DistanceSquared(node.Position, search.Goal) <= search.StopDistance * search.StopDistance &&
+            canFinish?.Invoke(node.Position) == true)
+        {
+            Finish(search, parent, new LocalNavigationEdge(node.Position));
+            return;
+        }
+
         var destination = direct
             ? search.Goal
             : node.Position + Directions[search.Direction] * search.Spacing;
         if (direct && Vector2.DistanceSquared(node.Position, search.Goal) > search.VisionRange * search.VisionRange)
             destination = Snap(search, node.Position + Vector2.Normalize(search.Goal - node.Position) * search.VisionRange);
-        else if (direct)
-            destination = search.Goal;
+        else if (direct && search.StopDistance > 0f)
+        {
+            var offset = search.Goal - node.Position;
+            var distance = offset.Length();
+            destination = distance > search.StopDistance
+                ? search.Goal - offset / distance * search.StopDistance
+                : search.Goal;
+        }
 
         search.Direction++;
         if (search.Direction == Directions.Length)
@@ -87,14 +103,13 @@ public static class LocalNavigationPathfinder
         if (edge == null)
             return;
 
-        if (edge.Value.Climb == null && Vector2.DistanceSquared(edge.Value.End, search.Goal) < 0.0001f)
+        if (edge.Value.Climb == null &&
+            (Vector2.DistanceSquared(edge.Value.End, search.Goal) < 0.0001f ||
+             search.StopDistance > 0f &&
+             Vector2.DistanceSquared(edge.Value.End, search.Goal) <= search.StopDistance * search.StopDistance + 0.0001f &&
+             canFinish?.Invoke(edge.Value.End) == true))
         {
-            search.Result.Add(edge.Value);
-            for (var current = parent; search.Nodes[current].Parent >= 0; current = search.Nodes[current].Parent)
-                search.Result.Add(search.Nodes[current].Edge);
-            search.Result.Reverse();
-            Simplify(search);
-            search.Status = LocalNavigationSearchStatus.Found;
+            Finish(search, parent, edge.Value);
             return;
         }
 
@@ -113,7 +128,7 @@ public static class LocalNavigationPathfinder
             neighbor.Parent = parent;
             neighbor.Edge = edge.Value;
             neighbor.Closed = false;
-            search.Frontier.Enqueue(existing, cost + Vector2.Distance(neighbor.Position, search.Goal));
+            search.Frontier.Enqueue(existing, cost + Math.Max(0f, Vector2.Distance(neighbor.Position, search.Goal) - search.StopDistance));
             return;
         }
 
@@ -132,7 +147,17 @@ public static class LocalNavigationPathfinder
             Edge = edge.Value,
         });
         search.Samples.Add(key, next);
-        search.Frontier.Enqueue(next, cost + Vector2.Distance(edge.Value.End, search.Goal));
+        search.Frontier.Enqueue(next, cost + Math.Max(0f, Vector2.Distance(edge.Value.End, search.Goal) - search.StopDistance));
+    }
+
+    private static void Finish(LocalNavigationSearch search, int parent, LocalNavigationEdge edge)
+    {
+        search.Result.Add(edge);
+        for (var current = parent; search.Nodes[current].Parent >= 0; current = search.Nodes[current].Parent)
+            search.Result.Add(search.Nodes[current].Edge);
+        search.Result.Reverse();
+        Simplify(search);
+        search.Status = LocalNavigationSearchStatus.Found;
     }
 
     private static void Simplify(LocalNavigationSearch search)

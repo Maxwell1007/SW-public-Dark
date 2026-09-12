@@ -6,8 +6,7 @@ using Content.Shared.Climbing.Events;
 using Content.Shared.Climbing.Systems;
 using Content.Shared.DoAfter;
 using Content.Shared.Imperial.Medieval.MobRiding;
-using Content.Shared.Mobs;
-using Content.Shared.Mobs.Components;
+using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Systems;
 using Robust.Shared.Containers;
@@ -26,13 +25,13 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
 
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly SharedPhysicsSystem _physics = default!;
-    [Dependency] private readonly RayCastSystem _rays = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly SharedMoverController _mover = default!;
     [Dependency] private readonly ClimbSystem _climb = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedContainerSystem _containers = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly SharedInteractionSystem _interaction = default!;
 
     private readonly Queue<Entity<MedievalNavigationComponent>> _requests = new();
     private readonly HashSet<EntityUid> _activeSearches = new();
@@ -82,6 +81,11 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
         component.Path.Clear();
         component.PathIndex = 0;
         component.Failures = 0;
+        component.SearchBudgetFailures = 0;
+        component.RefineSearch = false;
+        component.ProgressDistance = 0f;
+        component.RecoveryTarget = null;
+        component.NextRepath = TimeSpan.Zero;
         component.NextSearch = TimeSpan.Zero;
         _doAfter.Cancel(component.ClimbDoAfter);
         component.ClimbDoAfter = null;
@@ -97,6 +101,8 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
     {
         var component = EnsureComp<MedievalNavigationComponent>(uid);
         component.Probe ??= (from, to) => Probe(uid, component, from, to);
+        component.CanFinish ??= point => component.Search is { } search &&
+            CanReachGoal(uid, component, point, search.Goal, search.StopDistance);
         if (!TryComp<InputMoverComponent>(uid, out var mover) || TerminatingOrDeleted(target) ||
             _containers.IsEntityOrParentInContainer(uid) || !RefreshBody(uid, component))
         {
@@ -145,36 +151,65 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
 
         var position = Position(uid, component);
         var goal = Position(target, component);
-        if (component.Path.Count > 0 && component.PathIndex == component.Path.Count - 1)
-            component.Goal = goal;
-        if (Vector2.DistanceSquared(goal, component.Goal) > MathF.Pow(Math.Max(2f, component.VisionRange), 2))
+        if (CanReachGoal(uid, component, position, goal, component.StopDistance))
         {
-            component.Goal = goal;
+            _activeSearches.Remove(uid);
             component.Search = null;
             component.Path.Clear();
             component.PathIndex = 0;
-            component.NextSearch = TimeSpan.Zero;
             component.Failures = 0;
+            component.SearchBudgetFailures = 0;
+            component.RefineSearch = false;
+            Halt(uid, component);
+            return;
         }
 
-        if (component.PathIndex < component.Path.Count)
+        var hasPath = component.PathIndex < component.Path.Count;
+        var goalMoved = Vector2.DistanceSquared(goal, component.Goal) > component.RepathDistance * component.RepathDistance;
+        if (hasPath && goalMoved && component.Path[^1].Climb == null)
         {
-            if (component.Path[^1].Climb == null)
-                component.Path[^1] = new LocalNavigationEdge(goal);
-            FollowPath(uid, component, position);
-            return;
+            var from = component.PathIndex == component.Path.Count - 1
+                ? position
+                : component.Path[^2].End;
+            var destination = ApproachGoal(from, goal, component.StopDistance);
+            if (Trace(uid, component, from, destination, out _) &&
+                CanReachGoal(uid, component, destination, goal, component.StopDistance))
+            {
+                component.Path[^1] = new LocalNavigationEdge(destination);
+                component.Goal = goal;
+                goalMoved = false;
+            }
         }
 
-        Halt(uid, component);
-        if (component.Search != null || _timing.CurTime < component.NextSearch)
-            return;
+        if ((!hasPath || goalMoved) && component.Search == null &&
+            _timing.CurTime >= component.NextSearch && _timing.CurTime >= component.NextRepath)
+            RequestPath(uid, component, position, goal);
 
-        component.Goal = goal;
-        var spacing = component.Failures >= 2 ? component.SampleSpacing / 2 : component.SampleSpacing;
-        var radius = Math.Min(64f, Math.Max(component.SearchRadius, Vector2.Distance(position, goal) + 4f) + component.Failures * 4f);
-        component.Search = LocalNavigationPathfinder.Create(position, goal, spacing,
-            component.VisionRange, radius, component.MaxSearchNodes);
+        if (hasPath)
+            FollowPath(uid, component, position);
+        else
+            Halt(uid, component);
+    }
+
+    private static Vector2 ApproachGoal(Vector2 from, Vector2 goal, float stopDistance)
+    {
+        var offset = goal - from;
+        var distance = offset.Length();
+        return distance <= stopDistance ? from : goal - offset / distance * Math.Max(0f, stopDistance - 0.05f);
+    }
+
+    private void RequestPath(EntityUid uid, MedievalNavigationComponent component, Vector2 position, Vector2 goal)
+    {
+        var radius = Math.Min(64f, Math.Max(component.SearchRadius, Vector2.Distance(position, goal) + 4f) + component.SearchBudgetFailures * 4f);
+        var spacing = Math.Clamp(component.SampleSpacing, 0.2f, 1f);
+        var refinedSpacing = component.RefineSearch ? Math.Max(0.2f, spacing / 2) : spacing;
+        var density = spacing * spacing / (refinedSpacing * refinedSpacing);
+        var limit = (int) Math.Clamp(component.MaxSearchNodes * (double) density * (1 + component.SearchBudgetFailures),
+            16, Math.Clamp(component.MaxRetrySearchNodes, 16, 16384));
+        component.Search = LocalNavigationPathfinder.Create(position, goal, refinedSpacing,
+            component.VisionRange, radius, limit, Math.Max(0f, component.StopDistance - 0.05f));
         component.SearchStarted = _timing.CurTime;
+        component.NextRepath = _timing.CurTime + TimeSpan.FromSeconds(component.RepathInterval);
         Enqueue(uid, component);
     }
 
@@ -246,13 +281,13 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
                 component.SearchStarted = _timing.CurTime;
             }
 
-            if (_timing.CurTime - component.SearchStarted > TimeSpan.FromSeconds(8))
+            if (_timing.CurTime - component.SearchStarted > TimeSpan.FromSeconds(component.SearchTimeout))
             {
-                Fail(uid, component, "Search timeout");
+                Fail(uid, component, "Search timeout", true, true);
                 continue;
             }
 
-            LocalNavigationPathfinder.Step(search, component.Probe!);
+            LocalNavigationPathfinder.Step(search, component.Probe!, component.CanFinish);
             steps++;
             if (search.Status == LocalNavigationSearchStatus.Searching)
             {
@@ -262,17 +297,16 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
             else if (search.Status == LocalNavigationSearchStatus.Found)
             {
                 CompletedSearches++;
-                component.Path.Clear();
-                component.Path.AddRange(search.Result);
-                component.PathIndex = 0;
                 component.Search = null;
                 _activeSearches.Remove(uid);
-                component.LastProgress = _timing.CurTime;
-                component.ProgressPosition = Position(uid, component);
+                AdoptPath(uid, component, search);
             }
             else
             {
-                Fail(uid, component, search.Status.ToString());
+                if (search.Status == LocalNavigationSearchStatus.NoPath)
+                    component.RefineSearch = true;
+                Fail(uid, component, search.Status.ToString(), true,
+                    search.Status == LocalNavigationSearchStatus.BudgetExceeded);
             }
 
             if (steps >= StepsPerBatch || _physicsQueries >= 128 || _workTime.Elapsed.TotalMilliseconds >= BatchBudgetMilliseconds)
@@ -289,18 +323,84 @@ public sealed partial class MedievalNavigationSystem : EntitySystem
         Timer.Spawn(WorkIntervalMilliseconds, ProcessRequests, _cancellation.Token);
     }
 
-    private void Fail(EntityUid uid, MedievalNavigationComponent component, string reason)
+    private void AdoptPath(EntityUid uid, MedievalNavigationComponent component, LocalNavigationSearch search)
     {
-        if (component.Search != null)
-            FailedSearches++;
-        component.Search = null;
-        _activeSearches.Remove(uid);
+        var position = Position(uid, component);
+        var first = -1;
+        var nearest = 0;
+        var nearestDistance = float.MaxValue;
+        var last = search.Result.Count - 1;
+        for (var i = 0; i < search.Result.Count; i++)
+        {
+            var edge = search.Result[i];
+            var distance = Vector2.DistanceSquared(position, edge.Entry ?? edge.End);
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearest = i;
+            }
+            if (edge.Climb != null)
+            {
+                last = i;
+                break;
+            }
+        }
+
+        var checks = Math.Max(1, component.MaxPathJoinChecks);
+        var start = Math.Max(0, nearest - checks / 2);
+        var end = Math.Min(last, start + checks - 1);
+        for (var i = end; i >= start; i--)
+        {
+            var edge = search.Result[i];
+            var destination = edge.Entry ?? edge.End;
+            if (Trace(uid, component, position, destination, out _))
+            {
+                first = i;
+                break;
+            }
+        }
+
+        if (first < 0)
+        {
+            component.LastFailure = "Route start moved or obstructed";
+            component.NextSearch = _timing.CurTime;
+            return;
+        }
+
         component.Path.Clear();
-        component.PathIndex = 0;
+        component.Path.AddRange(search.Result);
+        component.PathIndex = first;
+        component.Goal = search.Goal;
+        component.RecoveryTarget = null;
+        component.LastProgress = _timing.CurTime;
+        component.ProgressPosition = position;
+    }
+
+    private void Fail(EntityUid uid, MedievalNavigationComponent component, string reason,
+        bool preservePath = false, bool budgetExceeded = false)
+    {
+        if (preservePath)
+        {
+            if (component.Search != null)
+                FailedSearches++;
+            component.Search = null;
+            _activeSearches.Remove(uid);
+        }
+        else
+        {
+            component.Path.Clear();
+            component.PathIndex = 0;
+            component.RecoveryTarget = null;
+            Halt(uid, component);
+        }
         component.Failures = Math.Min(component.Failures + 1, 4);
+        if (budgetExceeded)
+            component.SearchBudgetFailures = Math.Min(component.SearchBudgetFailures + 1, 4);
         component.LastFailure = reason;
-        component.NextSearch = _timing.CurTime + TimeSpan.FromSeconds(Math.Min(4, 0.5 * (1 << component.Failures)));
-        Halt(uid, component);
+        var delay = preservePath ? 0.5f * component.Failures : 0.25f * (component.Failures - 1);
+        component.NextSearch = _timing.CurTime + TimeSpan.FromSeconds(delay);
+        if (!preservePath)
+            component.NextRepath = component.NextSearch;
     }
 
     private float MoveSpeed(EntityUid uid)

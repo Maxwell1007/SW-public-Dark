@@ -13,12 +13,32 @@ public sealed partial class MedievalNavigationSystem
 {
     private void FollowPath(EntityUid uid, MedievalNavigationComponent component, Vector2 position)
     {
-        while (component.PathIndex < component.Path.Count &&
-               Vector2.DistanceSquared(position, component.Path[component.PathIndex].End) < 0.0144f)
+        var tolerance = component.WaypointTolerance;
+        while (component.PathIndex < component.Path.Count)
         {
+            var current = component.Path[component.PathIndex];
+            if (current.Climb != null || Vector2.DistanceSquared(position, current.End) > tolerance * tolerance)
+                break;
+
+            if (component.PathIndex == component.Path.Count - 1 &&
+                Vector2.DistanceSquared(position, current.End) > 0.0001f)
+                break;
+
+            if (component.PathIndex + 1 < component.Path.Count)
+            {
+                var next = component.Path[component.PathIndex + 1];
+                if (!Trace(uid, component, position, next.Entry ?? next.End, out _))
+                {
+                    if (Vector2.DistanceSquared(position, current.End) > 0.0001f)
+                        break;
+                    Fail(uid, component, "Next route segment obstructed");
+                    return;
+                }
+            }
+
             component.PathIndex++;
-            component.ProgressPosition = position;
-            component.LastProgress = _timing.CurTime;
+            component.RecoveryTarget = null;
+            RecordProgress(component, position);
         }
 
         if (component.PathIndex >= component.Path.Count)
@@ -28,24 +48,30 @@ public sealed partial class MedievalNavigationSystem
         }
 
         var edge = component.Path[component.PathIndex];
-        if (edge.Climb is { } obstacle)
+        var destination = edge.Entry ?? edge.End;
+        if (edge.Climb is { } obstacle && Vector2.DistanceSquared(position, destination) <= tolerance * tolerance)
         {
             StartClimb(uid, component, obstacle, edge.End);
             return;
         }
 
-        if (!Trace(uid, component, position, edge.End, out _))
+        if (!Trace(uid, component, position, destination, out _))
         {
-            RememberBlockedSegment(component, position, edge.End);
-            Fail(uid, component, "Route obstructed");
-            return;
+            if (!TryCorrectCourse(uid, component, position, destination, out destination))
+            {
+                Fail(uid, component, "Route obstructed");
+                return;
+            }
+        }
+        else
+        {
+            component.RecoveryTarget = null;
         }
 
-        var remaining = Vector2.Distance(position, edge.End);
-        if (remaining < Vector2.Distance(component.ProgressPosition, edge.End) - 0.05f)
+        var remaining = Vector2.Distance(position, destination);
+        if (remaining < Vector2.Distance(component.ProgressPosition, destination) - 0.05f)
         {
-            component.ProgressPosition = position;
-            component.LastProgress = _timing.CurTime;
+            RecordProgress(component, position);
         }
         else if (_timing.CurTime - component.LastProgress > TimeSpan.FromSeconds(Math.Max(1.5f, 1f / Math.Max(0.1f, MoveSpeed(uid)))))
         {
@@ -54,16 +80,64 @@ public sealed partial class MedievalNavigationSystem
             return;
         }
 
-        var destination = edge.End;
-        if (component.PathIndex == component.Path.Count - 1 && remaining > component.StopDistance)
-            destination -= Vector2.Normalize(destination - position) * Math.Max(0f, component.StopDistance - 0.15f);
-        else if (component.PathIndex == component.Path.Count - 1 && remaining <= component.StopDistance)
+        Steer(uid, component, destination);
+    }
+
+    private void RecordProgress(MedievalNavigationComponent component, Vector2 position)
+    {
+        component.ProgressDistance += Vector2.Distance(position, component.ProgressPosition);
+        component.ProgressPosition = position;
+        component.LastProgress = _timing.CurTime;
+        if (component.ProgressDistance >= component.RecoveryDistance)
         {
-            Halt(uid, component);
-            return;
+            component.Failures = 0;
+            component.SearchBudgetFailures = 0;
+            component.RefineSearch = false;
+            component.ProgressDistance = 0f;
+        }
+    }
+
+    private bool TryCorrectCourse(EntityUid uid, MedievalNavigationComponent component, Vector2 position,
+        Vector2 destination, out Vector2 correction)
+    {
+        if (component.RecoveryTarget is { } previous &&
+            Vector2.DistanceSquared(position, previous) > 0.0001f &&
+            Trace(uid, component, position, previous, out _) &&
+            Trace(uid, component, previous, destination, out _))
+        {
+            correction = previous;
+            return true;
         }
 
-        Steer(uid, component, destination);
+        correction = default;
+        var offset = destination - position;
+        if (offset.LengthSquared() < 0.0001f)
+            return false;
+
+        var forward = Vector2.Normalize(offset);
+        var side = new Vector2(-forward.Y, forward.X);
+        var distance = Math.Max(component.SampleSpacing, component.Radius * 2);
+        var bestCost = float.MaxValue;
+        for (var i = -1; i <= 1; i++)
+        {
+            for (var sign = -1; sign <= 1; sign += 2)
+            {
+                var candidate = position + (forward * i + side * sign) * distance;
+                var cost = Vector2.Distance(position, candidate) + Vector2.Distance(candidate, destination);
+                if (cost >= bestCost || !Trace(uid, component, position, candidate, out _) ||
+                    !Trace(uid, component, candidate, destination, out _))
+                    continue;
+
+                correction = candidate;
+                bestCost = cost;
+            }
+        }
+
+        if (bestCost == float.MaxValue)
+            return false;
+
+        component.RecoveryTarget = correction;
+        return true;
     }
 
     private void RememberBlockedSegment(MedievalNavigationComponent component, Vector2 from, Vector2 to)
@@ -95,10 +169,10 @@ public sealed partial class MedievalNavigationSystem
 
     private void SetInput(EntityUid uid, InputMoverComponent mover, Vector2 direction)
     {
-        _mover.SetVelocityDirection((uid, mover), Direction.East, 0, direction.X > 0.01f);
-        _mover.SetVelocityDirection((uid, mover), Direction.West, 0, direction.X < -0.01f);
-        _mover.SetVelocityDirection((uid, mover), Direction.North, 0, direction.Y > 0.01f);
-        _mover.SetVelocityDirection((uid, mover), Direction.South, 0, direction.Y < -0.01f);
+        _mover.SetVelocityDirection((uid, mover), Direction.East, 0, direction.X > 0.001f);
+        _mover.SetVelocityDirection((uid, mover), Direction.West, 0, direction.X < -0.001f);
+        _mover.SetVelocityDirection((uid, mover), Direction.North, 0, direction.Y > 0.001f);
+        _mover.SetVelocityDirection((uid, mover), Direction.South, 0, direction.Y < -0.001f);
     }
 
     private void OnWishDirection(EntityUid uid, MedievalNavigationComponent component, ref WishDirOverrideEvent args)
@@ -116,7 +190,7 @@ public sealed partial class MedievalNavigationSystem
 
         var offset = MapPosition(component, destination).Position - _transform.GetMapCoordinates(uid).Position;
         var distance = offset.Length();
-        args.WishDir = distance < 0.03f ? Vector2.Zero : offset / distance * Math.Min(args.WishDir.Length(), distance * 6f);
+        args.WishDir = distance < 0.003f ? Vector2.Zero : offset / distance * Math.Min(args.WishDir.Length(), distance * 6f);
     }
 
     private void StartClimb(EntityUid uid, MedievalNavigationComponent component, EntityUid obstacle, Vector2 exit)
@@ -131,20 +205,27 @@ public sealed partial class MedievalNavigationSystem
 
         Halt(uid, component);
         if (!TryComp<ClimbableComponent>(obstacle, out var climbable) ||
-            !_climb.CanVault(climbable, uid, obstacle, out _) ||
-            !Trace(uid, component, position, exit, out _, true) ||
-            !Trace(uid, component, position, Position(obstacle, component), out _, true))
+            !CanTraverseClimb(uid, component, obstacle, position, exit))
         {
-            RejectClimb(uid, component, obstacle);
+            RejectClimb(uid, component, obstacle, true);
             return;
         }
 
         PrepareQuery(uid, component);
         if (!IsFree(component, exit, component.Radius))
         {
+            RejectClimb(uid, component, obstacle, true);
+            return;
+        }
+
+        if (!_climb.CanVault(climbable, uid, obstacle, out _))
+        {
             RejectClimb(uid, component, obstacle);
             return;
         }
+
+        component.Search = null;
+        _activeSearches.Remove(uid);
 
         component.ClimbObstacle = obstacle;
         component.ClimbEntry = position;
@@ -173,8 +254,7 @@ public sealed partial class MedievalNavigationSystem
             return;
 
         var position = Position(uid, component);
-        if (!Trace(uid, component, position, component.ClimbExit, out _, true) ||
-            !Trace(uid, component, position, Position(args.BeingClimbedOn.Owner, component), out _, true))
+        if (!CanTraverseClimb(uid, component, args.BeingClimbedOn.Owner, position, component.ClimbExit))
         {
             args.Cancel();
             return;
@@ -224,8 +304,7 @@ public sealed partial class MedievalNavigationSystem
                 return;
             }
             component.PathIndex++;
-            component.LastProgress = _timing.CurTime;
-            component.ProgressPosition = position;
+            RecordProgress(component, position);
             Halt(uid, component);
             return;
         }
@@ -239,7 +318,8 @@ public sealed partial class MedievalNavigationSystem
         Steer(uid, component, component.ClimbExit);
     }
 
-    private void RejectClimb(EntityUid uid, MedievalNavigationComponent component, EntityUid obstacle)
+    private void RejectClimb(EntityUid uid, MedievalNavigationComponent component, EntityUid obstacle,
+        bool blocked = false)
     {
         if (component.ClimbStarted && !component.Retreating &&
             TryComp<ClimbingComponent>(uid, out var climbing) && climbing.IsClimbing && climbing.NextTransition == null &&
@@ -263,7 +343,8 @@ public sealed partial class MedievalNavigationSystem
         component.Retreating = false;
         if (component.FailedClimbs.Count >= 32)
             component.FailedClimbs.Clear();
-        component.FailedClimbs[obstacle] = _timing.CurTime + TimeSpan.FromSeconds(10);
-        Fail(uid, component, "Climb rejected or interrupted");
+        component.FailedClimbs[obstacle] = _timing.CurTime + TimeSpan.FromSeconds(
+            blocked ? component.BlockedClimbRetryDelay : component.ClimbRetryDelay);
+        Fail(uid, component, blocked ? "Climb route obstructed" : "Climb interrupted or unavailable");
     }
 }
