@@ -40,6 +40,8 @@ public sealed partial class AlchemySystem
         text.AppendLine(Loc.GetString("alchemy-recipe-ingredients"));
         foreach (var (id, amount) in recipe.Ingredients)
             text.AppendLine($"{ReagentName(id)}: {amount}");
+        foreach (var (id, count) in recipe.Entities)
+            text.AppendLine($"{_prototypes.Index<Robust.Shared.Prototypes.EntityPrototype>(id).Name}: {count}");
         text.AppendLine(Loc.GetString(recipe.StrictRatio ? "alchemy-recipe-strict" : "alchemy-recipe-excess"));
         text.AppendLine(Loc.GetString(recipe.AllowImpurities ? "alchemy-recipe-impurities" : "alchemy-recipe-pure"));
         for (var i = 0; i < recipe.Steps.Count; i++)

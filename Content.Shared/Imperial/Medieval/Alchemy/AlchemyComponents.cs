@@ -39,3 +39,20 @@ public sealed partial class AlchemyDoAfterEvent : DoAfterEvent
     [DataField] public string Operation = string.Empty;
     public override DoAfterEvent Clone() => (AlchemyDoAfterEvent) MemberwiseClone();
 }
+
+[RegisterComponent]
+public sealed partial class AlchemyApparatusComponent : Component
+{
+    [DataField] public string Operation = "Distill";
+    [DataField] public string OutputSlot = "alchemy_output";
+    [DataField] public string Solution = "alchemy_input";
+    public bool Running;
+    public Dictionary<EntityUid, int> Sources = new();
+    public List<EntityUid> Items = new();
+}
+
+[RegisterComponent]
+public sealed partial class AlchemyItemHistoryComponent : Component
+{
+    [DataField] public List<string> Operations = new();
+}

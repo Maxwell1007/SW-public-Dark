@@ -47,7 +47,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
     {
         if (proto.Abstract || proto.MaxComplexity < 0 || proto.ExpectedSteps < 0 || proto.ExpectedSteps > 64 ||
             proto.MinParts <= 0 || proto.MaxParts < proto.MinParts || proto.Products.Count == 0 ||
-            proto.Products.Any(p => p.Value <= 0))
+            proto.Products.Any(p => p.Value <= 0) || proto.Entities.Any(p => p.Value <= 0))
             throw new InvalidOperationException($"Invalid alchemy recipe {proto.ID}.");
         if (!proto.Randomized && (proto.Ingredients == null || proto.Steps == null))
             throw new InvalidOperationException($"Fixed alchemy recipe {proto.ID} is incomplete.");
@@ -56,6 +56,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
             Id = proto.ID,
             Group = proto.Group,
             Products = new(proto.Products),
+            Entities = new(proto.Entities),
             StrictRatio = proto.StrictRatio ?? (!proto.Randomized || random.Next(4) != 0),
             AllowImpurities = proto.AllowImpurities ?? (proto.Randomized && random.Next(4) == 0),
             Priority = proto.Priority,
@@ -167,13 +168,16 @@ public sealed class AlchemyGenerationSystem : EntitySystem
 
     public static bool Conflicts(AlchemyRecipe left, AlchemyRecipe right)
     {
-        if (left.Ingredients.Count != right.Ingredients.Count ||
+        if (left.Entities.Count != right.Entities.Count || left.Entities.Keys.Any(k => !right.Entities.ContainsKey(k)) ||
+            left.Ingredients.Count != right.Ingredients.Count ||
             left.Ingredients.Keys.Any(k => !right.Ingredients.ContainsKey(k)))
             return false;
         var first = left.Ingredients.First();
-        if (left.StrictRatio && right.StrictRatio && left.Ingredients.Any(p =>
+        if (left.StrictRatio && right.StrictRatio && (left.Ingredients.Any(p =>
                 (long) p.Value.Value * right.Ingredients[first.Key].Value !=
-                (long) right.Ingredients[p.Key].Value * first.Value.Value))
+                (long) right.Ingredients[p.Key].Value * first.Value.Value) || left.Entities.Any(p =>
+                (long) p.Value * right.Ingredients[first.Key].Value !=
+                (long) right.Entities[p.Key] * first.Value.Value)))
             return false;
         var shorter = left.Steps.Count <= right.Steps.Count ? left.Steps : right.Steps;
         var longer = left.Steps.Count <= right.Steps.Count ? right.Steps : left.Steps;

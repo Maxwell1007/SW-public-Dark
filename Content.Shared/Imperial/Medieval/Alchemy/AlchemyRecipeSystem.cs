@@ -42,8 +42,10 @@ public sealed class AlchemyRecipeSystem : EntitySystem
     }
 
     public static bool TryMatch(Solution solution, AlchemyRecipe recipe,
-        out Dictionary<string, FixedPoint2> consumed, out Dictionary<string, FixedPoint2> products)
+        out Dictionary<string, FixedPoint2> consumed, out Dictionary<string, FixedPoint2> products,
+        out Dictionary<string, int> consumedEntities, IReadOnlyDictionary<string, int>? entities = null)
     {
+        consumedEntities = new();
         consumed = new();
         products = new();
         if (recipe.Ingredients.Count == 0 || recipe.Products.Count == 0)
@@ -80,6 +82,29 @@ public sealed class AlchemyRecipeSystem : EntitySystem
                 numerator = total;
                 denominator = amount.Value;
             }
+        }
+        if (entities != null && !recipe.AllowImpurities && entities.Keys.Any(id => !recipe.Entities.ContainsKey(id)))
+            return false;
+        foreach (var (id, count) in recipe.Entities)
+        {
+            if (entities == null || !entities.TryGetValue(id, out var available) || available < count)
+                return false;
+            if (recipe.StrictRatio && (long) available * denominator != numerator * count)
+                return false;
+            if ((long) available * denominator < numerator * count)
+            {
+                numerator = available;
+                denominator = count;
+            }
+        }
+        if (recipe.Entities.Count > 0)
+        {
+            numerator /= denominator;
+            denominator = 1;
+            if (numerator <= 0 || numerator > int.MaxValue)
+                return false;
+            foreach (var (id, count) in recipe.Entities)
+                consumedEntities.Add(id, checked((int) numerator * count));
         }
         foreach (var (reagent, amount) in recipe.Ingredients)
         {

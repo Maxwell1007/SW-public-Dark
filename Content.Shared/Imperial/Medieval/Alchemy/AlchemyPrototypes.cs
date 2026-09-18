@@ -42,6 +42,7 @@ public sealed partial class AlchemyRecipePrototype : IPrototype, IInheritingProt
     [DataField] public int Tier = 1;
     [DataField] public List<AlchemyIngredientRequirement>? Ingredients;
     [DataField] public List<AlchemyStep>? Steps;
+    [DataField] public Dictionary<string, int> Entities = new();
     [DataField(required: true)] public Dictionary<string, FixedPoint2> Products = new();
     [DataField] public bool? StrictRatio;
     [DataField] public bool? AllowImpurities;
@@ -85,6 +86,7 @@ public sealed class AlchemyRecipe
     public string Group = string.Empty;
     public Dictionary<string, FixedPoint2> Ingredients = new();
     public List<string> Steps = new();
+    public Dictionary<string, int> Entities = new();
     public Dictionary<string, FixedPoint2> Products = new();
     public bool StrictRatio;
     public bool AllowImpurities;

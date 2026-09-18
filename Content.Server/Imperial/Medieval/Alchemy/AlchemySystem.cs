@@ -50,6 +50,7 @@ public sealed partial class AlchemySystem : EntitySystem
 
     public override void Initialize()
     {
+        InitializeApparatus();
         SubscribeLocalEvent<RoundStartingEvent>(OnRoundStarting);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
         SubscribeLocalEvent<AlchemyIngredientComponent, ExaminedEvent>(OnExamineIngredient);
@@ -115,6 +116,8 @@ public sealed partial class AlchemySystem : EntitySystem
                 throw new InvalidOperationException($"Cannot generate a unique alchemy recipe for {proto.ID}.");
             foreach (var reagent in recipe.Ingredients.Keys.Concat(recipe.Products.Keys))
                 _prototypes.Index<ReagentPrototype>(reagent);
+            foreach (var entity in recipe.Entities.Keys)
+                _prototypes.Index<EntityPrototype>(entity);
             _recipes.Add(recipe);
             _historyLimit = Math.Max(_historyLimit, recipe.Steps.Count);
         }
@@ -293,14 +296,57 @@ public sealed partial class AlchemySystem : EntitySystem
         }
     }
 
-    private void CompleteOperation(Entity<SolutionComponent> solution, string operation, EntityUid? user = null)
+    private void CompleteOperation(Entity<SolutionComponent> solution, string operation, EntityUid? user = null,
+        IReadOnlyList<EntityUid>? items = null)
     {
         EnsureRound();
         AlchemyRecipeSystem.RecordOperation(solution.Comp.Solution, operation, _historyLimit);
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                var history = EnsureComp<AlchemyItemHistoryComponent>(item).Operations;
+                history.Add(operation);
+                if (history.Count > _historyLimit)
+                    history.RemoveRange(0, history.Count - _historyLimit);
+            }
+        }
         foreach (var recipe in _recipes)
         {
-            if (!AlchemyRecipeSystem.TryMatch(solution.Comp.Solution, recipe, out var consumed, out var products))
+            var entities = new Dictionary<string, int>();
+            var matchingHistory = true;
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    if (MetaData(item).EntityPrototype is not { } proto)
+                        continue;
+                    var history = Comp<AlchemyItemHistoryComponent>(item).Operations;
+                    if (recipe.Entities.ContainsKey(proto.ID) && !history.TakeLast(recipe.Steps.Count).SequenceEqual(recipe.Steps))
+                        matchingHistory = false;
+                    entities.TryGetValue(proto.ID, out var count);
+                    entities[proto.ID] = count + (TryComp<StackComponent>(item, out var stack) ? stack.Count : 1);
+                }
+            }
+            if (!matchingHistory || !AlchemyRecipeSystem.TryMatch(solution.Comp.Solution, recipe, out var consumed, out var products,
+                    out var consumedEntities, entities))
                 continue;
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    if (MetaData(item).EntityPrototype is not { } proto ||
+                        !consumedEntities.TryGetValue(proto.ID, out var remaining) || remaining <= 0 ||
+                        !Comp<AlchemyItemHistoryComponent>(item).Operations.TakeLast(recipe.Steps.Count).SequenceEqual(recipe.Steps))
+                        continue;
+                    var count = TryComp<StackComponent>(item, out var stack) ? Math.Min(stack.Count, remaining) : 1;
+                    consumedEntities[proto.ID] -= count;
+                    if (stack != null)
+                        _stacks.SetCount(item, stack.Count - count);
+                    else
+                        QueueDel(item);
+                }
+            }
             foreach (var (reagent, amount) in consumed)
                 RemovePrototype(solution.Comp.Solution, reagent, amount);
             foreach (var (reagent, amount) in products)
