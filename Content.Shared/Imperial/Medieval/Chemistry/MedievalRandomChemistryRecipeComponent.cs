@@ -11,5 +11,7 @@ public sealed partial class MedievalRandomChemistryRecipeComponent : Component
 {
     [DataField]
     public Dictionary<string, float> Weights = new();
+    [DataField]
+    public string? RecipeId;
     public ReagentPrototype Reagent = default!;
 }

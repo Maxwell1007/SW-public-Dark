@@ -3224,7 +3224,6 @@
   - type: StationAiVision
     range: 28
     occluded: false
-  - type: MagicPotionsRecipes
   - type: AmbientSound
     volume: -3
     range: 6.5
@@ -3544,7 +3543,8 @@
         - MidImpassable
         - HighImpassable
         - BulletImpassable
-  - type: MagicPotionsMaker
+  - type: AlchemyTool
+    operation: Heat
   - type: PointLight
     color: Green
     radius: 3

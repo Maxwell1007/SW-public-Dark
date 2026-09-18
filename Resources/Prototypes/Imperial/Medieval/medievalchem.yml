@@ -14,8 +14,15 @@
   name: kotel
   description: Used to contain a large amount of chemicals or solutions.
   id: MedievalKotel
-  parent: BaseItem
+  parent: BaseStorageItem
   components:
+  - type: AlchemyVessel
+  - type: Storage
+    grid:
+    - 0,0,3,3
+    whitelist:
+      components:
+      - AlchemyIngredient
   - type: RDWeight
     value: 4
   - type: MeleeWeapon
@@ -93,6 +100,8 @@
   parent: BaseMachinePowered
   description: "The descendent of the microwaves, our newest invention in beaker heating technology: the hotplate!"
   components:
+  - type: AlchemyTool
+    operation: Heat
   - type: Transform
     anchored: true
   - type: Fixtures
@@ -163,6 +172,9 @@
   id: MedievalMortarNew
   description: Medieval Mortar for crushing herbs and other plant materials.
   components:
+    - type: AlchemyVessel
+    - type: FitsInDispenser
+      solution: beaker
     - type: SolutionContainerManager
       solutions:
         beaker:

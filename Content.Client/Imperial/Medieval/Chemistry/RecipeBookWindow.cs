@@ -105,6 +105,10 @@ public sealed class PotionBookWindow
     public void UpdateState(PotionBookUserInterfaceState state)
     {
         _container.DisposeAllChildren();
+        foreach (var recipe in state.Recipes.Values)
+        {
+            _container.AddChild(new Label { Text = recipe, HorizontalExpand = true });
+        }
         foreach (var id in state.Ids)
         {
             var proto = _proto.Index<ReagentPrototype>(id);

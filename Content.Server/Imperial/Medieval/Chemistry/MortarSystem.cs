@@ -33,6 +33,8 @@ public sealed class MortarSystem : EntitySystem
     }
     public void Finished(EntityUid uid, MortarComponent component, MortarDoAfterEvent args)
     {
+        if (args.Cancelled || args.Handled)
+            return;
         if (!TryComp<StorageComponent>(uid, out var storage))
             return;
         if (!TryComp<SolutionContainerManagerComponent>(uid, out var solutioncomp))
@@ -41,6 +43,8 @@ public sealed class MortarSystem : EntitySystem
             return;
         foreach (var item in storage.Container.ContainedEntities)
         {
+            if (HasComp<Content.Shared.Imperial.Medieval.Alchemy.AlchemyIngredientComponent>(item))
+                continue;
             if (!TryComp<ExtractableComponent>(item, out var extractable))
                 continue;
             Solution transfer;
