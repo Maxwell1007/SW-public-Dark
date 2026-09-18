@@ -49,14 +49,42 @@
 - type: entity
   parent: BaseStructure
   id: MedievalAlchemyDistill
-  name: alchemy apparatus
-  description: Apply a vessel to perform an alchemical operation.
+  name: distillation apparatus
+  description: Load ingredients and liquids, install an output vessel, then start distillation.
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Chem/fireplate.rsi
     state: icon
-  - type: AlchemyTool
+  - type: AlchemyApparatus
     operation: Distill
+  - type: Storage
+    grid:
+    - 0,0,9,5
+    maxItemSize: Huge
+    openOnActivate: false
+  - type: UserInterface
+    interfaces:
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+  - type: ItemSlots
+    slots:
+      alchemy_output:
+        name: alchemy-apparatus-receiver
+        insertOnInteract: false
+        insertVerbText: alchemy-apparatus-insert-receiver
+        ejectVerbText: alchemy-apparatus-eject-receiver
+        whitelist:
+          components:
+          - RefillableSolution
+  - type: ContainerContainer
+    containers:
+      storagebase: !type:Container
+      alchemy_output: !type:ContainerSlot
+  - type: SolutionContainerManager
+    solutions:
+      alchemy_input:
+        maxVol: 1000000
+        canReact: false
 
 - type: entity
   parent: BaseStructure

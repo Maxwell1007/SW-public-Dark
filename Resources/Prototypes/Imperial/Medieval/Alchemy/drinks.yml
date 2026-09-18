@@ -118,3 +118,16 @@
   effects:
   - !type:CreateEntityReactionEffect
     entity: FoodButter
+
+- type: alchemyRecipe
+  id: AlchemyEthanol
+  parent: BaseAlchemyRecipeDrink
+  entities:
+    WheatBushel: 1
+  ingredients:
+  - reagent: Water
+    amount: 10
+  steps:
+  - operation: Distill
+  products:
+    Ethanol: 10
