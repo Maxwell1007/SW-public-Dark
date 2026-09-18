@@ -183,6 +183,18 @@ public sealed class SharedChemistryRandomizationSystem : EntitySystem
             }
             GenerateFromGroup(item, ref recipes, ref offset);
         }
+        var alchemy = _prototypeManager.EnumeratePrototypes<Content.Shared.Imperial.Medieval.Alchemy.AlchemyRecipePrototype>().Where(p => !p.Abstract).ToList();
+        var products = alchemy.SelectMany(p => p.Products.Keys).ToHashSet();
+        foreach (var reactions in _reactions.Values.Concat(_reactionsSingle.Values))
+            reactions.RemoveAll(r => r.Products.Keys.Any(products.Contains));
+        foreach (var product in products)
+        {
+            if (_reagentsData.TryGetValue(product, out var generated))
+                generated.Reactions.Clear();
+        }
+        foreach (var product in alchemy.Where(p => !p.Randomized).SelectMany(p => p.Products.Keys))
+            _reagentsData.Remove(product);
+
     }
 
     /// <summary>
@@ -631,4 +643,3 @@ public sealed class SharedChemistryRandomizationSystem : EntitySystem
     }
     #endregion
 }
-

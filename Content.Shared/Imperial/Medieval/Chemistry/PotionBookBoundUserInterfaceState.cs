@@ -6,4 +6,5 @@ namespace Content.Shared.Imperial.Medieval.Chemistry;
 public sealed class PotionBookUserInterfaceState : BoundUserInterfaceState
 {
     public List<string> Ids = new();
+    public Dictionary<string, string> Recipes = new();
 }

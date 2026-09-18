@@ -593,6 +593,8 @@
   id: MedievalFlowerVetr
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerVetr
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -600,8 +602,6 @@
     state: produce
   - type: Produce
     seedId: VetrFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Vetr
   - type: Currency
     price:
       Revent: 3
@@ -613,12 +613,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerVetr
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerLipad
   name: ent-MedievalFlowerLipad
@@ -638,6 +632,8 @@
   id: MedievalFlowerLipad
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerLipad
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -645,8 +641,6 @@
     state: produce
   - type: Produce
     seedId: LipadFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Lipad
   - type: Currency
     price:
       Revent: 3
@@ -658,12 +652,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerLipad
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerLava
   name: ent-MedievalFlowerLava
@@ -683,6 +671,8 @@
   id: MedievalFlowerLava
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerLava
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -690,8 +680,6 @@
     state: produce
   - type: Produce
     seedId: LavaFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Lava
   - type: Currency
     price:
       Revent: 3
@@ -703,12 +691,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerLava
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerCryo
   name: ent-MedievalFlowerCryo
@@ -728,6 +710,8 @@
   id: MedievalFlowerCryo
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerCryo
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -735,8 +719,6 @@
     state: produce
   - type: Produce
     seedId: CryoFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Cryo
   - type: Currency
     price:
       Revent: 3
@@ -748,12 +730,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerCryo
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerLuna
   name: ent-MedievalFlowerLuna
@@ -773,6 +749,8 @@
   id: MedievalFlowerLuna
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerLuna
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -780,8 +758,6 @@
     state: produce
   - type: Produce
     seedId: LunaFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Luna
   - type: Currency
     price:
       Revent: 3
@@ -793,12 +769,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerLuna
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerStar
   name: ent-MedievalFlowerStar
@@ -818,6 +788,8 @@
   id: MedievalFlowerStar
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerStar
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -825,8 +797,6 @@
     state: produce
   - type: Produce
     seedId: StarFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Star
   - type: Currency
     price:
       Revent: 3
@@ -838,12 +808,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerStar
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerDark
   name: ent-MedievalFlowerDark
@@ -863,6 +827,8 @@
   id: MedievalFlowerDark
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerDark
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -870,8 +836,6 @@
     state: produce
   - type: Produce
     seedId: DarkFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Dark
   - type: Currency
     price:
       Revent: 3
@@ -883,12 +847,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerDark
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerBlood
   name: ent-MedievalFlowerBlood
@@ -908,6 +866,8 @@
   id: MedievalFlowerBlood
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerBlood
   - type: NocturnBloodFood
   - type: RDWeight
     value: 0.05
@@ -916,8 +876,6 @@
     state: produce
   - type: Produce
     seedId: BloodFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Bloody
   - type: Currency
     price:
       Revent: 3
@@ -929,12 +887,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerBlood
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerWhite
   name: ent-MedievalFlowerWhite
@@ -954,6 +906,8 @@
   id: MedievalFlowerWhite
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerWhite
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -961,8 +915,6 @@
     state: produce
   - type: Produce
     seedId: WhiteFlower
-  - type: MagicPotionsIngredient
-    ingredientType: White
   - type: Currency
     price:
       Revent: 3
@@ -974,12 +926,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerWhite
-        Quantity: 35
-
 - type: reagent
   id: MedievalFlowerBlack
   name: ent-MedievalFlowerBlack
@@ -999,6 +945,8 @@
   id: MedievalFlowerBlack
   description: gol
   components:
+  - type: AlchemyIngredient
+    profile: MedievalFlowerBlack
   - type: RDWeight
     value: 0.05
   - type: Sprite
@@ -1006,8 +954,6 @@
     state: produce
   - type: Produce
     seedId: BlackFlower
-  - type: MagicPotionsIngredient
-    ingredientType: Black
   - type: Currency
     price:
       Revent: 3
@@ -1019,12 +965,6 @@
     - AlchemicIngredient
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalFlowerBlack
-        Quantity: 35
-
 - type: reagent
   id: MedievalMushroom1
   name: ent-MedievalMushroom1
@@ -1044,6 +984,8 @@
   id: MedievalMushroom1
   description: MedievalLoot
   components:
+  - type: AlchemyIngredient
+    profile: MedievalMushroom1
   - type: Sprite
     sprite: Imperial/Medieval/Chem/Garden/mushroom1.rsi
     state: produce
@@ -1057,11 +999,6 @@
       Revent: 3
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalMushroom1
-        Quantity: 35
   - type: Tag
     tags:
     - AlchemicIngredient
@@ -1087,6 +1024,8 @@
   id: MedievalMushroom2
   description: MedievalLoot
   components:
+  - type: AlchemyIngredient
+    profile: MedievalMushroom2
   - type: Sprite
     sprite: Imperial/Medieval/Chem/Garden/mushroom2.rsi
     state: produce
@@ -1100,11 +1039,6 @@
       Revent: 3
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalMushroom2
-        Quantity: 35
   - type: Tag
     tags:
     - AlchemicIngredient
@@ -1130,6 +1064,8 @@
   id: MedievalMushroom3
   description: MedievalLoot
   components:
+  - type: AlchemyIngredient
+    profile: MedievalMushroom3
   - type: Sprite
     sprite: Imperial/Medieval/Chem/Garden/mushroom3.rsi
     state: produce
@@ -1143,11 +1079,6 @@
       Revent: 3
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalMushroom3
-        Quantity: 35
   - type: Tag
     tags:
     - AlchemicIngredient
@@ -1173,6 +1104,8 @@
   id: MedievalMushroom4
   description: MedievalLoot
   components:
+  - type: AlchemyIngredient
+    profile: MedievalMushroom4
   - type: Sprite
     sprite: Imperial/Medieval/Chem/Garden/mushroom4.rsi
     state: produce
@@ -1186,11 +1119,6 @@
       Revent: 3
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalMushroom4
-        Quantity: 35
   - type: Tag
     tags:
     - AlchemicIngredient
@@ -1215,6 +1143,8 @@
   id: MedievalMushroom5
   description: MedievalLoot
   components:
+  - type: AlchemyIngredient
+    profile: MedievalMushroom5
   - type: Sprite
     sprite: Imperial/Medieval/Chem/Garden/mushroom5.rsi
     state: produce
@@ -1228,11 +1158,6 @@
       Revent: 3
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalMushroom5
-        Quantity: 35
   - type: Tag
     tags:
     - AlchemicIngredient
@@ -1257,6 +1182,8 @@
   id: MedievalMushroom6
   description: MedievalLoot
   components:
+  - type: AlchemyIngredient
+    profile: MedievalMushroom6
   - type: Sprite
     sprite: Imperial/Medieval/Chem/Garden/mushroom6.rsi
     state: produce
@@ -1270,11 +1197,6 @@
       Revent: 3
   - type: Item
     size: Tiny
-  - type: Extractable
-    juiceSolution:
-      reagents:
-      - ReagentId: MedievalMushroom6
-        Quantity: 35
   - type: Tag
     tags:
     - AlchemicIngredient

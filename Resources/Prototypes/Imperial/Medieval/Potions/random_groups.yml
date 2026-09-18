@@ -150,7 +150,7 @@
   - "#5a7e45"
   - "#ffffff"
   - "#3d3d3d"
-  potionCount: 8
+  potionCount: 15
 
 - type: chemRandom
   id: HardPack
@@ -161,7 +161,7 @@
   - medievalbestacidradiation
   - medievalbeststimulant
   reactants: 1
-  potionCount: 2
+  potionCount: 5
   priority: 3
   usedGroups:
   - EasyPack

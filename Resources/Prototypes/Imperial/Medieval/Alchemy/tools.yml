@@ -1,0 +1,144 @@
+- type: entity
+  parent: BaseItem
+  id: MedievalAlchemySpoon
+  name: alchemy apparatus
+  description: Apply a vessel to perform an alchemical operation.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/utensils.rsi
+    state: spoon
+  - type: Item
+    size: Tiny
+  - type: AlchemyTool
+    operation: Stir
+
+- type: entity
+  parent: BaseItem
+  id: MedievalAlchemyWhisk
+  name: whisk
+  description: A tool for whipping milk into liquid butter.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/utensils.rsi
+    state: fork
+  - type: Item
+    size: Tiny
+  - type: AlchemyTool
+    operation: Whip
+
+- type: listing
+  id: MdvShopAlchemyWhisk
+  productEntity: MedievalAlchemyWhisk
+  cost:
+    Revent: 5
+  categories:
+  - MedievalMisc
+
+- type: entity
+  parent: BaseStructure
+  id: MedievalAlchemyCool
+  name: alchemy apparatus
+  description: Apply a vessel to perform an alchemical operation.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    state: icon
+  - type: AlchemyTool
+    operation: Cool
+
+- type: entity
+  parent: BaseStructure
+  id: MedievalAlchemyDistill
+  name: alchemy apparatus
+  description: Apply a vessel to perform an alchemical operation.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    state: icon
+  - type: AlchemyTool
+    operation: Distill
+
+- type: entity
+  parent: BaseStructure
+  id: MedievalAlchemyExtract
+  name: alchemy apparatus
+  description: Apply a vessel to perform an alchemical operation.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    state: icon
+  - type: AlchemyTool
+    operation: Extract
+
+- type: entity
+  parent: BaseStructure
+  id: MedievalAlchemyFilter
+  name: alchemy apparatus
+  description: Apply a vessel to perform an alchemical operation.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    state: icon
+  - type: AlchemyTool
+    operation: Filter
+
+- type: entity
+  parent: BaseStructure
+  id: MedievalAlchemyInfuse
+  name: alchemy apparatus
+  description: Apply a vessel to perform an alchemical operation.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    state: icon
+  - type: AlchemyTool
+    operation: Infuse
+
+- type: listing
+  id: MdvShopAlchemySpoon
+  productEntity: MedievalAlchemySpoon
+  cost:
+    Revent: 5
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopAlchemyCool
+  productEntity: MedievalAlchemyCool
+  cost:
+    Revent: 50
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopAlchemyDistill
+  productEntity: MedievalAlchemyDistill
+  cost:
+    Revent: 50
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopAlchemyExtract
+  productEntity: MedievalAlchemyExtract
+  cost:
+    Revent: 50
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopAlchemyFilter
+  productEntity: MedievalAlchemyFilter
+  cost:
+    Revent: 50
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopAlchemyInfuse
+  productEntity: MedievalAlchemyInfuse
+  cost:
+    Revent: 50
+  categories:
+  - MedievalMisc
+

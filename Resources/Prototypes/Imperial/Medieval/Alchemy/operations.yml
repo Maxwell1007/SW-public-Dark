@@ -1,0 +1,67 @@
+- type: alchemyOperation
+  id: Heat
+  name: alchemy-operation-heat
+  complexity: 1
+  minimumTier: 1
+  weight: 12
+  duration: 3
+  temperature: 373.15
+  heating: true
+
+- type: alchemyOperation
+  id: Cool
+  name: alchemy-operation-cool
+  complexity: 1
+  minimumTier: 1
+  weight: 10
+  duration: 3
+  temperature: 273.15
+  heating: false
+
+- type: alchemyOperation
+  id: Stir
+  name: alchemy-operation-stir
+  complexity: 1
+  minimumTier: 1
+  weight: 15
+  duration: 2
+
+- type: alchemyOperation
+  id: Distill
+  name: alchemy-operation-distill
+  complexity: 5
+  minimumTier: 2
+  weight: 2
+  duration: 12
+
+- type: alchemyOperation
+  id: Extract
+  name: alchemy-operation-extract
+  complexity: 4
+  minimumTier: 2
+  weight: 3
+  duration: 10
+
+- type: alchemyOperation
+  id: Filter
+  name: alchemy-operation-filter
+  complexity: 3
+  minimumTier: 2
+  weight: 4
+  duration: 6
+
+- type: alchemyOperation
+  id: Infuse
+  name: alchemy-operation-infuse
+  complexity: 2
+  minimumTier: 1
+  weight: 6
+  duration: 15
+
+- type: alchemyOperation
+  id: Whip
+  name: alchemy-operation-whip
+  complexity: 1
+  minimumTier: 1
+  weight: 0
+  duration: 5
