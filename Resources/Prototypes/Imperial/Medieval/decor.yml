@@ -3543,8 +3543,6 @@
         - MidImpassable
         - HighImpassable
         - BulletImpassable
-  - type: AlchemyTool
-    operation: Heat
   - type: PointLight
     color: Green
     radius: 3

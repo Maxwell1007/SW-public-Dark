@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Content.Server.Chemistry.EntitySystems;
 using Content.Server.GameTicking.Events;
 using Content.Server.Stack;
 using Content.Shared.Chemistry.Components;
@@ -25,7 +26,6 @@ namespace Content.Server.Imperial.Medieval.Alchemy;
 
 public sealed partial class AlchemySystem : EntitySystem
 {
-    private static readonly ProtoId<AlchemyOperationPrototype> HeatOperation = "Heat";
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutions = default!;
@@ -59,8 +59,12 @@ public sealed partial class AlchemySystem : EntitySystem
         SubscribeLocalEvent<AlchemyToolComponent, AfterInteractEvent>(OnToolInteract);
         SubscribeLocalEvent<AlchemyToolComponent, InteractUsingEvent>(OnStationInteract);
         SubscribeLocalEvent<AlchemyToolComponent, AlchemyDoAfterEvent>(OnOperationFinished);
+        SubscribeLocalEvent<ReactionMixerComponent, ComponentStartup>(OnReactionMixerStartup);
+        SubscribeLocalEvent<AlchemyMixerComponent, ReactionMixDoAfterEvent>(OnReactionMixFinished,
+            before: new[] { typeof(ReactionMixerSystem) });
         SubscribeLocalEvent<AlchemySolutionComponent, SolutionChangedEvent>(OnSolutionChanged);
         SubscribeLocalEvent<AlchemyVesselComponent, SolutionContainerChangedEvent>(OnVesselChanged);
+        SubscribeLocalEvent<MixableSolutionComponent, SolutionContainerChangedEvent>(OnMixableChanged);
         SubscribeLocalEvent<AlchemyVesselComponent, SolutionContainerOverflowEvent>(OnOverflow);
     }
 
@@ -173,12 +177,14 @@ public sealed partial class AlchemySystem : EntitySystem
 
     private bool StartOperation(EntityUid tool, AlchemyToolComponent comp, EntityUid vessel, EntityUid user, EntityUid used)
     {
+        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
+        if (operation.Temperature != null)
+            return false;
         if (!_solutions.TryGetMixableSolution(vessel, out var solution, out _) || solution == null)
             return false;
         EnsureRound();
         var vesselComponent = EnsureComp<AlchemyVesselComponent>(vessel);
         vesselComponent.Solution = solution.Value.Comp.Solution.Name ?? vesselComponent.Solution;
-        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
         var tracker = EnsureComp<AlchemySolutionComponent>(solution.Value.Owner);
         var ev = new AlchemyDoAfterEvent
         {
@@ -200,6 +206,40 @@ public sealed partial class AlchemySystem : EntitySystem
         comp.Revision++;
     }
 
+    private void OnReactionMixerStartup(EntityUid uid, ReactionMixerComponent comp, ComponentStartup args)
+    {
+        EnsureComp<AlchemyMixerComponent>(uid);
+    }
+
+    private void OnReactionMixFinished(EntityUid uid, AlchemyMixerComponent comp, ref ReactionMixDoAfterEvent args)
+    {
+        if (args.Cancelled || args.Handled || args.Target is not { } target || TerminatingOrDeleted(target) ||
+            !TryComp<ReactionMixerComponent>(uid, out var mixer) ||
+            !mixer.ReactionTypes.Any(type => type.Id == "Stir"))
+            return;
+
+        var attempt = new MixingAttemptEvent(uid);
+        RaiseLocalEvent(uid, ref attempt);
+        if (attempt.Cancelled || !_solutions.TryGetMixableSolution(target, out var solution, out _) ||
+            solution == null || solution.Value.Comp.Solution.Volume <= 0)
+            return;
+
+        var vessel = EnsureComp<AlchemyVesselComponent>(target);
+        vessel.Solution = solution.Value.Comp.Solution.Name ?? vessel.Solution;
+        if (vessel.Processing)
+            return;
+        vessel.Processing = true;
+        try
+        {
+            CompleteOperation(solution.Value, "Stir", args.User);
+        }
+        finally
+        {
+            UpdateTemperatureState(vessel, solution.Value.Comp.Solution);
+            vessel.Processing = false;
+        }
+    }
+
     private void OnOperationFinished(EntityUid uid, AlchemyToolComponent comp, AlchemyDoAfterEvent args)
     {
         if (args.Cancelled || args.Handled || args.Target == null || comp.Operation != args.Operation)
@@ -213,46 +253,66 @@ public sealed partial class AlchemySystem : EntitySystem
             return;
         }
         var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
+        if (operation.Temperature != null)
+            return;
         var vessel = CompOrNull<AlchemyVesselComponent>(args.Target.Value);
         if (vessel != null)
             vessel.Processing = true;
         try
         {
-            if (operation.Temperature is { } temperature)
-            {
-                var current = solution.Value.Comp.Solution.Temperature;
-                _solutions.SetTemperature(solution.Value, operation.Heating ? Math.Max(current, temperature) : Math.Min(current, temperature));
-            }
-            if (operation.Heating && vessel != null)
-                Extract(args.Target.Value, vessel, solution.Value);
             CompleteOperation(solution.Value, comp.Operation, args.User);
         }
         finally
         {
             if (vessel != null)
             {
-                vessel.Hot = solution.Value.Comp.Solution.Temperature >= _prototypes.Index(HeatOperation).Temperature;
+                UpdateTemperatureState(vessel, solution.Value.Comp.Solution);
                 vessel.Processing = false;
             }
         }
         _popup.PopupEntity(Loc.GetString("alchemy-operation-complete", ("operation", Loc.GetString(operation.Name))), uid, args.User);
     }
 
+    private void OnMixableChanged(EntityUid uid, MixableSolutionComponent comp, ref SolutionContainerChangedEvent args)
+    {
+        if (args.SolutionId != comp.Solution || HasComp<AlchemyVesselComponent>(uid) || args.Solution.Volume <= 0)
+            return;
+        var currentTemperature = args.Solution.Temperature;
+        if (!_prototypes.EnumeratePrototypes<AlchemyOperationPrototype>().Any(operation =>
+                operation.Temperature is { } temperature &&
+                (operation.Heating ? currentTemperature >= temperature : currentTemperature <= temperature)))
+            return;
+        var vessel = EnsureComp<AlchemyVesselComponent>(uid);
+        vessel.Solution = comp.Solution;
+        OnVesselChanged(uid, vessel, ref args);
+    }
+
+    private void UpdateTemperatureState(AlchemyVesselComponent vessel, Solution solution)
+    {
+        vessel.Hot = solution.Volume > 0 && solution.Temperature >= _prototypes.Index(vessel.HeatOperation).Temperature;
+        vessel.Cold = solution.Volume > 0 && solution.Temperature <= _prototypes.Index(vessel.CoolOperation).Temperature;
+    }
+
     private void OnVesselChanged(EntityUid uid, AlchemyVesselComponent comp, ref SolutionContainerChangedEvent args)
     {
         if (comp.Processing || args.SolutionId != comp.Solution)
             return;
-        var hot = args.Solution.Temperature >= _prototypes.Index(HeatOperation).Temperature;
-        var heated = hot && !comp.Hot;
-        comp.Hot = hot;
-        if (args.Solution.Temperature < comp.NigredoTemperature || !_solutions.TryGetSolution(uid, comp.Solution, out var solution, out _) || solution == null)
+        var wasHot = comp.Hot;
+        var wasCold = comp.Cold;
+        UpdateTemperatureState(comp, args.Solution);
+        if (args.Solution.Volume <= 0 || !_solutions.TryGetSolution(uid, comp.Solution, out var solution, out _) || solution == null)
             return;
         comp.Processing = true;
         try
         {
             Extract(uid, comp, solution.Value);
-            if (heated)
-                CompleteOperation(solution.Value, "Heat");
+            var apparatus = CompOrNull<AlchemyApparatusComponent>(uid);
+            var items = apparatus is { IsProcessing: true } ? apparatus.Items : null;
+            var user = apparatus?.User is { } actor && !TerminatingOrDeleted(actor) ? apparatus.User : null;
+            if (comp.Hot && !wasHot)
+                CompleteOperation(solution.Value, comp.HeatOperation.Id, user, items);
+            else if (comp.Cold && !wasCold)
+                CompleteOperation(solution.Value, comp.CoolOperation.Id, user, items);
         }
         finally
         {
@@ -303,6 +363,7 @@ public sealed partial class AlchemySystem : EntitySystem
         AlchemyRecipeSystem.RecordOperation(solution.Comp.Solution, operation, _historyLimit);
         if (items != null)
         {
+            items = items.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToList();
             foreach (var item in items)
             {
                 var history = EnsureComp<AlchemyItemHistoryComponent>(item).Operations;
@@ -311,6 +372,13 @@ public sealed partial class AlchemySystem : EntitySystem
                     history.RemoveRange(0, history.Count - _historyLimit);
             }
         }
+        ExecuteRecipes(solution, user, items);
+    }
+
+    private void ExecuteRecipes(Entity<SolutionComponent> solution, EntityUid? user = null,
+        IReadOnlyList<EntityUid>? items = null)
+    {
+        EnsureRound();
         foreach (var recipe in _recipes)
         {
             var entities = new Dictionary<string, int>();

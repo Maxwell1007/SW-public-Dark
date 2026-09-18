@@ -11,7 +11,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
         if (total <= 0)
             throw new InvalidOperationException("Alchemy requires a positive choice weight.");
         var choice = random.Next(total);
-        foreach (var (id, weight) in weights.OrderBy(p => p.Key, StringComparer.Ordinal))
+        foreach (var (id, weight) in weights.OrderBy(p => p.Key, Comparer<string>.Create(string.CompareOrdinal)))
         {
             if (weight <= 0)
                 continue;

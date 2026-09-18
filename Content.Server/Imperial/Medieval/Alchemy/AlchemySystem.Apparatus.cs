@@ -7,7 +7,6 @@ using Content.Shared.Interaction;
 using Content.Shared.Storage;
 using Content.Shared.Verbs;
 using Robust.Shared.Containers;
-using Robust.Shared.Timing;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
 
@@ -24,21 +23,43 @@ public sealed partial class AlchemySystem
         SubscribeLocalEvent<AlchemyApparatusComponent, ContainerIsRemovingAttemptEvent>(OnApparatusRemove);
     }
 
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        var query = EntityQueryEnumerator<AlchemyApparatusComponent>();
+        while (query.MoveNext(out var uid, out var comp))
+        {
+            if (!comp.IsProcessing)
+                continue;
+            if (!_solutions.TryGetSolution(uid, comp.Solution, out var input, out var mixture) || input == null || mixture == null)
+            {
+                StopApparatus(uid, comp);
+                continue;
+            }
+
+            comp.RemainingTime -= frameTime;
+            if (comp.RemainingTime > 0)
+                continue;
+
+            FinishApparatus(uid, comp, input.Value);
+        }
+    }
+
     private void OnApparatusInsert(EntityUid uid, AlchemyApparatusComponent comp, ContainerIsInsertingAttemptEvent args)
     {
-        if (comp.Running)
+        if (comp.IsProcessing)
             args.Cancel();
     }
 
     private void OnApparatusRemove(EntityUid uid, AlchemyApparatusComponent comp, ContainerIsRemovingAttemptEvent args)
     {
-        if (comp.Running)
+        if (comp.IsProcessing)
             args.Cancel();
     }
 
     private void OnApparatusExamine(EntityUid uid, AlchemyApparatusComponent comp, ExaminedEvent args)
     {
-        args.PushText(Loc.GetString(comp.Running ? "alchemy-apparatus-running" : "alchemy-apparatus-instructions"));
+        args.PushText(Loc.GetString(comp.IsProcessing ? "alchemy-apparatus-running" : "alchemy-apparatus-instructions"));
     }
 
     private void OnApparatusActivate(EntityUid uid, AlchemyApparatusComponent comp, ActivateInWorldEvent args)
@@ -51,7 +72,7 @@ public sealed partial class AlchemySystem
 
     private void OnApparatusVerbs(EntityUid uid, AlchemyApparatusComponent comp, GetVerbsEvent<ActivationVerb> args)
     {
-        if (!args.CanAccess || !args.CanInteract || comp.Running)
+        if (!args.CanAccess || !args.CanInteract || comp.IsProcessing)
             return;
         args.Verbs.Add(new ActivationVerb
         {
@@ -62,7 +83,7 @@ public sealed partial class AlchemySystem
 
     private void StartApparatus(EntityUid uid, AlchemyApparatusComponent comp, EntityUid user)
     {
-        if (comp.Running || !TryComp<StorageComponent>(uid, out var storage))
+        if (comp.IsProcessing || !TryComp<StorageComponent>(uid, out var storage))
             return;
         if (_itemSlots.GetItemOrNull(uid, comp.OutputSlot) is not { } receiver ||
             !_solutions.TryGetRefillableSolution(receiver, out _, out _))
@@ -70,87 +91,102 @@ public sealed partial class AlchemySystem
             _popup.PopupEntity(Loc.GetString("alchemy-apparatus-no-receiver"), uid, user);
             return;
         }
-        if (storage.Container.ContainedEntities.Count == 0)
+        if (!_solutions.TryGetSolution(uid, comp.Solution, out var input, out var mixture) || input == null || mixture == null)
+            return;
+        if (storage.Container.ContainedEntities.Count == 0 && mixture.Volume <= 0)
         {
             _popup.PopupEntity(Loc.GetString("alchemy-apparatus-empty"), uid, user);
             return;
         }
-        EnsureRound();
-        comp.Items = storage.Container.ContainedEntities.ToList();
-        comp.Sources.Clear();
-        foreach (var item in comp.Items)
-        {
-            if (_solutions.TryGetDrainableSolution(item, out var source, out _) && source != null)
-                comp.Sources[source.Value.Owner] = EnsureComp<AlchemySolutionComponent>(source.Value.Owner).Revision;
-        }
-        comp.Running = true;
-        _itemSlots.SetLock(uid, comp.OutputSlot, true);
-        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
-        _popup.PopupEntity(Loc.GetString("alchemy-apparatus-running"), uid, user);
-        Timer.Spawn(TimeSpan.FromSeconds(operation.Duration), () => FinishApparatus(uid, comp, receiver, user));
-    }
 
-    private void FinishApparatus(EntityUid uid, AlchemyApparatusComponent comp, EntityUid receiver, EntityUid user)
-    {
-        if (TerminatingOrDeleted(uid) || !comp.Running)
+        EnsureRound();
+        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
+        if (operation.Temperature != null)
             return;
-        comp.Running = false;
-        _itemSlots.SetLock(uid, comp.OutputSlot, false);
+
+        var vessel = EnsureComp<AlchemyVesselComponent>(uid);
+        vessel.Solution = comp.Solution;
+        vessel.Processing = true;
+        comp.Items.Clear();
         try
         {
-            if (TerminatingOrDeleted(receiver) || _itemSlots.GetItemOrNull(uid, comp.OutputSlot) != receiver ||
-                !_solutions.TryGetRefillableSolution(receiver, out var output, out _) || output == null ||
-                !TryComp<StorageComponent>(uid, out var storage) ||
-                !comp.Items.ToHashSet().SetEquals(storage.Container.ContainedEntities) ||
-                comp.Items.Any(item => TerminatingOrDeleted(item)) ||
-                comp.Sources.Any(p => !TryComp<AlchemySolutionComponent>(p.Key, out var tracker) || tracker.Revision != p.Value))
-            {
-                if (!TerminatingOrDeleted(user))
-                    _popup.PopupEntity(Loc.GetString("alchemy-mixture-changed"), uid, user);
-                return;
-            }
-            if (!_solutions.TryGetSolution(uid, comp.Solution, out var input, out var mixture) || input == null || mixture == null)
-                return;
-            var rawItems = new List<EntityUid>();
-            var sources = new List<Entity<SolutionComponent>>();
-            foreach (var item in comp.Items)
+            foreach (var item in storage.Container.ContainedEntities.ToArray())
             {
                 if (_solutions.TryGetDrainableSolution(item, out var source, out var liquid) && source != null && liquid != null)
-                    sources.Add(source.Value);
+                    mixture.AddSolution(_solutions.SplitSolution(source.Value, liquid.Volume), _prototypes);
                 else
-                    rawItems.Add(item);
+                {
+                    comp.Items.Add(item);
+                    EnsureComp<AlchemyItemHistoryComponent>(item);
+                }
             }
-            if (!comp.Sources.Keys.ToHashSet().SetEquals(sources.Select(source => source.Owner)))
-            {
-                if (!TerminatingOrDeleted(user))
-                    _popup.PopupEntity(Loc.GetString("alchemy-mixture-changed"), uid, user);
+            UpdateTemperatureState(vessel, mixture);
+            _solutions.UpdateChemicals(input.Value, false);
+        }
+        finally
+        {
+            vessel.Processing = false;
+        }
+
+        comp.User = user;
+        comp.Receiver = receiver;
+        comp.RemainingTime = operation.Duration;
+        comp.IsProcessing = true;
+        _itemSlots.SetLock(uid, comp.OutputSlot, true);
+        _popup.PopupEntity(Loc.GetString("alchemy-apparatus-running"), uid, user);
+    }
+
+    private void FinishApparatus(EntityUid uid, AlchemyApparatusComponent comp, Entity<SolutionComponent> input)
+    {
+        var user = comp.User is { } actor && !TerminatingOrDeleted(actor) ? comp.User : null;
+        try
+        {
+            if (comp.Receiver is not { } receiver || TerminatingOrDeleted(receiver) ||
+                _itemSlots.GetItemOrNull(uid, comp.OutputSlot) != receiver ||
+                !_solutions.TryGetRefillableSolution(receiver, out var output, out _) || output == null)
                 return;
-            }
-            foreach (var source in sources)
-                mixture.AddSolution(_solutions.SplitSolution(source, source.Comp.Solution.Volume), _prototypes);
+
+            var items = comp.Items.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToList();
             var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
-            if (operation.Temperature is { } temperature)
-                mixture.Temperature = operation.Heating ? Math.Max(mixture.Temperature, temperature) : Math.Min(mixture.Temperature, temperature);
-            CompleteOperation(input.Value, comp.Operation, TerminatingOrDeleted(user) ? null : user, rawItems);
+            var inputVessel = Comp<AlchemyVesselComponent>(uid);
+            inputVessel.Processing = true;
+            try
+            {
+                CompleteOperation(input, comp.Operation, user, items);
+            }
+            finally
+            {
+                inputVessel.Processing = false;
+            }
+
             var vessel = EnsureComp<AlchemyVesselComponent>(receiver);
             vessel.Solution = output.Value.Comp.Solution.Name ?? vessel.Solution;
             vessel.Processing = true;
             try
             {
-                _solutions.ForceAddSolution(output.Value, _solutions.SplitSolution(input.Value, mixture.Volume));
+                _solutions.ForceAddSolution(output.Value, _solutions.SplitSolution(input, input.Comp.Solution.Volume));
             }
             finally
             {
-                vessel.Hot = output.Value.Comp.Solution.Temperature >= _prototypes.Index(HeatOperation).Temperature;
+                UpdateTemperatureState(vessel, output.Value.Comp.Solution);
                 vessel.Processing = false;
             }
-            if (!TerminatingOrDeleted(user))
-                _popup.PopupEntity(Loc.GetString("alchemy-operation-complete", ("operation", Loc.GetString(operation.Name))), uid, user);
+            if (user is { } recipient)
+                _popup.PopupEntity(Loc.GetString("alchemy-operation-complete", ("operation", Loc.GetString(operation.Name))), uid, recipient);
         }
         finally
         {
-            comp.Items.Clear();
-            comp.Sources.Clear();
+            StopApparatus(uid, comp);
         }
+    }
+
+    private void StopApparatus(EntityUid uid, AlchemyApparatusComponent comp)
+    {
+        comp.IsProcessing = false;
+        _itemSlots.SetLock(uid, comp.OutputSlot, false);
+        comp.Items.Clear();
+        comp.User = null;
+        comp.Receiver = null;
+        comp.RemainingTime = 0;
     }
 }

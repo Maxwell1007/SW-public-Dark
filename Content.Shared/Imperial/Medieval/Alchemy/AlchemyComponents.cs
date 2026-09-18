@@ -1,5 +1,6 @@
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.DoAfter;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared.Imperial.Medieval.Alchemy;
@@ -15,8 +16,11 @@ public sealed partial class AlchemyVesselComponent : Component
 {
     [DataField] public string Solution = "beaker";
     [DataField] public float NigredoTemperature = 350;
+    [DataField] public ProtoId<AlchemyOperationPrototype> HeatOperation = "Heat";
+    [DataField] public ProtoId<AlchemyOperationPrototype> CoolOperation = "Cool";
     [DataField] public bool Processing;
     [DataField] public bool Hot;
+    [DataField] public bool Cold;
 }
 
 [RegisterComponent]
@@ -46,8 +50,10 @@ public sealed partial class AlchemyApparatusComponent : Component
     [DataField] public string Operation = "Distill";
     [DataField] public string OutputSlot = "alchemy_output";
     [DataField] public string Solution = "alchemy_input";
-    public bool Running;
-    public Dictionary<EntityUid, int> Sources = new();
+    public bool IsProcessing;
+    public float RemainingTime;
+    public EntityUid? User;
+    public EntityUid? Receiver;
     public List<EntityUid> Items = new();
 }
 

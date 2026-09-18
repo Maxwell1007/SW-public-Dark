@@ -63,5 +63,5 @@
   name: alchemy-operation-whip
   complexity: 1
   minimumTier: 1
-  weight: 0
+  weight: 10
   duration: 5

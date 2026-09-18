@@ -47,9 +47,11 @@ public sealed partial class AlchemySystem
         for (var i = 0; i < recipe.Steps.Count; i++)
         {
             var step = _prototypes.Index<AlchemyOperationPrototype>(recipe.Steps[i]);
-            text.Append($"{i + 1}. {Loc.GetString(step.Name)} ({step.Duration} s)");
+            text.Append($"{i + 1}. {Loc.GetString(step.Name)}");
             if (step.Temperature is { } temperature)
                 text.Append($" — {temperature - 273.15f:0.##} °C");
+            else
+                text.Append($" ({step.Duration} s)");
             text.AppendLine();
         }
         return text.ToString();
