@@ -110,6 +110,41 @@ public sealed partial class NPCSteeringComponent : Component
     /// </summary>
     [ViewVariables] public int FailedPathCount;
 
+    // Imperial Medieval npc-obstacle-handling Start
+    public const int ObstacleFailLimit = 3;
+
+    public static readonly TimeSpan ObstacleStallLimit = TimeSpan.FromSeconds(5);
+
+    public static readonly TimeSpan ObstacleRepathTime = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// StuckDistance only asks whether we moved, which circling an obstacle satisfies forever.
+    /// </summary>
+    public static readonly TimeSpan NoProgressTime = TimeSpan.FromSeconds(6);
+
+    public const float ProgressDistance = 3f;
+
+    [ViewVariables] public int ObstacleFailCount;
+
+    /// <summary>
+    /// Nodes we gave up on, excluded from the next query so it can't hand back the same route.
+    /// </summary>
+    [ViewVariables] public readonly List<PathNodeRef> BlockedNodes = new();
+
+    /// <summary>
+    /// Busy prying / climbing / smashing the obstacle ahead. Keeps the other contributors off us.
+    /// </summary>
+    [ViewVariables] public bool ClearingObstacle;
+
+    [ViewVariables] public TimeSpan LastObstacleProgress;
+
+    [ViewVariables] public TimeSpan LastObstacleRepath;
+
+    [ViewVariables] public EntityCoordinates LastProgressCoordinates;
+
+    [ViewVariables] public TimeSpan LastProgressTime;
+    // Imperial Medieval npc-obstacle-handling End
+
     [ViewVariables] public SteeringStatus Status = SteeringStatus.Moving;
 
     [ViewVariables(VVAccess.ReadWrite)] public PathFlags Flags = PathFlags.None;

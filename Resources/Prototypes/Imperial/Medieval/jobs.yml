@@ -6249,6 +6249,124 @@
   - TravellerVillage5
   - TravellerVillage6
 
+
+# ==========================================
+# MEDIEVAL CITIZEN (Обычный житель)
+# ==========================================
+
+- type: startingGear
+  id: MedievalCitizenGear
+  equipment:
+    pocket1: MedievalRevent10
+    jumpsuit: MedievalClothingUniformJumpsuitShitCloth17
+    id: MedievalHouseKeyBase
+
+- type: playTimeTracker
+  id: JobMedievalCitizen
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMedievalCitizen
+  icon:
+    sprite: /Textures/Imperial/Medieval/Misc/job_icons.rsi
+    state: citizen
+  jobName: job-name-citizen-medieval
+
+- type: job
+  id: MedievalCitizen
+  name: job-name-citizen-medieval
+  description: job-description-citizen-medieval
+  playTimeTracker: JobMedievalCitizen
+  startingGear: MedievalCitizenGear
+  icon: "JobIconMedievalCitizen"
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: WarningOnAttach
+      message: medieval-warning-base
+    - type: Citizen
+      jobId: MedievalCitizen
+      isRich: false
+      keyAccess: House
+    - type: MedievalPasportPerson
+      personJob: "[color=gray]Горожанин[/color]"
+      pasport: MedievalPasportLegion
+      jobPrefix: "[Гор]"
+    - type: GiveItemObjective
+    - type: MoneyCollector
+      objectivePrototype: MedievalGetMoneyObjective300500
+
+- type: roleLoadout
+  id: JobMedievalCitizen
+  groups:
+  - TravellerHead
+  - TravellerJumpsuitVillage
+  - MedievalNeck
+  - MedievalBackpack
+  - MedievalShoes
+  - MedievalBelt
+  - MedievalTrinkets
+  - MedievalGloves
+  - MedievalRepair
+
+# ==========================================
+# MEDIEVAL RICH CITIZEN (Богатый житель)
+# ==========================================
+
+- type: startingGear
+  id: MedievalCitizenRichGear
+  equipment:
+    pocket1: MedievalRevent50
+    jumpsuit: MedievalClothingUniformJumpsuitShitCloth17
+    id: MedievalRichHouseKeyBase
+
+- type: playTimeTracker
+  id: JobMedievalCitizenRich
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconMedievalCitizenRich
+  icon:
+    sprite: /Textures/Imperial/Medieval/Misc/job_icons.rsi
+    state: citizen_rich
+  jobName: job-name-citizen-rich-medieval
+
+- type: job
+  id: MedievalCitizenRich
+  name: job-name-citizen-rich-medieval
+  description: job-description-citizen-rich-medieval
+  playTimeTracker: JobMedievalCitizenRich
+  startingGear: MedievalCitizenRichGear
+  icon: "JobIconMedievalCitizenRich"
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: WarningOnAttach
+      message: medieval-warning-base
+    - type: Citizen
+      jobId: MedievalCitizenRich
+      isRich: true
+      keyAccess: RichHouse
+    - type: MedievalPasportPerson
+      personJob: "[color=gold]Знатный горожанин[/color]"
+      pasport: MedievalPasportLegion
+      jobPrefix: "[Знат]"
+    - type: GiveItemObjective
+    - type: MoneyCollector
+      objectivePrototype: MedievalGetMoneyObjective5001000
+
+- type: roleLoadout
+  id: JobMedievalCitizenRich
+  groups:
+  - SouthTraderHead
+  - TraderJumpsuit
+  - MedievalNeck
+  - MedievalBackpack
+  - MedievalShoes
+  - MedievalBelt
+  - MedievalTrinkets
+  - MedievalGloves
+  - MedievalRepair
 - type: loadoutGroup
   id: TravellerJumpsuitVillageRegular
   name: loadout-group-traveller-jumpsuit

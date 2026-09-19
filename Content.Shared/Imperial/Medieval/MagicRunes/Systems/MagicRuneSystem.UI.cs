@@ -1,6 +1,7 @@
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Imperial.Medieval.MagicRunes.Components;
 using Content.Shared.Imperial.Medieval.MagicRunes.Data;
+using Content.Shared.Random.Helpers;
 using Content.Shared.Stacks;
 using Content.Shared.UserInterface;
 
@@ -15,8 +16,14 @@ namespace Content.Shared.Imperial.Medieval.MagicRunes.Systems;
 
 public partial class MagicRuneSystem
 {
-    private List<string> _essences = new List<string> { "MagicMedievalLight", "MagicMedievalFire", "MagicMedievalEarth", "MagicMedievalVodka", "MagicMedievalDarkness" };
-    private List<string> _effectes = new List<string> { "SunstrikeSpellCastEffectMiddle", "FireWallSpellCastEffectMiddle", "SpikesSpellCastEffectBeginner", "IceDaggerSpellCastEffectBeginner", "TentaclesSpellCastEffectBeginner" };
+    private readonly (string Id, string Effect, int Min, int Max)[] _rewards = new[]
+    {
+        ("MagicMedievalLight", "SunstrikeSpellCastEffectMiddle", 7, 15),
+        ("MagicMedievalFire", "FireWallSpellCastEffectMiddle", 7, 15),
+        ("MagicMedievalEarth", "SpikesSpellCastEffectBeginner", 7, 15),
+        ("MagicMedievalVodka", "IceDaggerSpellCastEffectBeginner", 7, 15),
+        ("MagicMedievalDarkness", "TentaclesSpellCastEffectBeginner", 1, 2)
+    };
 
     [Dependency] private readonly SharedStackSystem _stacks = default!;
     public void InitializeUI()
@@ -86,14 +93,20 @@ public partial class MagicRuneSystem
     {
         if (_net.IsClient)
             return;
-        if (_essences.Count == 0 || _effectes.Count != _essences.Count)
+
+        if (_rewards.Length == 0)
             return;
 
-        int index = _random.Next(0, _essences.Count);
-        int count = _random.Next(8, 12);
-        var essence = Spawn(_essences[index], Transform(user).Coordinates);
+        var reward = _rewards[_random.Next(_rewards.Length)];
+
+        int count = _random.Next(reward.Min, reward.Max + 1);
+
+        var coords = Transform(user).Coordinates;
+
+        var essence = Spawn(reward.Id, coords);
         _stacks.SetCount(essence, count);
 
-        Spawn(_effectes[index], Transform(user).Coordinates);
+        Spawn(reward.Effect, coords);
     }
 }
+

@@ -2932,6 +2932,16 @@
     sprite: Imperial/Medieval/Clothing/Shoes/forstone.rsi
 
 - type: entity
+  parent: MedievalClothingFeetEbonit
+  id: MedievalClothingFeetEbonitMcDonalds
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Shoes/mcdonalds_shoes.rsi
+    state: icon
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Shoes/mcdonalds_shoes.rsi
+
+- type: entity
   parent: ClothingHandsBase
   id: MedievalEbonitGloves
   name: IronGloves
@@ -3163,6 +3173,15 @@
     sprite: Imperial/Medieval/Clothing/Shoes/foxei_boots.rsi
 
 - type: entity
+  parent: MedievalClothingFeetSteel
+  id: MedievalClothingFeetSteelMcDonalds
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Shoes/mcdonalds_shoes.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Shoes/mcdonalds_shoes.rsi
+
+- type: entity
   parent: MedievalIronGloves
   id: MedievalIronGlovesFoxei
   name: MedievalIronGlovesFoxei
@@ -3337,6 +3356,42 @@
   - type: MedievalIronHitSound
 
 - type: entity
+  parent: MedievalClothingOuterArmorEbonit
+  id: MedievalClothingOuterArmorEbonitMcDonalds
+  name: upgrade iron armor
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: MedievalIronHitSound
+
+- type: entity
+  parent: MedievalClothingOuterArmorEbonit2
+  id: MedievalClothingOuterArmorEbonit2McDonalds
+  name: upgrade iron armor
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: MedievalIronHitSound
+
+- type: entity
+  parent: MedievalClothingOuterArmorForstone
+  id: MedievalClothingOuterArmorForstoneMcDonalds
+  name: upgrade iron armor
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: MedievalIronHitSound
+
+- type: entity
   parent: MedievalClothingFeetSteel
   id: MedievalClothingFeetSteelGreenKnight
   components:
@@ -3377,6 +3432,141 @@
     sprite: Imperial/Medieval/Clothing/Gloves/zablik_gloves.rsi
   - type: Clothing
     sprite: Imperial/Medieval/Clothing/Gloves/zablik_gloves.rsi
+
+- type: entity
+  parent: MedievalEbonitGloves
+  id: MedievalEbonitGlovesMcDonalds
+  name: MedievalIronGlovesMcDonalds
+  description: MedievalIronGlovesMcDonalds
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Gloves/mcdonalds_gloves.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Gloves/mcdonalds_gloves.rsi
+
+- type: entity
+  parent: MedievalIronGloves
+  id: MedievalIronGlovesMcDonalds
+  name: MedievalIronGlovesMcDonalds
+  description: MedievalIronGlovesMcDonalds
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Gloves/mcdonalds_gloves.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Gloves/mcdonalds_gloves.rsi
+
+- type: entity
+  parent: ClothingOuterArmorPodWars
+  id: ClothingOuterArmorPodWarsMcDonalds
+  name: iron armor cuirass
+  description: An armored iron plate to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorIronCuirassLight
+  id: MedievalClothingOuterArmorIronCuirassLightMcDonalds
+  name: iron armor cuirass
+  description: An armored iron plate to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorBrigantin
+  id: MedievalClothingOuterArmorBrigantinMcDonalds
+  name: armor
+  description: An armored northern armor to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorIronCuirass
+  id: MedievalClothingOuterArmorIronCuirassMcDonalds
+  name: iron armor cuirass
+  description: An armored iron plate to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorChainMail
+  id: MedievalClothingOuterArmorChainMailMcDonalds
+  name: iron armor cuirass
+  description: An armored iron plate to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorChainMailLight
+  id: MedievalClothingOuterArmorChainMailLightMcDonalds
+  name: iron armor cuirass
+  description: An armored iron plate to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorIron
+  id: MedievalClothingOuterArmorIronMcDonalds
+  name: cloth
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+
+- type: entity
+  parent: MedievalClothingOuterArmorUpIron2
+  id: MedievalClothingOuterArmorUpIron2McDonalds
+  name: upgrade iron armor
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: MedievalIronHitSound
+
+- type: entity
+  parent: MedievalClothingOuterArmorUpIron3
+  id: MedievalClothingOuterArmorUpIron3McDonalds
+  name: upgrade iron armor
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: MedievalIronHitSound
+
+- type: entity
+  parent: MedievalClothingOuterArmorUpIron
+  id: MedievalClothingOuterArmorUpIronMcDonalds
+  name: upgrade iron armor
+  description: An upgraded armor with iron plates to protect against melee weapons.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Armor/mcdonalds_armor.rsi
+  - type: MedievalIronHitSound
 
 - type: entity
   parent: MedievalIronGloves

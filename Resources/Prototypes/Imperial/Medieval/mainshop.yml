@@ -3842,3 +3842,27 @@
     Revent: 50
   categories:
   - MedievalMisc
+
+- type: listing
+  id: MdvShopPerfumeBottleRose
+  productEntity: PerfumeBottleRose
+  cost:
+    Revent: 75
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopPerfumeBottleLavender
+  productEntity: PerfumeBottleLavender
+  cost:
+    Revent: 75
+  categories:
+  - MedievalMisc
+
+- type: listing
+  id: MdvShopPerfumeBottleAmber
+  productEntity: PerfumeBottleAmber
+  cost:
+    Revent: 75
+  categories:
+  - MedievalMisc

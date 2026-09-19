@@ -183,6 +183,12 @@
         },
         {
             "name": "archivist"
+        },
+        {
+            "name": "citizen_rich"
+        },
+        {
+            "name": "citizen"
         }
     ]
 }

@@ -2,29 +2,37 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Administration.Managers;
+using Content.Server.Destructible; // Imperial Medieval npc-obstacle-handling
 using Content.Server.DoAfter;
+using Content.Server.Imperial.Medieval.NPC; // Imperial Medieval npc-obstacle-handling
 using Content.Server.NPC.Components;
 using Content.Server.NPC.Events;
 using Content.Server.NPC.Pathfinding;
 using Content.Shared.CCVar;
 using Content.Shared.Climbing.Systems;
 using Content.Shared.CombatMode;
+using Content.Shared.Imperial.Medieval.Grab.Components; // Imperial Medieval npc-obstacle-handling
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Events;
+using Content.Shared.Movement.Pulling.Components; // Imperial Medieval npc-obstacle-handling
 using Content.Shared.Movement.Systems;
 using Content.Shared.NPC;
 using Content.Shared.NPC.Components;
 using Content.Shared.NPC.Systems;
 using Content.Shared.NPC.Events;
 using Content.Shared.Physics;
+// Imperial Medieval npc-obstacle-handling Start
 using Content.Shared.Weapons.Melee;
+using Content.Shared.Whitelist;
+// Imperial Medieval npc-obstacle-handling End
 using Robust.Shared.Configuration;
 using Robust.Shared.Map;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes; // Imperial Medieval npc-obstacle-handling
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
@@ -54,13 +62,17 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     [Dependency] private readonly IConfigurationManager _configManager = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
+    // Imperial Medieval npc-obstacle-handling Start
+    [Dependency] private readonly IPrototypeManager _protoManager = default!;
     [Dependency] private readonly ClimbSystem _climb = default!;
+    [Dependency] private readonly DestructibleSystem _destructible = default!;
+    [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
+    // Imperial Medieval npc-obstacle-handling End
     [Dependency] private readonly DoAfterSystem _doAfter = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly NpcFactionSystem _npcFaction = default!;
     [Dependency] private readonly PathfindingSystem _pathfindingSystem = default!;
     [Dependency] private readonly PryingSystem _pryingSystem = default!;
-    [Dependency] private readonly SharedMapSystem _mapSystem = default!;
     [Dependency] private readonly SharedInteractionSystem _interaction = default!;
     [Dependency] private readonly SharedMeleeWeaponSystem _melee = default!;
     [Dependency] private readonly SharedMoverController _mover = default!;
@@ -68,7 +80,16 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly SharedCombatModeSystem _combat = default!;
 
+    // Imperial Medieval npc-obstacle-handling Start
+    private EntityQuery<DestructibleComponent> _destructibleQuery;
     private EntityQuery<FixturesComponent> _fixturesQuery;
+    private EntityQuery<GrabbableComponent> _grabbableQuery;
+    private EntityQuery<PullableComponent> _pullableQuery;
+    private EntityQuery<NPCMeleeCombatComponent> _meleeCombatQuery;
+    private EntityQuery<NPCRangedCombatComponent> _rangedCombatQuery;
+    private EntityQuery<NPCTargetMemoryComponent> _targetMemoryQuery;
+    private EntityQuery<NPCUnsmashableComponent> _unsmashableQuery;
+    // Imperial Medieval npc-obstacle-handling End
     private EntityQuery<MovementSpeedModifierComponent> _modifierQuery;
     private EntityQuery<NpcFactionMemberComponent> _factionQuery;
     private EntityQuery<PhysicsComponent> _physicsQuery;
@@ -76,6 +97,13 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
 
     private ObjectPool<HashSet<EntityUid>> _entSetPool =
         new DefaultObjectPool<HashSet<EntityUid>>(new SetPolicy<EntityUid>());
+
+    // Imperial Medieval npc-obstacle-handling Start
+    /// <summary>
+    /// Something this close to the destination is occupying it, not blocking it.
+    /// </summary>
+    private const float DestinationRadius = 0.5f;
+    // Imperial Medieval npc-obstacle-handling End
 
     /// <summary>
     /// Enabled antistuck detection so if an NPC is in the same spot for a while it will re-path.
@@ -99,7 +127,16 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         base.Initialize();
 
         Log.Level = LogLevel.Info;
+        // Imperial Medieval npc-obstacle-handling Start
+        _destructibleQuery = GetEntityQuery<DestructibleComponent>();
         _fixturesQuery = GetEntityQuery<FixturesComponent>();
+        _grabbableQuery = GetEntityQuery<GrabbableComponent>();
+        _pullableQuery = GetEntityQuery<PullableComponent>();
+        _meleeCombatQuery = GetEntityQuery<NPCMeleeCombatComponent>();
+        _rangedCombatQuery = GetEntityQuery<NPCRangedCombatComponent>();
+        _targetMemoryQuery = GetEntityQuery<NPCTargetMemoryComponent>();
+        _unsmashableQuery = GetEntityQuery<NPCUnsmashableComponent>();
+        // Imperial Medieval npc-obstacle-handling End
         _modifierQuery = GetEntityQuery<MovementSpeedModifierComponent>();
         _factionQuery = GetEntityQuery<NpcFactionMemberComponent>();
         _physicsQuery = GetEntityQuery<PhysicsComponent>();
@@ -185,7 +222,12 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             component.Flags = _pathfindingSystem.GetFlags(uid);
         }
 
-        ResetStuck(component, Transform(uid).Coordinates);
+        // Imperial Medieval npc-obstacle-handling Start
+        ResetArrival(component, Transform(uid).Coordinates);
+        component.ObstacleFailCount = 0;
+        component.ClearingObstacle = false;
+        component.BlockedNodes.Clear();
+        // Imperial Medieval npc-obstacle-handling End
         component.Coordinates = coordinates;
         return component;
     }
@@ -427,9 +469,15 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     private async void RequestPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, float targetDistance)
     {
         // If we already have a pathfinding request then don't grab another.
-        // If we're in range then just beeline them; this can avoid stutter stepping and is an easy way to look nicer.
-        if (steering.Pathfind || targetDistance < steering.RepathRange)
+        // Imperial Medieval npc-obstacle-handling Start
+        if (steering.Pathfind)
             return;
+
+        // If we're in range then just beeline them; this can avoid stutter stepping and is an easy way to look nicer.
+        // Only while nothing is between us, or the obstacle handling never gets a node to work with.
+        if (targetDistance < steering.RepathRange && HasClearLine(uid, steering, steering.RepathRange))
+            return;
+        // Imperial Medieval npc-obstacle-handling End
 
         // Short-circuit with no path.
         var targetPoly = _pathfindingSystem.GetPoly(steering.Coordinates);
@@ -456,13 +504,23 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             steering.Coordinates,
             steering.Range,
             steering.PathfindToken.Token,
-            flags);
+            flags,
+            steering.BlockedNodes.Count > 0 ? steering.BlockedNodes.ToArray() : null); // Imperial Medieval npc-obstacle-handling
 
         steering.PathfindToken = null;
 
         if (result.Result == PathResult.NoPath)
         {
             steering.CurrentPath.Clear();
+
+            // Imperial Medieval npc-obstacle-handling Start
+            if (steering.BlockedNodes.Count > 0)
+            {
+                steering.BlockedNodes.Clear();
+                return;
+            }
+            // Imperial Medieval npc-obstacle-handling End
+
             steering.FailedPathCount++;
 
             if (steering.FailedPathCount >= NPCSteeringComponent.FailedPathLimit)
@@ -478,7 +536,74 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
 
         PrunePath(uid, ourPos, targetPos.Position - ourPos.Position, result.Path);
         steering.CurrentPath = new Queue<PathPoly>(result.Path);
+
+        // Imperial Medieval npc-obstacle-handling Start
+        if (steering.ClearingObstacle &&
+            steering.CurrentPath.TryPeek(out var next) &&
+            IsFreeSpace(uid, steering, next))
+        {
+            ResetArrival(steering, xform.Coordinates);
+        }
+        // Imperial Medieval npc-obstacle-handling End
     }
+
+    // Imperial Medieval npc-obstacle-handling Start
+    /// <summary>
+    /// Nothing we do about the route frees us, so the stuck handling has to stay out of it.
+    /// </summary>
+    private bool IsHeld(EntityUid uid)
+    {
+        if (TryGetGrabber(uid, out _))
+            return true;
+
+        return _pullableQuery.TryGetComponent(uid, out var pullable) && pullable.BeingPulled;
+    }
+
+    /// <summary>
+    /// A grab, not an ordinary pull. Only a grab takes combat mode, so only a grab is worth hitting back over.
+    /// </summary>
+    private bool TryGetGrabber(EntityUid uid, out EntityUid grabber)
+    {
+        grabber = default;
+
+        if (!_grabbableQuery.TryGetComponent(uid, out var grabbable) ||
+            grabbable.Grabber is not { Valid: true } holder)
+        {
+            return false;
+        }
+
+        grabber = holder;
+        return true;
+    }
+
+    /// <summary>
+    /// Whether we can go straight there, or need a path and the obstacle handling that comes with it.
+    /// </summary>
+    public bool HasClearLine(EntityUid uid, NPCSteeringComponent steering, float range)
+    {
+        if (!_physicsQuery.TryGetComponent(uid, out var physics))
+            return true;
+
+        var mask = (CollisionGroup) physics.CollisionMask;
+
+        // A zero position means the destination is the entity itself, and that overload ignores it.
+        if (steering.Coordinates.Position.Equals(Vector2.Zero))
+            return _interaction.InRangeUnobstructed(uid, steering.Coordinates.EntityId, range, mask);
+
+        var destination = _transform.ToMapCoordinates(steering.Coordinates);
+
+        return _interaction.InRangeUnobstructed(uid, destination, range, mask,
+            ent => IsAtDestination(ent, destination));
+    }
+
+    private bool IsAtDestination(EntityUid uid, MapCoordinates destination)
+    {
+        var position = _transform.GetMapCoordinates(uid);
+
+        return position.MapId == destination.MapId &&
+               (position.Position - destination.Position).LengthSquared() <= DestinationRadius * DestinationRadius;
+    }
+    // Imperial Medieval npc-obstacle-handling End
 
     // TODO: Move these to movercontroller
 

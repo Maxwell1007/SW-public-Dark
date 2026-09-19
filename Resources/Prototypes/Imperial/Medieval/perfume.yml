@@ -1,0 +1,105 @@
+- type: entity
+  name: perfume bottle
+  parent: BaseItem
+  id: PerfumeBottle
+  components:
+  - type: Perfume
+  - type: Appearance
+  - type: Sprite
+    sprite: Imperial/Medieval/perfume.rsi
+    scale: 0.75, 0.75
+    layers:
+    - state: perfume
+    - state: perfume-1
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: Item
+    size: Tiny
+  - type: ExaminableSolution
+    solution: spray
+    exactVolume: true
+  - type: SolutionContainerVisuals
+    solutionName: spray
+    fillBaseName: perfume-
+    maxFillLevels: 6
+  - type: SolutionContainerManager
+    solutions:
+      spray:
+        maxVol: 6
+  - type: RefillableSolution
+    solution: spray
+  - type: FitsInDispenser
+    solution: spray
+  - type: Spray
+    solution: spray
+    transferAmount: 1
+    sprayDistance: 1
+    sprayVelocity: 0.5
+    sprayedPrototype: PerfumeVapor 
+    pushbackAmount: 0
+    spraySound:
+      path: /Audio/Effects/spray2.ogg
+  - type: UseDelay
+    delay: 2.5
+
+- type: entity
+  parent: Vapor
+  id: PerfumeVapor 
+  components:
+  - type: Sprite
+    sprite: Effects/chempuff.rsi
+    rotation: 180
+    layers:
+    - state: chempuff
+      map: ["enum.VaporVisualLayers.Base"]
+  - type: Vapor
+    transferAmountPercentage: 1.0
+  - type: SolutionContainerManager
+    solutions:
+      vapor:
+        maxVol: 1
+
+- type: CP14Recipe
+  id: PerfumeBottleRecipe
+  craftTime: 5
+  iconOverride: PerfumeBottle
+  stacks:
+    MedievalSilver: 1
+  entities:
+    MedievalChemistryEmptyBottleTempering02: 1
+  result: PerfumeBottle
+
+- type: entity
+  parent: PerfumeBottle
+  id: PerfumeBottleRose
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      spray:
+        maxVol: 6
+        reagents:
+        - ReagentId: medievalPerfumeRose
+          Quantity: 6
+
+- type: entity
+  parent: PerfumeBottle
+  id: PerfumeBottleLavender
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      spray:
+        maxVol: 6
+        reagents:
+        - ReagentId: medievalPerfumeLavender
+          Quantity: 6
+
+- type: entity
+  parent: PerfumeBottle
+  id: PerfumeBottleAmber
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      spray:
+        maxVol: 6
+        reagents:
+        - ReagentId: medievalPerfumeAmber
+          Quantity: 6

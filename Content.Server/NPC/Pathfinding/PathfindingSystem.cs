@@ -10,7 +10,12 @@ using Content.Shared.Access.Components;
 using Content.Shared.Administration;
 using Content.Shared.Climbing.Components;
 using Content.Shared.Doors.Components;
+// Imperial Medieval npc-obstacle-handling Start
+using Content.Shared.CombatMode;
 using Content.Shared.NPC;
+using Content.Shared.Prying.Components;
+using Content.Shared.Weapons.Melee;
+// Imperial Medieval npc-obstacle-handling End
 using Robust.Server.Player;
 using Robust.Shared.Enums;
 using Robust.Shared.Map;
@@ -354,9 +359,11 @@ namespace Content.Server.NPC.Pathfinding
             EntityCoordinates end,
             float range,
             CancellationToken cancelToken,
-            PathFlags flags = PathFlags.None)
+            PathFlags flags = PathFlags.None,
+            IReadOnlyList<PathNodeRef>? blacklist = null) // Imperial Medieval npc-obstacle-handling
         {
             var request = GetRequest(entity, start, end, range, cancelToken, flags);
+            request.Blacklist = blacklist; // Imperial Medieval npc-obstacle-handling
             return await GetPath(request, true);
         }
 
@@ -448,19 +455,43 @@ namespace Content.Server.NPC.Pathfinding
             return GetFlags(npc.Blackboard);
         }
 
+        // Imperial Medieval npc-obstacle-handling Start
+        private bool CanEverSmash(EntityUid uid)
+        {
+            // TryGetWeapon raises, and this runs from HTN planning off the main thread.
+            return HasComp<CombatModeComponent>(uid) && HasComp<MeleeWeaponComponent>(uid);
+        }
+        // Imperial Medieval npc-obstacle-handling End
+
         public PathFlags GetFlags(NPCBlackboard blackboard)
         {
             var flags = PathFlags.None;
 
-            if (blackboard.TryGetValue<bool>(NPCBlackboard.NavPry, out var pry, EntityManager) && pry)
+            // Imperial Medieval npc-obstacle-handling Start
+            if (blackboard.TryGetValue<bool>(NPCBlackboard.NavPry, out var pry, EntityManager))
+            {
+                if (pry)
+                    flags |= PathFlags.Prying;
+            }
+            else if (blackboard.TryGetValue<EntityUid>(NPCBlackboard.Owner, out var pryOwner, EntityManager) &&
+                     HasComp<PryingComponent>(pryOwner))
             {
                 flags |= PathFlags.Prying;
             }
+            // Imperial Medieval npc-obstacle-handling End
 
-            if (blackboard.TryGetValue<bool>(NPCBlackboard.NavSmash, out var smash, EntityManager) && smash)
+            // Imperial Medieval npc-obstacle-handling Start
+            if (blackboard.TryGetValue<bool>(NPCBlackboard.NavSmash, out var smash, EntityManager))
+            {
+                if (smash)
+                    flags |= PathFlags.Smashing;
+            }
+            else if (blackboard.TryGetValue<EntityUid>(NPCBlackboard.Owner, out var owner, EntityManager) &&
+                     CanEverSmash(owner))
             {
                 flags |= PathFlags.Smashing;
             }
+            // Imperial Medieval npc-obstacle-handling End
 
             if (blackboard.TryGetValue<bool>(NPCBlackboard.NavClimb, out var climb, EntityManager) && climb)
             {

@@ -2804,7 +2804,7 @@
         layer:
         - WallLayer
   - type: Damageable
-    damageContainer: Inorganic
+    damageContainer: StructuralInorganic
     damageModifierSet: Wood
   - type: MeleeSound
     soundGroups:
@@ -2837,6 +2837,7 @@
           Log:
             min: 2
             max: 8
+  - type: NPCUnsmashable
 
 - type: entity
   parent: MedievalBaseTree
@@ -3711,7 +3712,7 @@
         layer:
         - WallLayer
   - type: Damageable
-    damageContainer: Inorganic
+    damageContainer: StructuralInorganic
     damageModifierSet: Wood
   - type: MeleeSound
     soundGroups:
@@ -3744,6 +3745,7 @@
           Log:
             min: 1
             max: 3
+  - type: NPCUnsmashable
 
 - type: entity
   id: MedievalBaseTreeAutumn
@@ -3772,7 +3774,7 @@
         layer:
         - WallLayer
   - type: Damageable
-    damageContainer: Inorganic
+    damageContainer: StructuralInorganic
     damageModifierSet: Wood
   - type: MeleeSound
     soundGroups:
@@ -3805,6 +3807,7 @@
           Log:
             min: 2
             max: 8
+  - type: NPCUnsmashable
 
 - type: entity
   parent: MedievalBaseTreeAutumn

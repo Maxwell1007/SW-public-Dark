@@ -1926,3 +1926,113 @@
         conditions:
         - !type:ReagentThreshold
           min: 11
+
+- type: reagent
+  id: medievalPerfumeRose
+  name: reagent-name-medieval-perfume-rose
+  desc: reagent-desc-medieval-perfume-rose
+  physicalDesc: reagent-physical-desc-fragrant
+  showinbook: false
+  evaporationSpeed: 0.2
+  absorbent: true
+  flavor: sweet
+  color: "#E25875"
+  reactiveEffects:
+    Acidic:
+      methods: [ Touch ]
+      effects:
+      - !type:PerfumeReagentEffect
+        scentId: medievalPerfumeRose
+        locKey: perfume-scent-rose
+        durationPerUnit: 300
+        maxDuration: 3600
+  metabolisms:
+    Poison:
+      effects:
+      - !type:HealthChange
+        damage:
+          groups:
+            Toxin: 4
+        conditions:
+        - !type:ReagentThreshold
+          min: 25
+      - !type:Jitter
+        conditions:
+        - !type:ReagentThreshold
+          min: 25
+
+- type: reagent
+  id: medievalPerfumeLavender
+  name: reagent-name-medieval-perfume-lavender
+  desc: reagent-desc-medieval-perfume-lavender
+  physicalDesc: reagent-physical-desc-calming
+  showinbook: false
+  evaporationSpeed: 0.15
+  absorbent: true
+  flavor: bitter
+  color: "#967BB6"
+  reactiveEffects:
+    Acidic:
+      methods: [ Touch ]
+      effects:
+      - !type:PerfumeReagentEffect
+        scentId: medievalPerfumeLavender
+        locKey: perfume-scent-lavender
+        durationPerUnit: 300
+        maxDuration: 3600
+  metabolisms:
+    Narcotic:
+      effects:
+      - !type:GenericStatusEffect
+        key: Drowsiness
+        component: Drowsiness
+        time: 5
+        type: Add
+        conditions:
+        - !type:ReagentThreshold
+          min: 15
+    Poison:
+      effects:
+      - !type:HealthChange
+        damage:
+          groups:
+            Toxin: 4
+        conditions:
+        - !type:ReagentThreshold
+          min: 25
+
+- type: reagent
+  id: medievalPerfumeAmber
+  name: reagent-name-medieval-perfume-amber
+  desc: reagent-desc-medieval-perfume-amber
+  physicalDesc: reagent-physical-desc-resinous
+  showinbook: false
+  evaporationSpeed: 0.1
+  absorbent: true
+  flavor: sharp
+  color: "#DA9100"
+  reactiveEffects:
+    Acidic:
+      methods: [ Touch ]
+      effects:
+      - !type:PerfumeReagentEffect
+        scentId: medievalPerfumeAmber
+        locKey: perfume-scent-amber
+        durationPerUnit: 300
+        maxDuration: 3600
+  metabolisms:
+    Poison:
+      effects:
+      - !type:HealthChange
+        damage:
+          groups:
+            Toxin: 6
+        conditions:
+        - !type:ReagentThreshold
+          min: 20
+      - !type:GenericStatusEffect
+        key: Stutter
+        component: StutteringAccent
+        conditions:
+        - !type:ReagentThreshold
+          min: 20

@@ -5,7 +5,7 @@
   name: calendar-event-default-name
   text: calendar-event-default-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Effects/day.ogg"
 
 # Базовый ночной фоллбэк
 - type: calendarEvent
@@ -14,7 +14,7 @@
   name: calendar-event-default-night-name
   text: calendar-event-default-night-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Imperial/Medieval/Werewolf/howl-far.ogg"
 
 # ==============================================================================
 # ДНЕВНЫЕ СОБЫТИЯ (Тег: Day)
@@ -27,7 +27,7 @@
   name: calendar-event-sunny-name
   text: calendar-event-sunny-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Effects/day.ogg"
   weight: 20.0
   maxOccurrences: 100 # Дни заполнители не должны иметь ограничений на количество появлений
   minDay: 1 # Могут начинаться сразу же
@@ -42,7 +42,7 @@
   name: calendar-event-rain-name
   text: calendar-event-rain-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Effects/day.ogg"
   weight: 0.0
   minDay: 1
   minOffset: 2
@@ -56,7 +56,7 @@
   name: calendar-event-fair-name
   text: calendar-event-fair-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Effects/day.ogg"
   weight: 10.0 # Базовый вес, если кривой нет
   weightCurve:
     points:
@@ -64,20 +64,22 @@
       - 4, 0.05  # прямая до четвертого дня
       - 5, 150000.0  # К пятому дню шанс возрастает
       - 6, 0.0 # На шестой день и после событие не появится
-  minDay: 3
+  minDay: 2
   minPlayers: 1 # Нужно минимум 1 игрок для включения этого ивента
   maxPlayers: 15 # Если будет больше 15, то ивент не будет включен
-  maxOccurrences: 1
+  maxOccurrences: 0
   minOffset: 2
   tags:
     - Day
     - TradeEvent
   spawns:
     MobHuman:
-      - FairSpawnMarker1
-      - FairSpawnMarker2 # Нужно навесить на объект в мире компонент CalendarSpawnMarkerComponent и указать там айди такой же как
+      - marker: FairSpawnMarker1
+        amount: 10 # Заспавнит 10 прототипов на одном маркере
+      - marker: FairSpawnMarker2 # Нужно навесить на объект в мире компонент CalendarSpawnMarkerComponent и указать там айди такой же как
     CrowbarRed:
-      - "Global" # Если не важно где появится прототип (допустим это спавн прототипа для триггера ивента). Это конечно можно было бы сделать и если бы маперы добавили просто объект с айди Global
+      - marker: Global # Если не важно где появится прототип (допустим это спавн прототипа для триггера ивента). Это конечно можно было бы сделать и если бы маперы добавили просто объект с айди Global
+
 
 # 4. Солнечное затмение
 - type: calendarEvent
@@ -86,8 +88,8 @@
   name: calendar-event-eclipse-name
   text: calendar-event-eclipse-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
-  weight: 100
+    path: "/Audio/Effects/day.ogg"
+  weight: 1
   minDay: 7
   maxOccurrences: 1
   tags:
@@ -105,7 +107,7 @@
   name: calendar-event-clear-night-name
   text: calendar-event-clear-night-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Imperial/Medieval/Werewolf/howl-far.ogg"
   weight: 20.0
   maxOccurrences: 100 # Дни заполнители не должны иметь ограничений на количество появлений
   minDay: 1 # Могут начинаться сразу же
@@ -120,7 +122,7 @@
   name: calendar-event-fog-night-name
   text: calendar-event-fog-night-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Imperial/Medieval/Werewolf/howl-far.ogg"
   weight: 0.0
   minDay: 2
   maxOccurrences: 4
@@ -135,7 +137,7 @@
   name: calendar-event-blood-moon-name
   text: calendar-event-blood-moon-desc
   sound:
-    path: "/Audio/Effects/church_bell1.ogg"
+    path: "/Audio/Imperial/Medieval/Werewolf/howl-far.ogg"
   weight: 1.0
   minDay: 5
   maxOccurrences: 1

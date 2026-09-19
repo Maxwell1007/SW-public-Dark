@@ -8,6 +8,7 @@ using Robust.Shared.Collections;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
+using Robust.Shared.Physics.Collision.Shapes; // Imperial Medieval npc-obstacle-handling
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
@@ -22,6 +23,12 @@ public sealed partial class PathfindingSystem
     // Stuff like chairs have collision but aren't relevant for mobs.
     public const int PathfindingCollisionMask = (int) CollisionGroup.MobMask;
     public const int PathfindingCollisionLayer = (int) CollisionGroup.MobLayer;
+
+    // Imperial Medieval npc-obstacle-handling Start
+    private const float CellHalf = 0.5f / SubStep;
+
+    private const float CellInset = CellHalf - 0.01f;
+    // Imperial Medieval npc-obstacle-handling End
 
     /// <summary>
     ///     If true, UpdateGrid() will not process grids.
@@ -218,6 +225,17 @@ public sealed partial class PathfindingSystem
         }
     }
 
+    // Imperial Medieval npc-obstacle-handling Start
+    private bool ShapeOverlapsCell(IPhysShape shape, in Transform xform, Vector2 center)
+    {
+        return _fixtures.TestPoint(shape, xform, center) ||
+               _fixtures.TestPoint(shape, xform, new Vector2(center.X - CellInset, center.Y - CellInset)) ||
+               _fixtures.TestPoint(shape, xform, new Vector2(center.X - CellInset, center.Y + CellInset)) ||
+               _fixtures.TestPoint(shape, xform, new Vector2(center.X + CellInset, center.Y - CellInset)) ||
+               _fixtures.TestPoint(shape, xform, new Vector2(center.X + CellInset, center.Y + CellInset));
+    }
+    // Imperial Medieval npc-obstacle-handling End
+
     private bool IsBodyRelevant(FixturesComponent fixtures)
     {
         foreach (var fixture in fixtures.Fixtures.Values)
@@ -282,18 +300,56 @@ public sealed partial class PathfindingSystem
             ? gridUid
             : _transform.GetGrid((ev.Entity.Owner, ev.Component));
 
-        if (oldGridUid != null && oldGridUid != gridUid)
-        {
-            var aabb = _lookup.GetAABBNoContainer(ev.Sender, ev.OldPosition.Position, ev.OldRotation);
-            DirtyChunkArea(oldGridUid.Value, aabb);
-        }
+        // Imperial Medieval npc-obstacle-handling Start
+        var sameFrame = ev.OldPosition.EntityId == ev.NewPosition.EntityId;
+        Box2? newAabb = null;
 
         if (gridUid != null)
         {
-            var aabb = _lookup.GetAABBNoContainer(ev.Sender, ev.NewPosition.Position, ev.NewRotation);
-            DirtyChunkArea(gridUid.Value, aabb);
+            newAabb = _lookup.GetAABBNoContainer(ev.Sender, ev.NewPosition.Position, ev.NewRotation);
+            DirtyChunkArea(gridUid.Value, newAabb.Value);
         }
+
+        if (oldGridUid == null)
+            return;
+
+        // The old position is in the old parent's frame after a reparent.
+        if (!sameFrame)
+        {
+            if (oldGridUid != gridUid)
+            {
+                var aabb = _lookup.GetAABBNoContainer(ev.Sender, ev.OldPosition.Position, ev.OldRotation);
+                DirtyChunkArea(oldGridUid.Value, aabb);
+            }
+
+            return;
+        }
+
+        if (newAabb == null)
+            return;
+
+        var oldAabb = ev.OldRotation == ev.NewRotation
+            ? newAabb.Value.Translated(ev.OldPosition.Position - ev.NewPosition.Position)
+            : _lookup.GetAABBNoContainer(ev.Sender, ev.OldPosition.Position, ev.OldRotation);
+
+        if (SameChunks(oldAabb, newAabb.Value))
+            return;
+
+        DirtyChunkArea(oldGridUid.Value, oldAabb);
     }
+
+    private static Vector2i ChunkIndex(Vector2 point)
+    {
+        return new Vector2i((int) Math.Floor(point.X / ChunkSize), (int) Math.Floor(point.Y / ChunkSize));
+    }
+
+    // Per-axis floor, so opposite corners cover all four.
+    private static bool SameChunks(Box2 a, Box2 b)
+    {
+        return ChunkIndex(a.BottomLeft) == ChunkIndex(b.BottomLeft) &&
+               ChunkIndex(a.TopRight) == ChunkIndex(b.TopRight);
+    }
+    // Imperial Medieval npc-obstacle-handling End
 
     private void OnGridInit(GridInitializeEvent ev)
     {
@@ -443,11 +499,13 @@ public sealed partial class PathfindingSystem
 
                     var xform = _xformQuery.GetComponent(ent);
 
-                    if (xform.ParentUid != grid.Owner ||
-                        _maps.LocalToTile(grid.Owner, grid.Comp, xform.Coordinates) != tilePos)
+                    // Imperial Medieval npc-obstacle-handling Start
+                    // LocalPosition below is only grid-local for direct children.
+                    if (xform.ParentUid != grid.Owner)
                     {
                         continue;
                     }
+                    // Imperial Medieval npc-obstacle-handling End
 
                     tileEntities.Add(ent);
                 }
@@ -482,12 +540,18 @@ public sealed partial class PathfindingSystem
                                     continue;
                                 }
 
-                                // Do an AABB check first as it's probably faster, then do an actual point check.
+                                // Imperial Medieval npc-obstacle-handling Start
+                                // A point test misses anything narrower than the sub-step.
+                                var cell = new Box2(localPos.X - CellHalf, localPos.Y - CellHalf,
+                                    localPos.X + CellHalf, localPos.Y + CellHalf);
+
+                                // Do an AABB check first as it's probably faster, then do an actual shape check.
+                                // Imperial Medieval npc-obstacle-handling End
                                 var intersects = false;
 
                                 foreach (var proxy in fixture.Proxies)
                                 {
-                                    if (!proxy.AABB.Contains(localPos))
+                                    if (!proxy.AABB.Intersects(cell)) // Imperial Medieval npc-obstacle-handling
                                         continue;
 
                                     intersects = true;
@@ -499,7 +563,7 @@ public sealed partial class PathfindingSystem
                                     continue;
                                 }
 
-                                if (!_fixtures.TestPoint(fixture.Shape, new Transform(xform.LocalPosition, xform.LocalRotation), localPos))
+                                if (!ShapeOverlapsCell(fixture.Shape, new Transform(xform.LocalPosition, xform.LocalRotation), localPos)) // Imperial Medieval npc-obstacle-handling
                                 {
                                     continue;
                                 }

@@ -2699,6 +2699,36 @@
 
 - type: entity
   parent: MedievalClothingHeadHelmetCrusader
+  id: MedievalClothingHeadHelmetCrusaderMcDonalds
+  name: MedievalClothingHeadHelmetCrusaderMcDonalds
+  description: MedievalClothingHeadHelmetCrusaderMcDonalds
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Head/mcdonalds_head.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Head/mcdonalds_head.rsi
+  - type: IngestionBlocker
+    enabled: false
+  - type: IdentityBlocker
+    enabled: false
+
+- type: entity
+  parent: MedievalClothingHeadHelmetEbonit
+  id: MedievalClothingHeadHelmetEbonitMcDonalds
+  name: MedievalClothingHeadHelmetEbonitMcDonalds
+  description: MedievalClothingHeadHelmetEbonitMcDonalds
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Clothing/Head/mcdonalds_head.rsi
+  - type: Clothing
+    sprite: Imperial/Medieval/Clothing/Head/mcdonalds_head.rsi
+  - type: IngestionBlocker
+    enabled: false
+  - type: IdentityBlocker
+    enabled: false
+
+- type: entity
+  parent: MedievalClothingHeadHelmetCrusader
   id: MedievalClothingHeadHelmetDraconic
   name: MedievalClothingHeadHelmetDraconic
   description: MedievalClothingHeadHelmetDraconic
