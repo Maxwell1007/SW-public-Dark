@@ -54,7 +54,6 @@ public sealed partial class AlchemySystem : EntitySystem
         SubscribeLocalEvent<RoundStartingEvent>(OnRoundStarting);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
         SubscribeLocalEvent<AlchemyIngredientComponent, ExaminedEvent>(OnExamineIngredient);
-        SubscribeLocalEvent<AlchemyIngredientComponent, ComponentStartup>(OnIngredientStartup);
         SubscribeLocalEvent<AlchemyToolComponent, ExaminedEvent>(OnExamineTool);
         SubscribeLocalEvent<AlchemyToolComponent, AfterInteractEvent>(OnToolInteract);
         SubscribeLocalEvent<AlchemyToolComponent, InteractUsingEvent>(OnStationInteract);
@@ -69,11 +68,6 @@ public sealed partial class AlchemySystem : EntitySystem
     }
 
     private void OnRoundStarting(RoundStartingEvent args) => EnsureRound();
-
-    private void OnIngredientStartup(EntityUid uid, AlchemyIngredientComponent comp, ComponentStartup args)
-    {
-        RemComp<ExtractableComponent>(uid);
-    }
 
     private void OnRoundCleanup(RoundRestartCleanupEvent args)
     {

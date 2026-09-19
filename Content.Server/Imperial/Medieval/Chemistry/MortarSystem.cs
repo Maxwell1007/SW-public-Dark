@@ -43,8 +43,6 @@ public sealed class MortarSystem : EntitySystem
             return;
         foreach (var item in storage.Container.ContainedEntities)
         {
-            if (HasComp<Content.Shared.Imperial.Medieval.Alchemy.AlchemyIngredientComponent>(item))
-                continue;
             if (!TryComp<ExtractableComponent>(item, out var extractable))
                 continue;
             Solution transfer;
