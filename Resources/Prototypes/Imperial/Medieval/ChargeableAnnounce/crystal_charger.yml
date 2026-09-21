@@ -1,0 +1,24 @@
+- type: entity
+  parent: BaseItem
+  id: MedievalCommsCrystalCharger
+  name: comms crystal charger
+  description: A single-use charge for a faction communication crystal.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Misc/comms.rsi
+    layers:
+    - state: uncharged
+      map: [ "charger" ]
+  - type: Item
+    size: Tiny
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.CommsCrystalChargerVisuals.Spent:
+        charger:
+          True:
+            state: inactivecomm
+          False:
+            state: uncharged
+  - type: CommsCrystalCharger
+    delay: 2

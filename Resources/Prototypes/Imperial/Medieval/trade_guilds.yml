@@ -247,6 +247,8 @@
   - productEntity: MedievalGlowStone
     cost: 12
     reputationForBuying: 0.4
+  - productEntity: MedievalCommsCrystalCharger
+    cost: 20
   - productEntity: MedievalServerMap
     cost: 5
     reputationForBuying: 0.15

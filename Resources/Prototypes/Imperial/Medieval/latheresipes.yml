@@ -1,4 +1,11 @@
 - type: CP14Recipe
+  id: MedievalCommsCrystalCharger
+  craftTime: 2
+  stacks:
+    MedievalTopaz: 1
+  result: MedievalCommsCrystalCharger
+
+- type: CP14Recipe
   id: MedievalDoorLockT1
   craftTime: 8
   stacks:
