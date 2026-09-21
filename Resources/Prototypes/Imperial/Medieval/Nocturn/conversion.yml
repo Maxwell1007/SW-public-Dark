@@ -3,6 +3,9 @@
   name: Turn into a nocturne
   description: Turn a human into a young nocturne.
   components:
+  - type: NocturnBlockedAction
+    checkOnAttempt: false
+    blockedMessage: medieval-ancient-nocturne-conversion-blocked
   - type: NocturnBloodDrainSpell
     bloodDrain: 0
     bloodDrainFraction: 0.5

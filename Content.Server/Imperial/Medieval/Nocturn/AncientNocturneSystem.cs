@@ -33,7 +33,7 @@ public sealed class AncientNocturneSystem : EntitySystem
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly NocturnBloodSpellSystem _bloodSpells = default!;
     [Dependency] private readonly NocturneConversionSystem _conversion = default!;
-    [Dependency] private readonly RaceSystem _race = default!;
+    [Dependency] private readonly NocturnBlockedActionSystem _blockedActions = default!;
 
     public override void Initialize()
     {
@@ -96,7 +96,7 @@ public sealed class AncientNocturneSystem : EntitySystem
             return;
         }
 
-        if (TryBlockConversion(ent, args.Action.Owner))
+        if (_blockedActions.TryBlock(ent.Owner, args.Action.Owner))
             return;
 
         if (!_hands.TryGetEmptyHand(ent.Owner, out _))
@@ -171,22 +171,8 @@ public sealed class AncientNocturneSystem : EntitySystem
             return;
         }
 
-        if (TryBlockConversion(ent, actionUid))
+        if (_blockedActions.TryBlock(ent.Owner, actionUid))
             args.Cancel();
-    }
-
-    private bool TryBlockConversion(Entity<AncientNocturneComponent> ent, EntityUid action)
-    {
-        if (_race.CanBite(ent.Owner))
-            return false;
-
-        _popup.PopupEntity(
-            Loc.GetString("medieval-ancient-nocturne-conversion-blocked"),
-            ent.Owner,
-            ent.Owner,
-            PopupType.LargeCaution);
-        _actions.SetCooldown(action, ent.Comp.ConversionBlockedCooldown);
-        return true;
     }
 
     private void OnConversionDoAfter(

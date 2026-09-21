@@ -51,9 +51,6 @@ public sealed partial class BloodRubyOwnerComponent : Component
     [DataField]
     public float EmergencyTeleportCastDuration = 1f;
 
-    [DataField]
-    public float EmergencyTeleportBlockedCooldown = 15f;
-
     [ViewVariables(VVAccess.ReadOnly)]
     public EntityUid? BloodRuby;
 }

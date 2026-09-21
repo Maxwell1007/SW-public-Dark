@@ -3,6 +3,10 @@
   name: Emergency teleport
   description: After a short cast, teleports you to your blood ruby. Cost 15 blood units.
   components:
+  - type: NocturnBlockedAction
+    checkOnAttempt: false
+    blockedCooldown: 15
+    blockedMessage: medieval-ancient-nocturne-emergency-teleport-blocked
   - type: NocturnBloodDrainSpell
     bloodDrain: 15
   - type: Action

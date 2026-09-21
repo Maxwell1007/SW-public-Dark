@@ -32,6 +32,7 @@ ent-MedievalAncientNocturneEmergencyTeleportAction = Emergency teleport
 medieval-ancient-nocturne-emergency-teleport-blocked = Something interfered with your teleport!
 medieval-nocturn-cant-use-blood-spells = You should not be seeing this; contact an administrator via ahelp.
 medieval-nocturn-not-enough-blood = Not enough blood.
+medieval-ancient-nocturne-action-blocked = A nearby bible, garlic, or cross prevents you from using this ability!
 
 ent-MedievalAncientNocturneConversionAction = Turn into a nocturne
     .desc = Turn a human into a nocturne.

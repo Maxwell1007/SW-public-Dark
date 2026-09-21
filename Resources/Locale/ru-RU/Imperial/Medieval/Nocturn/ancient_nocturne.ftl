@@ -32,6 +32,7 @@ ent-MedievalAncientNocturneEmergencyTeleportAction = Экстренный тел
 medieval-ancient-nocturne-emergency-teleport-blocked = Что-то помешало вашему телепорту!
 medieval-nocturn-cant-use-blood-spells = Вы не должны это видеть, обратитесь в ahelp.
 medieval-nocturn-not-enough-blood = Недостаточно крови.
+medieval-ancient-nocturne-action-blocked = Библия, чеснок или крест поблизости мешают использовать способность!
 
 ent-MedievalAncientNocturneConversionAction = Обращение в ноктюрна
     .desc = Обратите человека в ноктюрна.

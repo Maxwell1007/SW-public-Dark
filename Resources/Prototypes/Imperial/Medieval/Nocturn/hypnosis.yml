@@ -3,6 +3,7 @@
   name: Hypnosis
   description: Attempt to bend the victim to your will and put them to sleep.
   components:
+  - type: NocturnBlockedAction
   - type: NocturnBloodDrainSpell
     bloodDrain: 40
   - type: SpellCastEffect

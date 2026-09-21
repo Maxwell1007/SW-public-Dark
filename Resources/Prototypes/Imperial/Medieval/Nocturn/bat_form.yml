@@ -3,6 +3,7 @@
   name: Transform into a bat
   description: Transform into a bat for 20 seconds. Cost 20 blood units.
   components:
+  - type: NocturnBlockedAction
   - type: NocturnBloodDrainSpell
     bloodDrain: 20
   - type: Action
