@@ -51,7 +51,7 @@
   id: Alchemymedievalexplosion
   parent: BaseAlchemyRecipeT1
   ingredients:
-  - reagent: AlchemyWater
+  - reagent: AlchemyFire
     amount: 1
   - reagent: AlchemyEarth
     amount: 1
