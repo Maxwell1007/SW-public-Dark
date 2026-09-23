@@ -1323,6 +1323,10 @@
     - MedievalHatchet
     - BarberScissors
     - MedievalGrenade
+    - MedievalAlchemyGrenadeT1
+    - MedievalCryoGrenade
+    - MedievalAlchemyGrenadeT2
+    - MedievalAlchemyGrenadeT3
     - MedievalLintstock
     - MedievalRamrod
     - MedievalGunpowderCharge

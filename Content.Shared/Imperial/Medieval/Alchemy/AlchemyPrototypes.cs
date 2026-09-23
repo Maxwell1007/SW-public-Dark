@@ -9,6 +9,10 @@ public sealed partial class AlchemyOperationPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField(required: true)] public string Name = default!;
+    [DataField(required: true)] public LocId StartMessage;
+    [DataField(required: true)] public LocId EmptyMessage;
+    [DataField(required: true)] public LocId RunningMessage;
+    [DataField(required: true)] public LocId CompletionMessage;
     [DataField] public int Complexity = 1;
     [DataField] public int MinimumTier = 1;
     [DataField] public int Weight = 10;
@@ -43,7 +47,8 @@ public sealed partial class AlchemyRecipePrototype : IPrototype, IInheritingProt
     [DataField] public List<AlchemyIngredientRequirement>? Ingredients;
     [DataField] public List<AlchemyStep>? Steps;
     [DataField] public Dictionary<string, int> Entities = new();
-    [DataField(required: true)] public Dictionary<string, FixedPoint2> Products = new();
+    [DataField] public Dictionary<string, FixedPoint2> Products = new();
+    [DataField] public Dictionary<string, int> EntityProducts = new();
     [DataField] public bool? StrictRatio;
     [DataField] public bool? AllowImpurities;
     [DataField] public int IngredientCount = 2;
@@ -88,6 +93,7 @@ public sealed class AlchemyRecipe
     public List<string> Steps = new();
     public Dictionary<string, int> Entities = new();
     public Dictionary<string, FixedPoint2> Products = new();
+    public Dictionary<string, int> EntityProducts = new();
     public bool StrictRatio;
     public bool AllowImpurities;
     public int Priority;

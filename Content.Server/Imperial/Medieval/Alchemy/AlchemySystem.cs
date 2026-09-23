@@ -1,16 +1,13 @@
-﻿using System.Linq;
+using System.Linq;
 using Content.Server.Chemistry.EntitySystems;
-using Content.Server.GameTicking.Events;
 using Content.Server.Stack;
+using Content.Server.MedievalPotionChecker.Components;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
-using Content.Shared.DoAfter;
 using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
-using Content.Shared.GameTicking;
 using Content.Shared.Imperial.Medieval.Alchemy;
-using Content.Shared.Interaction;
 using Content.Shared.Popups;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
@@ -29,175 +26,38 @@ public sealed partial class AlchemySystem : EntitySystem
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutions = default!;
-    [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly StackSystem _stacks = default!;
     [Dependency] private readonly PuddleSystem _puddles = default!;
-
-    private readonly Dictionary<string, AlchemyIngredient> _ingredients = new();
-    private readonly List<AlchemyRecipe> _recipes = new();
-    private bool _ready;
-    private int _historyLimit = 1;
-
-    public IReadOnlyList<AlchemyRecipe> Recipes
-    {
-        get
-        {
-            EnsureRound();
-            return _recipes;
-        }
-    }
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
 
     public override void Initialize()
     {
         InitializeApparatus();
-        SubscribeLocalEvent<RoundStartingEvent>(OnRoundStarting);
-        SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
+        InitializeRound();
         SubscribeLocalEvent<AlchemyIngredientComponent, ExaminedEvent>(OnExamineIngredient);
-        SubscribeLocalEvent<AlchemyToolComponent, ExaminedEvent>(OnExamineTool);
-        SubscribeLocalEvent<AlchemyToolComponent, AfterInteractEvent>(OnToolInteract);
-        SubscribeLocalEvent<AlchemyToolComponent, InteractUsingEvent>(OnStationInteract);
-        SubscribeLocalEvent<AlchemyToolComponent, AlchemyDoAfterEvent>(OnOperationFinished);
         SubscribeLocalEvent<ReactionMixerComponent, ComponentStartup>(OnReactionMixerStartup);
         SubscribeLocalEvent<AlchemyMixerComponent, ReactionMixDoAfterEvent>(OnReactionMixFinished,
             before: new[] { typeof(ReactionMixerSystem) });
-        SubscribeLocalEvent<AlchemySolutionComponent, SolutionChangedEvent>(OnSolutionChanged);
         SubscribeLocalEvent<AlchemyVesselComponent, SolutionContainerChangedEvent>(OnVesselChanged);
         SubscribeLocalEvent<MixableSolutionComponent, SolutionContainerChangedEvent>(OnMixableChanged);
         SubscribeLocalEvent<AlchemyVesselComponent, SolutionContainerOverflowEvent>(OnOverflow);
     }
 
-    private void OnRoundStarting(RoundStartingEvent args) => EnsureRound();
-
-    private void OnRoundCleanup(RoundRestartCleanupEvent args)
-    {
-        _ready = false;
-        _recipes.Clear();
-        _ingredients.Clear();
-        _historyLimit = 1;
-    }
-
-    private void EnsureRound()
-    {
-        if (_ready)
-            return;
-        var random = new System.Random(_random.Next());
-        var operations = _prototypes.EnumeratePrototypes<AlchemyOperationPrototype>().ToDictionary(o => o.ID);
-        foreach (var operation in operations.Values)
-        {
-            if (operation.Complexity <= 0 || operation.Duration < 0 || !float.IsFinite(operation.Duration) ||
-                operation.Temperature is { } temperature && (!float.IsFinite(temperature) || temperature < 0))
-                throw new InvalidOperationException($"Invalid alchemy operation {operation.ID}.");
-        }
-        foreach (var proto in _prototypes.EnumeratePrototypes<AlchemyIngredientPrototype>().OrderBy(p => p.ID, StringComparer.Ordinal))
-        {
-            var ingredient = AlchemyGenerationSystem.GenerateIngredient(proto, random);
-            _prototypes.Index<ReagentPrototype>(ingredient.Solvent);
-            foreach (var aspect in ingredient.Aspects.Keys)
-                _prototypes.Index<ReagentPrototype>(aspect);
-            _ingredients.Add(proto.ID, ingredient);
-        }
-        foreach (var proto in _prototypes.EnumeratePrototypes<AlchemyRecipePrototype>()
-                     .Where(p => !p.Abstract)
-                     .OrderBy(p => p.Randomized).ThenBy(p => p.ID, StringComparer.Ordinal))
-        {
-            AlchemyRecipe? recipe = null;
-            for (var attempt = 0; attempt < (proto.Randomized ? 512 : 1); attempt++)
-            {
-                var candidate = AlchemyGenerationSystem.GenerateRecipe(proto, operations, random);
-                if (_recipes.Any(r => AlchemyGenerationSystem.Conflicts(r, candidate)))
-                    continue;
-                recipe = candidate;
-                break;
-            }
-            if (recipe == null)
-                throw new InvalidOperationException($"Cannot generate a unique alchemy recipe for {proto.ID}.");
-            foreach (var reagent in recipe.Ingredients.Keys.Concat(recipe.Products.Keys))
-                _prototypes.Index<ReagentPrototype>(reagent);
-            foreach (var entity in recipe.Entities.Keys)
-                _prototypes.Index<EntityPrototype>(entity);
-            _recipes.Add(recipe);
-            _historyLimit = Math.Max(_historyLimit, recipe.Steps.Count);
-        }
-        _recipes.Sort((a, b) => a.Priority != b.Priority ? b.Priority.CompareTo(a.Priority) : string.CompareOrdinal(a.Id, b.Id));
-        var requiredAspects = _recipes.SelectMany(r => r.Ingredients.Keys)
-            .Where(r => r.StartsWith("Alchemy", StringComparison.Ordinal)).ToHashSet();
-        var profiles = _prototypes.EnumeratePrototypes<AlchemyIngredientPrototype>().OrderBy(p => p.ID, StringComparer.Ordinal).ToList();
-        for (var attempt = 0; !requiredAspects.IsSubsetOf(_ingredients.Values.SelectMany(i => i.Aspects.Keys)); attempt++)
-        {
-            if (attempt >= 512)
-                throw new InvalidOperationException("Alchemy ingredients cannot supply the generated recipes.");
-            foreach (var profile in profiles)
-                _ingredients[profile.ID] = AlchemyGenerationSystem.GenerateIngredient(profile, random);
-        }
-        _ready = true;
-    }
-
     private void OnExamineIngredient(EntityUid uid, AlchemyIngredientComponent comp, ExaminedEvent args)
     {
-        EnsureRound();
-        if (!_ingredients.TryGetValue(comp.Profile, out var ingredient))
+        if (!HasComp<MedievalPotionCheckerComponent>(args.Examiner) ||
+            !TryGetRoundState(out var state) || !state.Ingredients.TryGetValue(comp.Profile, out var ingredient))
             return;
         var aspects = string.Join(", ", ingredient.Aspects.Select(p => $"{ReagentName(p.Key)}: {p.Value}"));
         args.PushText(Loc.GetString("alchemy-ingredient-description", ("solvent", ReagentName(ingredient.Solvent)),
-            ("aspects", aspects), ("cost", ingredient.Aspects.Values.Aggregate(FixedPoint2.Zero, (a, b) => a + b) * 0.25)));
-    }
-
-    private void OnExamineTool(EntityUid uid, AlchemyToolComponent comp, ExaminedEvent args)
-    {
-        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
-        args.PushText(Loc.GetString("alchemy-tool-description", ("operation", Loc.GetString(operation.Name)), ("duration", operation.Duration)));
+            ("aspects", aspects)));
     }
 
     public string ReagentName(string id)
     {
         var proto = _prototypes.Index<ReagentPrototype>(id);
         return string.IsNullOrWhiteSpace(proto.LocalizedName) ? id : proto.LocalizedName;
-    }
-
-    private void OnToolInteract(EntityUid uid, AlchemyToolComponent comp, AfterInteractEvent args)
-    {
-        if (args.Handled || !args.CanReach || args.Target == null)
-            return;
-        args.Handled = StartOperation(uid, comp, args.Target.Value, args.User, uid);
-    }
-
-    private void OnStationInteract(EntityUid uid, AlchemyToolComponent comp, InteractUsingEvent args)
-    {
-        if (args.Handled)
-            return;
-        args.Handled = StartOperation(uid, comp, args.Used, args.User, args.Used);
-    }
-
-    private bool StartOperation(EntityUid tool, AlchemyToolComponent comp, EntityUid vessel, EntityUid user, EntityUid used)
-    {
-        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
-        if (operation.Temperature != null)
-            return false;
-        if (!_solutions.TryGetMixableSolution(vessel, out var solution, out _) || solution == null)
-            return false;
-        EnsureRound();
-        var vesselComponent = EnsureComp<AlchemyVesselComponent>(vessel);
-        vesselComponent.Solution = solution.Value.Comp.Solution.Name ?? vesselComponent.Solution;
-        var tracker = EnsureComp<AlchemySolutionComponent>(solution.Value.Owner);
-        var ev = new AlchemyDoAfterEvent
-        {
-            Solution = GetNetEntity(solution.Value.Owner),
-            Revision = tracker.Revision,
-            Operation = comp.Operation,
-        };
-        _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, user, TimeSpan.FromSeconds(operation.Duration), ev, tool, vessel, used)
-        {
-            BreakOnMove = true,
-            BreakOnDamage = true,
-            NeedHand = true,
-        });
-        return true;
-    }
-
-    private void OnSolutionChanged(EntityUid uid, AlchemySolutionComponent comp, ref SolutionChangedEvent args)
-    {
-        comp.Revision++;
     }
 
     private void OnReactionMixerStartup(EntityUid uid, ReactionMixerComponent comp, ComponentStartup args)
@@ -215,7 +75,7 @@ public sealed partial class AlchemySystem : EntitySystem
         var attempt = new MixingAttemptEvent(uid);
         RaiseLocalEvent(uid, ref attempt);
         if (attempt.Cancelled || !_solutions.TryGetMixableSolution(target, out var solution, out _) ||
-            solution == null || solution.Value.Comp.Solution.Volume <= 0)
+            solution == null || solution.Value.Comp.Solution.Volume <= 0 || !TryGetRoundState(out var state))
             return;
 
         var vessel = EnsureComp<AlchemyVesselComponent>(target);
@@ -225,46 +85,13 @@ public sealed partial class AlchemySystem : EntitySystem
         vessel.Processing = true;
         try
         {
-            CompleteOperation(solution.Value, "Stir", args.User);
+            CompleteOperation(solution.Value, state, "Stir", args.User);
         }
         finally
         {
             UpdateTemperatureState(vessel, solution.Value.Comp.Solution);
             vessel.Processing = false;
         }
-    }
-
-    private void OnOperationFinished(EntityUid uid, AlchemyToolComponent comp, AlchemyDoAfterEvent args)
-    {
-        if (args.Cancelled || args.Handled || args.Target == null || comp.Operation != args.Operation)
-            return;
-        args.Handled = true;
-        if (!_solutions.TryGetMixableSolution(args.Target.Value, out var solution, out _) || solution == null ||
-            GetNetEntity(solution.Value.Owner) != args.Solution ||
-            !TryComp<AlchemySolutionComponent>(solution.Value.Owner, out var tracker) || tracker.Revision != args.Revision)
-        {
-            _popup.PopupEntity(Loc.GetString("alchemy-mixture-changed"), uid, args.User);
-            return;
-        }
-        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
-        if (operation.Temperature != null)
-            return;
-        var vessel = CompOrNull<AlchemyVesselComponent>(args.Target.Value);
-        if (vessel != null)
-            vessel.Processing = true;
-        try
-        {
-            CompleteOperation(solution.Value, comp.Operation, args.User);
-        }
-        finally
-        {
-            if (vessel != null)
-            {
-                UpdateTemperatureState(vessel, solution.Value.Comp.Solution);
-                vessel.Processing = false;
-            }
-        }
-        _popup.PopupEntity(Loc.GetString("alchemy-operation-complete", ("operation", Loc.GetString(operation.Name))), uid, args.User);
     }
 
     private void OnMixableChanged(EntityUid uid, MixableSolutionComponent comp, ref SolutionContainerChangedEvent args)
@@ -289,7 +116,7 @@ public sealed partial class AlchemySystem : EntitySystem
 
     private void OnVesselChanged(EntityUid uid, AlchemyVesselComponent comp, ref SolutionContainerChangedEvent args)
     {
-        if (comp.Processing || args.SolutionId != comp.Solution)
+        if (comp.Processing || args.SolutionId != comp.Solution || !TryGetRoundState(out var state))
             return;
         var wasHot = comp.Hot;
         var wasCold = comp.Cold;
@@ -299,14 +126,14 @@ public sealed partial class AlchemySystem : EntitySystem
         comp.Processing = true;
         try
         {
-            Extract(uid, comp, solution.Value);
+            Extract(uid, comp, solution.Value, state);
             var apparatus = CompOrNull<AlchemyApparatusComponent>(uid);
             var items = apparatus is { IsProcessing: true } ? apparatus.Items : null;
             var user = apparatus?.User is { } actor && !TerminatingOrDeleted(actor) ? apparatus.User : null;
             if (comp.Hot && !wasHot)
-                CompleteOperation(solution.Value, comp.HeatOperation.Id, user, items);
+                CompleteOperation(solution.Value, state, comp.HeatOperation.Id, user, items);
             else if (comp.Cold && !wasCold)
-                CompleteOperation(solution.Value, comp.CoolOperation.Id, user, items);
+                CompleteOperation(solution.Value, state, comp.CoolOperation.Id, user, items);
         }
         finally
         {
@@ -322,15 +149,15 @@ public sealed partial class AlchemySystem : EntitySystem
         args.Handled = true;
     }
 
-    private void Extract(EntityUid uid, AlchemyVesselComponent vessel, Entity<SolutionComponent> solution)
+    private void Extract(EntityUid uid, AlchemyVesselComponent vessel, Entity<SolutionComponent> solution,
+        AlchemyRoundComponent state)
     {
         if (solution.Comp.Solution.Temperature < vessel.NigredoTemperature || !TryComp<StorageComponent>(uid, out var storage))
             return;
-        EnsureRound();
         foreach (var item in storage.Container.ContainedEntities.ToArray())
         {
             if (TerminatingOrDeleted(item) || !TryComp<AlchemyIngredientComponent>(item, out var ingredient) ||
-                !_ingredients.TryGetValue(ingredient.Profile, out var profile))
+                !state.Ingredients.TryGetValue(ingredient.Profile, out var profile))
                 continue;
             var output = profile.Aspects.Values.Aggregate(FixedPoint2.Zero, (a, b) => a + b);
             var cost = output * 0.25;
@@ -350,11 +177,11 @@ public sealed partial class AlchemySystem : EntitySystem
         }
     }
 
-    private void CompleteOperation(Entity<SolutionComponent> solution, string operation, EntityUid? user = null,
+    private void CompleteOperation(Entity<SolutionComponent> solution, AlchemyRoundComponent state, string operation,
+        EntityUid? user = null,
         IReadOnlyList<EntityUid>? items = null)
     {
-        EnsureRound();
-        AlchemyRecipeSystem.RecordOperation(solution.Comp.Solution, operation, _historyLimit);
+        AlchemyRecipeSystem.RecordOperation(solution.Comp.Solution, operation, state.HistoryLimit);
         if (items != null)
         {
             items = items.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToList();
@@ -362,18 +189,17 @@ public sealed partial class AlchemySystem : EntitySystem
             {
                 var history = EnsureComp<AlchemyItemHistoryComponent>(item).Operations;
                 history.Add(operation);
-                if (history.Count > _historyLimit)
-                    history.RemoveRange(0, history.Count - _historyLimit);
+                if (history.Count > state.HistoryLimit)
+                    history.RemoveRange(0, history.Count - state.HistoryLimit);
             }
         }
-        ExecuteRecipes(solution, user, items);
+        ExecuteRecipes(solution, state, user, items);
     }
 
-    private void ExecuteRecipes(Entity<SolutionComponent> solution, EntityUid? user = null,
+    private void ExecuteRecipes(Entity<SolutionComponent> solution, AlchemyRoundComponent state, EntityUid? user = null,
         IReadOnlyList<EntityUid>? items = null)
     {
-        EnsureRound();
-        foreach (var recipe in _recipes)
+        foreach (var recipe in state.Recipes)
         {
             var entities = new Dictionary<string, int>();
             var matchingHistory = true;
@@ -391,7 +217,7 @@ public sealed partial class AlchemySystem : EntitySystem
                 }
             }
             if (!matchingHistory || !AlchemyRecipeSystem.TryMatch(solution.Comp.Solution, recipe, out var consumed, out var products,
-                    out var consumedEntities, entities))
+                    out var consumedEntities, out var entityProducts, entities))
                 continue;
             if (items != null)
             {
@@ -413,6 +239,15 @@ public sealed partial class AlchemySystem : EntitySystem
                 RemovePrototype(solution.Comp.Solution, reagent, amount);
             foreach (var (reagent, amount) in products)
                 solution.Comp.Solution.AddReagent(reagent, amount);
+            foreach (var (prototype, count) in entityProducts)
+            {
+                var coordinates = _transform.GetMapCoordinates(solution.Owner);
+                for (var i = 0; i < count; i++)
+                {
+                    var product = Spawn(prototype, coordinates);
+                    _transform.AttachToGridOrMap(product);
+                }
+            }
             if (user is { } actor && TryComp<AffectRoundStatsComponent>(actor, out var stats))
                 stats.Potions++;
             var counters = EntityQueryEnumerator<RoundStatCounterRuleComponent>();

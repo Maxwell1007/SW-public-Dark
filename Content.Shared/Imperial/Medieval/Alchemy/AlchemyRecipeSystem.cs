@@ -43,12 +43,14 @@ public sealed class AlchemyRecipeSystem : EntitySystem
 
     public static bool TryMatch(Solution solution, AlchemyRecipe recipe,
         out Dictionary<string, FixedPoint2> consumed, out Dictionary<string, FixedPoint2> products,
-        out Dictionary<string, int> consumedEntities, IReadOnlyDictionary<string, int>? entities = null)
+        out Dictionary<string, int> consumedEntities, out Dictionary<string, int> entityProducts,
+        IReadOnlyDictionary<string, int>? entities = null)
     {
         consumedEntities = new();
+        entityProducts = new();
         consumed = new();
         products = new();
-        if (recipe.Ingredients.Count == 0 || recipe.Products.Count == 0)
+        if (recipe.Ingredients.Count == 0 || (recipe.Products.Count == 0 && recipe.EntityProducts.Count == 0))
             return false;
         var totals = new Dictionary<string, long>();
         foreach (var entry in solution.Contents)
@@ -97,14 +99,26 @@ public sealed class AlchemyRecipeSystem : EntitySystem
                 denominator = count;
             }
         }
-        if (recipe.Entities.Count > 0)
+        if (recipe.Entities.Count > 0 || recipe.EntityProducts.Count > 0)
         {
             numerator /= denominator;
             denominator = 1;
             if (numerator <= 0 || numerator > int.MaxValue)
                 return false;
             foreach (var (id, count) in recipe.Entities)
-                consumedEntities.Add(id, checked((int) numerator * count));
+            {
+                var value = numerator * count;
+                if (value <= 0 || value > int.MaxValue)
+                    return false;
+                consumedEntities.Add(id, (int) value);
+            }
+            foreach (var (id, count) in recipe.EntityProducts)
+            {
+                var value = numerator * count;
+                if (value <= 0 || value > int.MaxValue)
+                    return false;
+                entityProducts.Add(id, (int) value);
+            }
         }
         foreach (var (reagent, amount) in recipe.Ingredients)
         {

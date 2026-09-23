@@ -1,6 +1,10 @@
 - type: alchemyOperation
   id: Heat
   name: alchemy-operation-heat
+  startMessage: alchemy-heat-start
+  emptyMessage: alchemy-heat-empty
+  runningMessage: alchemy-heat-running
+  completionMessage: alchemy-heat-complete
   complexity: 1
   minimumTier: 1
   weight: 12
@@ -11,6 +15,10 @@
 - type: alchemyOperation
   id: Cool
   name: alchemy-operation-cool
+  startMessage: alchemy-cool-start
+  emptyMessage: alchemy-cool-empty
+  runningMessage: alchemy-cool-running
+  completionMessage: alchemy-cool-complete
   complexity: 1
   minimumTier: 1
   weight: 10
@@ -21,6 +29,10 @@
 - type: alchemyOperation
   id: Stir
   name: alchemy-operation-stir
+  startMessage: alchemy-stir-start
+  emptyMessage: alchemy-stir-empty
+  runningMessage: alchemy-stir-running
+  completionMessage: alchemy-stir-complete
   complexity: 1
   minimumTier: 1
   weight: 15
@@ -29,6 +41,10 @@
 - type: alchemyOperation
   id: Distill
   name: alchemy-operation-distill
+  startMessage: alchemy-distill-start
+  emptyMessage: alchemy-distill-empty
+  runningMessage: alchemy-distill-running
+  completionMessage: alchemy-distill-complete
   complexity: 5
   minimumTier: 2
   weight: 2
@@ -37,6 +53,10 @@
 - type: alchemyOperation
   id: Extract
   name: alchemy-operation-extract
+  startMessage: alchemy-extract-start
+  emptyMessage: alchemy-extract-empty
+  runningMessage: alchemy-extract-running
+  completionMessage: alchemy-extract-complete
   complexity: 4
   minimumTier: 2
   weight: 3
@@ -45,6 +65,10 @@
 - type: alchemyOperation
   id: Filter
   name: alchemy-operation-filter
+  startMessage: alchemy-filter-start
+  emptyMessage: alchemy-filter-empty
+  runningMessage: alchemy-filter-running
+  completionMessage: alchemy-filter-complete
   complexity: 3
   minimumTier: 2
   weight: 4
@@ -53,6 +77,10 @@
 - type: alchemyOperation
   id: Infuse
   name: alchemy-operation-infuse
+  startMessage: alchemy-infuse-start
+  emptyMessage: alchemy-infuse-empty
+  runningMessage: alchemy-infuse-running
+  completionMessage: alchemy-infuse-complete
   complexity: 2
   minimumTier: 1
   weight: 6
@@ -61,6 +89,10 @@
 - type: alchemyOperation
   id: Whip
   name: alchemy-operation-whip
+  startMessage: alchemy-whip-start
+  emptyMessage: alchemy-whip-empty
+  runningMessage: alchemy-whip-running
+  completionMessage: alchemy-whip-complete
   complexity: 1
   minimumTier: 1
   weight: 10
