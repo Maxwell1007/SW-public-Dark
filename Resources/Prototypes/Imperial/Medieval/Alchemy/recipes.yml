@@ -57,12 +57,15 @@
   parent: BaseAlchemyRecipeT1
   ingredients:
   - reagent: AlchemyFire
-    amount: 1
+    amount: 4
   - reagent: AlchemyEarth
-    amount: 1
+    amount: 4
+  - reagent: AlchemyLight
+    amount: 4
   steps:
-  - operation: Heat
+  - operation: Filter
   - operation: Stir
+  - operation: Cool
   entityProducts:
     MedievalExplosiveMixtureT1: 1
 
@@ -141,7 +144,6 @@
     amount: 1
   steps:
   - operation: Heat
-  - operation: Stir
   products:
     medievalAmmonia: 3
 
@@ -244,9 +246,9 @@
   parent: BaseAlchemyRecipeT1
   ingredients:
   - reagent: AlchemyWater
-    amount: 3
+    amount: 2
   - reagent: AlchemyLight
-    amount: 1
+    amount: 2
   steps:
   - operation: Stir
   products:
