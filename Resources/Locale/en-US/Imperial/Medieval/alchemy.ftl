@@ -137,3 +137,10 @@ ent-MedievalAlchemyGrenadeT2 = potent explosive bomb
 
 ent-MedievalAlchemyGrenadeT3 = powerful explosive bomb
     .desc = A bomb filled with a concentrated alchemical mixture.
+
+alchemy-ui-input = Ingredients
+alchemy-ui-insert-input = Add to ingredients
+alchemy-ui-insert-output = Add to result slot
+alchemy-ui-output = Final result ({ $count }/{ $capacity })
+alchemy-ui-start = Start processing
+alchemy-ui-running = Processing

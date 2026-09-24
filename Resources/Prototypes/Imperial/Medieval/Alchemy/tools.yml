@@ -15,20 +15,11 @@
     interfaces:
       enum.StorageUiKey.Key:
         type: StorageBoundUserInterface
-  - type: ItemSlots
-    slots:
-      alchemy_output:
-        name: alchemy-apparatus-receiver
-        insertOnInteract: false
-        insertVerbText: alchemy-apparatus-insert-receiver
-        ejectVerbText: alchemy-apparatus-eject-receiver
-        whitelist:
-          components:
-          - RefillableSolution
+      enum.AlchemyUiKey.Key:
+        type: AlchemyBoundUserInterface
   - type: ContainerContainer
     containers:
       storagebase: !type:Container
-      alchemy_output: !type:ContainerSlot
   - type: SolutionContainerManager
     solutions:
       alchemy_input:
@@ -125,4 +116,5 @@
     state: icon
   - type: AlchemyApparatus
     operation: Infuse
+    outputToInput: true
 

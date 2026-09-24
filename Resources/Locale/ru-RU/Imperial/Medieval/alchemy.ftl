@@ -137,3 +137,10 @@ ent-MedievalAlchemyGrenadeT2 = усиленная взрывная бомбоч�
 
 ent-MedievalAlchemyGrenadeT3 = мощная взрывная бомбочка
     .desc = Бомбочка с концентрированной алхимической смесью.
+
+alchemy-ui-input = Сырьё
+alchemy-ui-insert-input = Добавить в сырьё
+alchemy-ui-insert-output = Добавить в слот результата
+alchemy-ui-output = Конечный результат ({ $count }/{ $capacity })
+alchemy-ui-start = Начать обработку
+alchemy-ui-running = Идёт обработка

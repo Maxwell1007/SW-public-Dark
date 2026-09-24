@@ -25,14 +25,16 @@ public sealed partial class AlchemyVesselComponent : Component
 public sealed partial class AlchemyApparatusComponent : Component
 {
     [DataField] public string Operation = "Distill";
-    [DataField] public string OutputSlot = "alchemy_output";
+    [DataField] public string OutputContainer = "alchemy_output";
+    [DataField] public int OutputCapacity = 10;
+    [DataField] public bool OutputToInput;
     [DataField] public string Solution = "alchemy_input";
     public bool IsProcessing;
     public uint ProcessingGeneration;
     public EntityUid? Input;
     public FixedPoint2 InputVolume;
     public EntityUid? User;
-    public EntityUid? Receiver;
+    public bool Completing;
     public List<EntityUid> Items = new();
 }
 

@@ -131,9 +131,9 @@ public sealed partial class AlchemySystem : EntitySystem
             var items = apparatus is { IsProcessing: true } ? apparatus.Items : null;
             var user = apparatus?.User is { } actor && !TerminatingOrDeleted(actor) ? apparatus.User : null;
             if (comp.Hot && !wasHot)
-                CompleteOperation(solution.Value, state, comp.HeatOperation.Id, user, items);
+                CompleteOperation(solution.Value, state, comp.HeatOperation.Id, user, items, apparatus != null ? uid : null);
             else if (comp.Cold && !wasCold)
-                CompleteOperation(solution.Value, state, comp.CoolOperation.Id, user, items);
+                CompleteOperation(solution.Value, state, comp.CoolOperation.Id, user, items, apparatus != null ? uid : null);
         }
         finally
         {
@@ -179,7 +179,7 @@ public sealed partial class AlchemySystem : EntitySystem
 
     private void CompleteOperation(Entity<SolutionComponent> solution, AlchemyRoundComponent state, string operation,
         EntityUid? user = null,
-        IReadOnlyList<EntityUid>? items = null)
+        IReadOnlyList<EntityUid>? items = null, EntityUid? apparatus = null)
     {
         AlchemyRecipeSystem.RecordOperation(solution.Comp.Solution, operation, state.HistoryLimit);
         if (items != null)
@@ -193,11 +193,11 @@ public sealed partial class AlchemySystem : EntitySystem
                     history.RemoveRange(0, history.Count - state.HistoryLimit);
             }
         }
-        ExecuteRecipes(solution, state, user, items);
+        ExecuteRecipes(solution, state, user, items, apparatus);
     }
 
     private void ExecuteRecipes(Entity<SolutionComponent> solution, AlchemyRoundComponent state, EntityUid? user = null,
-        IReadOnlyList<EntityUid>? items = null)
+        IReadOnlyList<EntityUid>? items = null, EntityUid? apparatus = null)
     {
         foreach (var recipe in state.Recipes)
         {
@@ -246,6 +246,8 @@ public sealed partial class AlchemySystem : EntitySystem
                 {
                     var product = Spawn(prototype, coordinates);
                     _transform.AttachToGridOrMap(product);
+                    if (apparatus is { } station)
+                        StoreApparatusProduct(station, product);
                 }
             }
             if (user is { } actor && TryComp<AffectRoundStatsComponent>(actor, out var stats))
