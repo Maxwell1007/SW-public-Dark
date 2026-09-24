@@ -1,0 +1,16 @@
+guide-entry-medieval-alchemy = Alchemy
+guide-entry-medieval-alchemy-potions = Tier 1 potions
+guide-entry-medieval-alchemy-drinks = Drinks
+alchemy-guide-products = Products
+alchemy-guide-ingredients = Ingredients
+alchemy-guide-steps = Steps
+alchemy-guide-precision = Ratios
+alchemy-guide-impurities = Impurities
+alchemy-guide-reagent = { $name }: { $amount } u.
+alchemy-guide-entity = { $name }: { $amount } pcs.
+alchemy-guide-temperature = { $operation } to { $temperature } °C
+alchemy-guide-duration = { $operation }: { $seconds } s
+alchemy-guide-strict = Exact ratio
+alchemy-guide-excess = Excess ingredients allowed
+alchemy-guide-impurities-allowed = Allowed, remain in the mixture
+alchemy-guide-impurities-forbidden = Forbidden

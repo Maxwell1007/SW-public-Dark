@@ -41,6 +41,7 @@ public sealed partial class AlchemyRecipePrototype : IPrototype, IInheritingProt
     [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<AlchemyRecipePrototype>))]
     public string[]? Parents { get; }
     [NeverPushInheritance, AbstractDataField] public bool Abstract { get; }
+    [DataField(required: true)] public AlchemyRecipeTag Tag;
     [DataField] public bool Randomized;
     [DataField] public string Group = "EasyPack";
     [DataField] public int Tier = 1;

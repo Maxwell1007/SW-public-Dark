@@ -1,6 +1,7 @@
 - type: alchemyRecipe
   id: BaseAlchemyRecipeT1
   abstract: true
+  tag: Potion
   group: EasyPack
   tier: 1
   randomized: false
@@ -13,6 +14,7 @@
 - type: alchemyRecipe
   id: BaseAlchemyRecipeT2
   abstract: true
+  tag: Potion
   group: MediumPack
   tier: 2
   randomized: true
@@ -28,6 +30,7 @@
 - type: alchemyRecipe
   id: BaseAlchemyRecipeT3
   abstract: true
+  tag: Potion
   group: HardPack
   tier: 3
   randomized: true
@@ -44,7 +47,9 @@
   id: BaseAlchemyRecipeDrink
   abstract: true
   parent: BaseAlchemyRecipeT1
+  tag: Drink
   strictRatio: false
+  allowImpurities: false
   maxComplexity: 8
 
 - type: alchemyRecipe

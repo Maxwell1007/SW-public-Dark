@@ -1,0 +1,16 @@
+guide-entry-medieval-alchemy = Алхимия
+guide-entry-medieval-alchemy-potions = Зелья T1
+guide-entry-medieval-alchemy-drinks = Напитки
+alchemy-guide-products = Результат
+alchemy-guide-ingredients = Ингредиенты
+alchemy-guide-steps = Шаги
+alchemy-guide-precision = Точность
+alchemy-guide-impurities = Примеси
+alchemy-guide-reagent = { $name }: { $amount } ед.
+alchemy-guide-entity = { $name }: { $amount } шт.
+alchemy-guide-temperature = { $operation } до { $temperature } °C
+alchemy-guide-duration = { $operation }: { $seconds } с
+alchemy-guide-strict = Точное соотношение
+alchemy-guide-excess = Излишки ингредиентов разрешены
+alchemy-guide-impurities-allowed = Разрешены, остаются в смеси
+alchemy-guide-impurities-forbidden = Запрещены
