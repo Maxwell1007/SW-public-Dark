@@ -31,15 +31,15 @@
 - type: alchemyRecipe
   id: AlchemyMead
   parent: BaseAlchemyRecipeDrink
+  entities:
+    MedievalBeeHoneyPiece: 1
   ingredients:
-  - reagent: Sugar
-    amount: 1
   - reagent: Water
-    amount: 3
+    amount: 20
   steps:
   - operation: Infuse
   products:
-    Mead: 4
+    Mead: 20
 
 - type: alchemyRecipe
   id: AlchemyRedMead
@@ -58,7 +58,7 @@
   id: AlchemyMoonshine
   parent: BaseAlchemyRecipeDrink
   ingredients:
-  - reagent: Mead
+  - reagent: Ethanol
     amount: 4
   steps:
   - operation: Distill
