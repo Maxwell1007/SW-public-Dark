@@ -86,7 +86,8 @@ public sealed class GuideAlchemyRecipeTable : TableContainer, IDocumentTag
             AddCell(products);
             AddCell(DescribeContents(recipe.Ingredients, recipe.Entities));
             AddCell(string.Join("\n", recipe.Steps.Select((id, index) =>
-                $"{index + 1}. {DescribeOperation(operations[id])}")));
+                Loc.GetString("alchemy-guide-step", ("number", index + 1),
+                    ("operation", DescribeOperation(operations[id]))))));
             AddCell(Loc.GetString(recipe.StrictRatio ? "alchemy-guide-strict" : "alchemy-guide-excess"));
             AddCell(Loc.GetString(recipe.AllowImpurities
                 ? "alchemy-guide-impurities-allowed"

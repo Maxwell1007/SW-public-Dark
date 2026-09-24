@@ -1,7 +1,7 @@
 <Document>
-  # Зелья T1
+  <GuideLocalizedText Key="guide-entry-medieval-alchemy-potions" Style="LabelHeadingBigger"/>
 
-  Постоянные рецепты первого уровня. Количества указаны на одну порцию; состав можно пропорционально увеличивать. Выполняйте операции по порядку и учитывайте требования к точности и примесям.
+  <GuideLocalizedText Key="alchemy-guide-potions-description"/>
 
   <GuideAlchemyRecipeTable Tag="Potion"/>
 </Document>

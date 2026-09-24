@@ -1,5 +1,5 @@
 guide-entry-medieval-alchemy = Алхимия
-guide-entry-medieval-alchemy-potions = Зелья T1
+guide-entry-medieval-alchemy-potions = Зелья первого уровня
 guide-entry-medieval-alchemy-drinks = Напитки
 alchemy-guide-products = Результат
 alchemy-guide-ingredients = Ингредиенты
@@ -14,3 +14,9 @@ alchemy-guide-strict = Точное соотношение
 alchemy-guide-excess = Излишки ингредиентов разрешены
 alchemy-guide-impurities-allowed = Разрешены, остаются в смеси
 alchemy-guide-impurities-forbidden = Запрещены
+alchemy-guide-step = { $number }. { $operation }
+alchemy-guide-introduction = Здесь собраны постоянные алхимические рецепты. Случайные рецепты изучаются по свиткам и в таблицах не показываются.
+alchemy-guide-quantities = Количества указаны на одну порцию. Состав можно пропорционально увеличивать. Предметы расходуются целыми штуками. Операции выполняются в указанном порядке.
+alchemy-guide-requirements = Строгий рецепт требует точного соотношения ингредиентов. Нестрогий допускает излишки необходимых ингредиентов. Примеси — посторонние вещества и предметы, не входящие в рецепт; их допустимость указана отдельно.
+alchemy-guide-drinks-description = Рецепты напитков допускают излишки необходимых ингредиентов, но запрещают посторонние вещества и предметы.
+alchemy-guide-potions-description = Постоянные рецепты первого уровня. Количества указаны на одну порцию; состав можно пропорционально увеличивать. Выполняйте операции по порядку и учитывайте требования к точности и примесям.

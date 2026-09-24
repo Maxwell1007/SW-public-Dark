@@ -1,9 +1,9 @@
 <Document>
-  # Напитки
+  <GuideLocalizedText Key="guide-entry-medieval-alchemy-drinks" Style="LabelHeadingBigger"/>
 
-  Количества указаны на одну порцию; состав можно пропорционально увеличивать. Предметы расходуются целыми штуками. Выполняйте операции по порядку.
+  <GuideLocalizedText Key="alchemy-guide-quantities"/>
 
-  Рецепты напитков допускают излишки необходимых ингредиентов, но запрещают посторонние вещества и предметы.
+  <GuideLocalizedText Key="alchemy-guide-drinks-description"/>
 
   <GuideAlchemyRecipeTable Tag="Drink"/>
 </Document>
