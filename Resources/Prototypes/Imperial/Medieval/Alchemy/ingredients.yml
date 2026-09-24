@@ -167,14 +167,15 @@
 
 - type: alchemyIngredient
   id: MedievalLootGoblin
-  minYield: 2
-  maxYield: 3
-  aspectCount: 2
+  minYield: 15
+  maxYield: 20
+  aspectCount: 4
   aspectWeights:
     AlchemyWater: 10
     AlchemyEarth: 10
     AlchemyFire: 10
     AlchemyLight: 10
+    AlchemyDarkness: 5
 
 - type: alchemyIngredient
   id: MedievalLootHog
@@ -186,7 +187,7 @@
     AlchemyEarth: 10
     AlchemyFire: 10
     AlchemyLight: 10
-    AlchemyDarkness: 15
+    AlchemyDarkness: 5
 
 - type: alchemyIngredient
   id: MedievalLootHunter
@@ -221,7 +222,7 @@
     AlchemyEarth: 10
     AlchemyFire: 10
     AlchemyLight: 10
-    AlchemyDarkness: 10
+    AlchemyDarkness: 15
 
 - type: alchemyIngredient
   id: MedievalLootDevilMouse

@@ -6,10 +6,10 @@
   tier: 1
   randomized: false
   strictRatio: true
-  allowImpurities: true
+  allowImpurities: false
   ingredientCount: 2
   expectedSteps: 2
-  maxComplexity: 2
+  maxComplexity: 8
 
 - type: alchemyRecipe
   id: BaseAlchemyRecipeT2
@@ -102,7 +102,7 @@
   - reagent: AlchemyEarth
     amount: 1
   - reagent: AlchemyFire
-    amount: 1
+    amount: 2
   steps:
   - operation: Stir
   products:
@@ -166,11 +166,14 @@
   parent: BaseAlchemyRecipeT1
   ingredients:
   - reagent: AlchemyWater
-    amount: 2
+    amount: 1
   - reagent: AlchemyLight
+    amount: 1
+  - reagent: AlchemyEarth
     amount: 1
   steps:
   - operation: Stir
+  - operation: Cool
   products:
     medievalLeft4Zed: 3
 
@@ -246,11 +249,13 @@
   parent: BaseAlchemyRecipeT1
   ingredients:
   - reagent: AlchemyWater
-    amount: 2
+    amount: 1
   - reagent: AlchemyLight
-    amount: 2
+    amount: 1
+  - reagent: AlchemyFire
+    amount: 1
   steps:
-  - operation: Stir
+  - operation: Whip
   products:
     medievalAntihol: 4
 
