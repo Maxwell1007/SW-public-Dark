@@ -1,3 +1,4 @@
+using Content.Shared.FixedPoint;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Imperial.Medieval.Alchemy;
@@ -27,7 +28,9 @@ public sealed partial class AlchemyApparatusComponent : Component
     [DataField] public string OutputSlot = "alchemy_output";
     [DataField] public string Solution = "alchemy_input";
     public bool IsProcessing;
-    public float RemainingTime;
+    public uint ProcessingGeneration;
+    public EntityUid? Input;
+    public FixedPoint2 InputVolume;
     public EntityUid? User;
     public EntityUid? Receiver;
     public List<EntityUid> Items = new();
