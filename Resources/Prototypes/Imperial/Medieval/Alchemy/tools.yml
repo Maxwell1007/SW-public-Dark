@@ -47,14 +47,6 @@
   - type: AlchemyApparatus
     operation: Whip
 
-- type: listing
-  id: MdvShopAlchemyWhisk
-  productEntity: MedievalAlchemyWhisk
-  cost:
-    Revent: 5
-  categories:
-  - MedievalMisc
-
 - type: entity
   parent: BaseStructure
   id: MedievalAlchemyCool
@@ -88,6 +80,15 @@
     state: icon
   - type: AlchemyApparatus
     operation: Distill
+
+- type: entity
+  parent: MedievalAlchemyDistill
+  id: MedievalAlchemyRectify
+  name: rectifier
+  description: An apparatus for rectifying alchemical mixtures.
+  components:
+  - type: AlchemyApparatus
+    operation: Rectify
 
 - type: entity
   parent: BaseMedievalAlchemyApparatus
@@ -124,44 +125,4 @@
     state: icon
   - type: AlchemyApparatus
     operation: Infuse
-
-- type: listing
-  id: MdvShopAlchemyCool
-  productEntity: MedievalAlchemyCool
-  cost:
-    Revent: 50
-  categories:
-  - MedievalMisc
-
-- type: listing
-  id: MdvShopAlchemyDistill
-  productEntity: MedievalAlchemyDistill
-  cost:
-    Revent: 50
-  categories:
-  - MedievalMisc
-
-- type: listing
-  id: MdvShopAlchemyExtract
-  productEntity: MedievalAlchemyExtract
-  cost:
-    Revent: 50
-  categories:
-  - MedievalMisc
-
-- type: listing
-  id: MdvShopAlchemyFilter
-  productEntity: MedievalAlchemyFilter
-  cost:
-    Revent: 50
-  categories:
-  - MedievalMisc
-
-- type: listing
-  id: MdvShopAlchemyInfuse
-  productEntity: MedievalAlchemyInfuse
-  cost:
-    Revent: 50
-  categories:
-  - MedievalMisc
 
