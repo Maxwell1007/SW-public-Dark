@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Content.Shared.FixedPoint;
 
 namespace Content.Shared.Imperial.Medieval.Alchemy;
@@ -46,8 +46,9 @@ public sealed class AlchemyGenerationSystem : EntitySystem
         IReadOnlyDictionary<string, AlchemyOperationPrototype> operations, System.Random random)
     {
         if (proto.Abstract || proto.MaxComplexity < 0 || proto.ExpectedSteps < 0 || proto.ExpectedSteps > 64 ||
-            proto.MinParts <= 0 || proto.MaxParts < proto.MinParts || proto.Products.Count == 0 ||
-            proto.Products.Any(p => p.Value <= 0) || proto.Entities.Any(p => p.Value <= 0))
+            proto.MinParts <= 0 || proto.MaxParts < proto.MinParts || (proto.Products.Count == 0 && proto.EntityProducts.Count == 0) ||
+            proto.Products.Any(p => p.Value <= 0) || proto.EntityProducts.Any(p => p.Value <= 0) ||
+            proto.Entities.Any(p => p.Value <= 0))
             throw new InvalidOperationException($"Invalid alchemy recipe {proto.ID}.");
         if (!proto.Randomized && (proto.Ingredients == null || proto.Steps == null))
             throw new InvalidOperationException($"Fixed alchemy recipe {proto.ID} is incomplete.");
@@ -56,6 +57,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
             Id = proto.ID,
             Group = proto.Group,
             Products = new(proto.Products),
+            EntityProducts = new(proto.EntityProducts),
             Entities = new(proto.Entities),
             StrictRatio = proto.StrictRatio ?? (!proto.Randomized || random.Next(4) != 0),
             AllowImpurities = proto.AllowImpurities ?? (proto.Randomized && random.Next(4) == 0),
@@ -163,32 +165,72 @@ public sealed class AlchemyGenerationSystem : EntitySystem
         return result;
     }
 
-    private static bool IsAspect(string reagent) => reagent is
+    public static bool IsAspect(string reagent) => reagent is
         "AlchemyWater" or "AlchemyEarth" or "AlchemyFire" or "AlchemyLight" or "AlchemyDarkness";
 
     public static bool Conflicts(AlchemyRecipe left, AlchemyRecipe right)
     {
-        if (left.Entities.Count != right.Entities.Count || left.Entities.Keys.Any(k => !right.Entities.ContainsKey(k)) ||
-            left.Ingredients.Count != right.Ingredients.Count ||
-            left.Ingredients.Keys.Any(k => !right.Ingredients.ContainsKey(k)))
+        if (!CanShareContents(left, right) || !CanShareContents(right, left))
             return false;
-        var first = left.Ingredients.First();
-        if (left.StrictRatio && right.StrictRatio && (left.Ingredients.Any(p =>
-                (long) p.Value.Value * right.Ingredients[first.Key].Value !=
-                (long) right.Ingredients[p.Key].Value * first.Value.Value) || left.Entities.Any(p =>
-                (long) p.Value * right.Ingredients[first.Key].Value !=
-                (long) right.Entities[p.Key] * first.Value.Value)))
+        if (left.StrictRatio && right.StrictRatio && !HaveCompatibleRatios(left, right))
             return false;
-        var shorter = left.Steps.Count <= right.Steps.Count ? left.Steps : right.Steps;
-        var longer = left.Steps.Count <= right.Steps.Count ? right.Steps : left.Steps;
-        if (shorter.Count == 0)
-            return true;
-        for (var offset = 0; offset <= longer.Count - shorter.Count; offset++)
+        return ContainsSteps(left.Steps, right.Steps) || ContainsSteps(right.Steps, left.Steps);
+    }
+
+    private static bool CanShareContents(AlchemyRecipe recipe, AlchemyRecipe other)
+    {
+        return recipe.AllowImpurities ||
+               other.Ingredients.Keys.All(recipe.Ingredients.ContainsKey) &&
+               other.Entities.Keys.All(recipe.Entities.ContainsKey);
+    }
+
+    private static bool HaveCompatibleRatios(AlchemyRecipe left, AlchemyRecipe right)
+    {
+        long leftScale = 0;
+        long rightScale = 0;
+        foreach (var (leftAmount, rightAmount) in SharedAmounts(left, right))
         {
-            if (shorter.SequenceEqual(longer.Skip(offset).Take(shorter.Count)))
+            if (leftScale == 0)
+            {
+                leftScale = leftAmount;
+                rightScale = rightAmount;
+                continue;
+            }
+            if (leftAmount * rightScale != rightAmount * leftScale)
+                return false;
+        }
+        return true;
+    }
+
+    private static IEnumerable<(long Left, long Right)> SharedAmounts(AlchemyRecipe left, AlchemyRecipe right)
+    {
+        foreach (var (reagent, amount) in left.Ingredients)
+        {
+            if (right.Ingredients.TryGetValue(reagent, out var otherAmount))
+                yield return (amount.Value, otherAmount.Value);
+        }
+        foreach (var (entity, count) in left.Entities)
+        {
+            if (right.Entities.TryGetValue(entity, out var otherCount))
+                yield return (count, otherCount);
+        }
+    }
+
+    private static bool ContainsSteps(IReadOnlyList<string> sequence, IReadOnlyList<string> steps)
+    {
+        for (var offset = 0; offset <= sequence.Count - steps.Count; offset++)
+        {
+            var matches = true;
+            for (var index = 0; index < steps.Count; index++)
+            {
+                if (sequence[offset + index] == steps[index])
+                    continue;
+                matches = false;
+                break;
+            }
+            if (matches)
                 return true;
         }
         return false;
     }
 }
-

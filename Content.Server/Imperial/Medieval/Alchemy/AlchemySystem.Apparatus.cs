@@ -59,7 +59,8 @@ public sealed partial class AlchemySystem
 
     private void OnApparatusExamine(EntityUid uid, AlchemyApparatusComponent comp, ExaminedEvent args)
     {
-        args.PushText(Loc.GetString(comp.IsProcessing ? "alchemy-apparatus-running" : "alchemy-apparatus-instructions"));
+        if (comp.IsProcessing)
+            args.PushText(Loc.GetString(_prototypes.Index<AlchemyOperationPrototype>(comp.Operation).RunningMessage));
     }
 
     private void OnApparatusActivate(EntityUid uid, AlchemyApparatusComponent comp, ActivateInWorldEvent args)
@@ -76,7 +77,7 @@ public sealed partial class AlchemySystem
             return;
         args.Verbs.Add(new ActivationVerb
         {
-            Text = Loc.GetString("alchemy-apparatus-start"),
+            Text = Loc.GetString(_prototypes.Index<AlchemyOperationPrototype>(comp.Operation).StartMessage),
             Act = () => StartApparatus(uid, comp, args.User),
         });
     }
@@ -84,6 +85,9 @@ public sealed partial class AlchemySystem
     private void StartApparatus(EntityUid uid, AlchemyApparatusComponent comp, EntityUid user)
     {
         if (comp.IsProcessing || !TryComp<StorageComponent>(uid, out var storage))
+            return;
+        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
+        if (operation.Temperature != null || !TryGetRoundState(out _))
             return;
         if (_itemSlots.GetItemOrNull(uid, comp.OutputSlot) is not { } receiver ||
             !_solutions.TryGetRefillableSolution(receiver, out _, out _))
@@ -95,14 +99,9 @@ public sealed partial class AlchemySystem
             return;
         if (storage.Container.ContainedEntities.Count == 0 && mixture.Volume <= 0)
         {
-            _popup.PopupEntity(Loc.GetString("alchemy-apparatus-empty"), uid, user);
+            _popup.PopupEntity(Loc.GetString(operation.EmptyMessage), uid, user);
             return;
         }
-
-        EnsureRound();
-        var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
-        if (operation.Temperature != null)
-            return;
 
         var vessel = EnsureComp<AlchemyVesselComponent>(uid);
         vessel.Solution = comp.Solution;
@@ -133,7 +132,7 @@ public sealed partial class AlchemySystem
         comp.RemainingTime = operation.Duration;
         comp.IsProcessing = true;
         _itemSlots.SetLock(uid, comp.OutputSlot, true);
-        _popup.PopupEntity(Loc.GetString("alchemy-apparatus-running"), uid, user);
+        _popup.PopupEntity(Loc.GetString(operation.RunningMessage), uid, user);
     }
 
     private void FinishApparatus(EntityUid uid, AlchemyApparatusComponent comp, Entity<SolutionComponent> input)
@@ -143,7 +142,8 @@ public sealed partial class AlchemySystem
         {
             if (comp.Receiver is not { } receiver || TerminatingOrDeleted(receiver) ||
                 _itemSlots.GetItemOrNull(uid, comp.OutputSlot) != receiver ||
-                !_solutions.TryGetRefillableSolution(receiver, out var output, out _) || output == null)
+                !_solutions.TryGetRefillableSolution(receiver, out var output, out _) || output == null ||
+                !TryGetRoundState(out var state))
                 return;
 
             var items = comp.Items.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToList();
@@ -152,7 +152,7 @@ public sealed partial class AlchemySystem
             inputVessel.Processing = true;
             try
             {
-                CompleteOperation(input, comp.Operation, user, items);
+                CompleteOperation(input, state, comp.Operation, user, items);
             }
             finally
             {
@@ -172,7 +172,7 @@ public sealed partial class AlchemySystem
                 vessel.Processing = false;
             }
             if (user is { } recipient)
-                _popup.PopupEntity(Loc.GetString("alchemy-operation-complete", ("operation", Loc.GetString(operation.Name))), uid, recipient);
+                _popup.PopupEntity(Loc.GetString(operation.CompletionMessage), uid, recipient);
         }
         finally
         {

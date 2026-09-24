@@ -36,17 +36,15 @@
         canReact: false
 
 - type: entity
-  parent: BaseItem
+  parent: BaseMedievalAlchemyApparatus
   id: MedievalAlchemyWhisk
-  name: whisk
-  description: A tool for whipping alchemical mixtures and milk.
+  name: crushing station
+  description: A sturdy station with a pestle for processing alchemical mixtures.
   components:
   - type: Sprite
-    sprite: Objects/Misc/utensils.rsi
-    state: fork
-  - type: Item
-    size: Tiny
-  - type: AlchemyTool
+    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    state: icon
+  - type: AlchemyApparatus
     operation: Whip
 
 - type: listing
@@ -61,7 +59,7 @@
   parent: BaseStructure
   id: MedievalAlchemyCool
   name: cooling bath
-  description: Load items and set a timer to cool their contents.
+  description: A bath for gradually cooling alchemical vessels.
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Chem/fireplate.rsi
@@ -83,7 +81,7 @@
   parent: BaseMedievalAlchemyApparatus
   id: MedievalAlchemyDistill
   name: distillation apparatus
-  description: Load ingredients and liquids, install an output vessel, then start distillation.
+  description: An apparatus for distilling alchemical mixtures.
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Chem/fireplate.rsi
@@ -95,7 +93,7 @@
   parent: BaseMedievalAlchemyApparatus
   id: MedievalAlchemyExtract
   name: alchemy apparatus
-  description: Load ingredients and liquid containers, install an output vessel, then start processing.
+  description: An apparatus for preparing alchemical extracts.
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Chem/fireplate.rsi
@@ -107,7 +105,7 @@
   parent: BaseMedievalAlchemyApparatus
   id: MedievalAlchemyFilter
   name: alchemy apparatus
-  description: Load ingredients and liquid containers, install an output vessel, then start processing.
+  description: A station for filtering alchemical mixtures.
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Chem/fireplate.rsi
@@ -119,7 +117,7 @@
   parent: BaseMedievalAlchemyApparatus
   id: MedievalAlchemyInfuse
   name: alchemy apparatus
-  description: Load ingredients and liquid containers, install an output vessel, then start processing.
+  description: A station for preparing alchemical infusions.
   components:
   - type: Sprite
     sprite: Imperial/Medieval/Chem/fireplate.rsi

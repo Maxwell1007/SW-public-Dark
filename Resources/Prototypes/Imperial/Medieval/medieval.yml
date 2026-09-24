@@ -3196,6 +3196,11 @@
   id: MedievalLootGoblin
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootGoblin
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootGoblin
   - type: Sprite
@@ -3287,6 +3292,11 @@
   id: MedievalLootHog
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootHog
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootHog
   - type: RDWeight
@@ -3327,6 +3337,11 @@
   id: MedievalLootHunter
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootHunter
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootHunter
   - type: RDWeight
@@ -3367,6 +3382,11 @@
   id: MedievalLootCrab
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootCrab
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootCrab
   - type: RDWeight
@@ -3407,6 +3427,11 @@
   id: MedievalLootCrabDevil
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootCrabDevil
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootCrabDevil
   - type: RDWeight
@@ -3637,6 +3662,11 @@
   id: MedievalLootDevilMouse
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootDevilMouse
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootDevilMouse
   - type: Sprite
@@ -3673,6 +3703,11 @@
   id: MedievalLootAnt
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootAnt
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootAnt
   - type: MyrmexStew
@@ -3868,6 +3903,11 @@
   id: MedievalLootEgg
   description: MedievalLoot
   components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: MedievalLootEgg
+        Quantity: 35
   - type: AlchemyIngredient
     profile: MedievalLootEgg
   - type: Sprite

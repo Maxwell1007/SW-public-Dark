@@ -86,7 +86,6 @@ public sealed partial class ChemistryRandomizationSystem : EntitySystem
         var recipe = alchemy.ResolveScroll(component);
         if (recipe == null)
             return;
-        component.Reagent = _prototype.Index<ReagentPrototype>(recipe.Products.Keys.First());
         _meta.SetEntityDescription(uid, alchemy.DescribeRecipe(recipe));
     }
 

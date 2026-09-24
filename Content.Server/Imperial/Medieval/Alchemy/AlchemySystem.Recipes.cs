@@ -9,10 +9,11 @@ public sealed partial class AlchemySystem
 {
     public AlchemyRecipe? ResolveScroll(MedievalRandomChemistryRecipeComponent scroll)
     {
-        EnsureRound();
+        if (!TryGetRoundState(out var state))
+            return null;
         if (scroll.RecipeId != null)
-            return _recipes.FirstOrDefault(r => r.Id == scroll.RecipeId);
-        var groups = scroll.Weights.Where(p => p.Value > 0 && _recipes.Any(r => r.Group == p.Key)).ToList();
+            return state.Recipes.FirstOrDefault(r => r.Id == scroll.RecipeId);
+        var groups = scroll.Weights.Where(p => p.Value > 0 && state.Recipes.Any(r => r.Group == p.Key)).ToList();
         if (groups.Count == 0)
             return null;
         var choice = _random.NextFloat() * groups.Sum(p => p.Value);
@@ -25,7 +26,7 @@ public sealed partial class AlchemySystem
             group = entry.Key;
             break;
         }
-        var recipes = _recipes.Where(r => r.Group == group).ToList();
+        var recipes = state.Recipes.Where(r => r.Group == group).ToList();
         var recipe = recipes[_random.Next(recipes.Count)];
         scroll.RecipeId = recipe.Id;
         return recipe;
@@ -37,6 +38,8 @@ public sealed partial class AlchemySystem
         text.AppendLine(Loc.GetString("alchemy-recipe-products"));
         foreach (var (id, amount) in recipe.Products)
             text.AppendLine($"{ReagentName(id)}: {amount}");
+        foreach (var (id, count) in recipe.EntityProducts)
+            text.AppendLine($"{_prototypes.Index<Robust.Shared.Prototypes.EntityPrototype>(id).Name}: {count}");
         text.AppendLine(Loc.GetString("alchemy-recipe-ingredients"));
         foreach (var (id, amount) in recipe.Ingredients)
             text.AppendLine($"{ReagentName(id)}: {amount}");
@@ -59,14 +62,15 @@ public sealed partial class AlchemySystem
 
     public PotionBookUserInterfaceState BookState(IEnumerable<string> ids)
     {
-        EnsureRound();
-        var state = new PotionBookUserInterfaceState();
+        var result = new PotionBookUserInterfaceState();
+        if (!TryGetRoundState(out var state))
+            return result;
         foreach (var id in ids)
         {
-            var recipe = _recipes.FirstOrDefault(r => r.Id == id);
+            var recipe = state.Recipes.FirstOrDefault(r => r.Id == id);
             if (recipe != null)
-                state.Recipes[id] = DescribeRecipe(recipe);
+                result.Recipes[id] = DescribeRecipe(recipe);
         }
-        return state;
+        return result;
     }
 }

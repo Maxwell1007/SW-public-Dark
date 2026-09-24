@@ -7,6 +7,7 @@ using Content.Shared.Examine;
 using Content.Shared.Storage;
 using Content.Shared.Verbs;
 using Robust.Shared.Containers;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
 
@@ -14,6 +15,7 @@ public sealed class AlchemyCoolingBathSystem : EntitySystem
 {
     [Dependency] private readonly SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private readonly TemperatureSystem _temperature = default!;
+    [Dependency] private readonly IPrototypeManager _prototypes = default!;
 
     public override void Initialize()
     {
@@ -50,9 +52,8 @@ public sealed class AlchemyCoolingBathSystem : EntitySystem
 
     private void OnExamine(EntityUid uid, AlchemyCoolingBathComponent comp, ExaminedEvent args)
     {
-        args.PushText(comp.IsProcessing
-            ? Loc.GetString("alchemy-cooling-bath-running", ("seconds", (int) Math.Ceiling(comp.RemainingTime)))
-            : Loc.GetString("alchemy-cooling-bath-instructions"));
+        if (comp.IsProcessing)
+            args.PushText(Loc.GetString("alchemy-cooling-bath-running", ("seconds", (int) Math.Ceiling(comp.RemainingTime))));
     }
 
     private void OnInsert(EntityUid uid, AlchemyCoolingBathComponent comp, ContainerIsInsertingAttemptEvent args)
@@ -75,22 +76,39 @@ public sealed class AlchemyCoolingBathSystem : EntitySystem
         {
             if (!comp.IsProcessing)
                 continue;
-            comp.RemainingTime -= frameTime;
-            if (comp.RemainingTime > 0)
-                continue;
+            var elapsed = Math.Min(frameTime, comp.RemainingTime);
+            CoolContents(comp, storage, elapsed);
+            comp.RemainingTime = Math.Max(0, comp.RemainingTime - elapsed);
+            if (comp.RemainingTime <= 0)
+                comp.IsProcessing = false;
+        }
+    }
 
-            comp.IsProcessing = false;
-            comp.RemainingTime = 0;
-            foreach (var item in storage.Container.ContainedEntities.ToArray())
+    private void CoolContents(AlchemyCoolingBathComponent comp, StorageComponent storage, float elapsed)
+    {
+        var energy = comp.CoolingPower * elapsed;
+        if (energy <= 0)
+            return;
+        foreach (var item in storage.Container.ContainedEntities.ToArray())
+        {
+            if (TerminatingOrDeleted(item))
+                continue;
+            if (TryComp<TemperatureComponent>(item, out var temperature) &&
+                temperature.CurrentTemperature > comp.MinimumTemperature)
             {
-                if (TerminatingOrDeleted(item))
+                var available = (temperature.CurrentTemperature - comp.MinimumTemperature) *
+                                _temperature.GetHeatCapacity(item, temperature);
+                _temperature.ChangeHeat(item, -Math.Min(energy, available), temperature: temperature);
+            }
+            if (!TryComp<SolutionContainerManagerComponent>(item, out var solutions))
+                continue;
+            foreach (var (_, solution) in _solutions.EnumerateSolutions((item, solutions)))
+            {
+                var mixture = solution.Comp.Solution;
+                if (mixture.Volume <= 0 || mixture.Temperature <= comp.MinimumTemperature)
                     continue;
-                var temperature = EnsureComp<TemperatureComponent>(item);
-                _temperature.ForceChangeTemperature(item, Math.Min(temperature.CurrentTemperature, comp.Temperature), temperature);
-                if (!TryComp<SolutionContainerManagerComponent>(item, out var solutions))
-                    continue;
-                foreach (var (_, solution) in _solutions.EnumerateSolutions((item, solutions)))
-                    _solutions.SetTemperature(solution, Math.Min(solution.Comp.Solution.Temperature, comp.Temperature));
+                var available = (mixture.Temperature - comp.MinimumTemperature) * mixture.GetHeatCapacity(_prototypes);
+                _solutions.AddThermalEnergy(solution, -Math.Min(energy, available));
             }
         }
     }

@@ -1,0 +1,83 @@
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: BaseMedievalExplosiveMixture
+  components:
+  - type: Sprite
+    sprite: Objects/Consumable/Food/ingredients.rsi
+    state: dough
+  - type: Item
+    size: Small
+
+- type: entity
+  parent: BaseMedievalExplosiveMixture
+  id: MedievalExplosiveMixtureT1
+  name: explosive mixture
+  description: An alchemical charge for a gunpowder bomb.
+
+- type: entity
+  parent: BaseMedievalExplosiveMixture
+  id: MedievalCryoMixture
+  name: frost mixture
+  description: An alchemical charge for a frost bomb.
+  components:
+  - type: Sprite
+    color: "#80CFFF"
+
+- type: entity
+  parent: BaseMedievalExplosiveMixture
+  id: MedievalExplosiveMixtureT2
+  name: potent explosive mixture
+  description: A potent alchemical charge for an explosive bomb.
+  components:
+  - type: Sprite
+    color: "#FFAA60"
+
+- type: entity
+  parent: BaseMedievalExplosiveMixture
+  id: MedievalExplosiveMixtureT3
+  name: powerful explosive mixture
+  description: A concentrated alchemical charge for a powerful explosive bomb.
+  components:
+  - type: Sprite
+    color: "#FF6060"
+
+- type: entity
+  parent: MedievalGrenade
+  id: MedievalCryoGrenade
+  name: frost bomb
+  description: A bomb filled with an alchemical frost mixture.
+  components:
+  - type: Sprite
+    color: "#80CFFF"
+  - type: Explosive
+    explosionType: Cryo
+    maxIntensity: 4
+    intensitySlope: 1
+    totalIntensity: 60
+
+- type: entity
+  parent: MedievalGrenade
+  id: MedievalAlchemyGrenadeT2
+  name: potent explosive bomb
+  description: A bomb filled with a potent alchemical mixture.
+  components:
+  - type: Sprite
+    color: "#FFAA60"
+  - type: Explosive
+    maxIntensity: 6.4
+    intensitySlope: 1.6
+    totalIntensity: 96
+
+- type: entity
+  parent: MedievalGrenade
+  id: MedievalAlchemyGrenadeT3
+  name: powerful explosive bomb
+  description: A bomb filled with a concentrated alchemical mixture.
+  components:
+  - type: Sprite
+    color: "#FF6060"
+  - type: Explosive
+    maxIntensity: 80
+    intensitySlope: 1
+    totalIntensity: 1200
