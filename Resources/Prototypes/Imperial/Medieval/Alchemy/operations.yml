@@ -51,6 +51,18 @@
   duration: 12
 
 - type: alchemyOperation
+  id: Rectify
+  name: alchemy-operation-rectify
+  startMessage: alchemy-rectify-start
+  emptyMessage: alchemy-rectify-empty
+  runningMessage: alchemy-rectify-running
+  completionMessage: alchemy-rectify-complete
+  complexity: 6
+  minimumTier: 2
+  weight: 2
+  duration: 12
+
+- type: alchemyOperation
   id: Extract
   name: alchemy-operation-extract
   startMessage: alchemy-extract-start

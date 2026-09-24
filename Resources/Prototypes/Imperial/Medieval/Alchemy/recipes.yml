@@ -514,7 +514,6 @@
   - reagent: Sugar
     amount: 1
   steps:
-  - operation: Whip
   - operation: Infuse
   products:
     Wine: 4
