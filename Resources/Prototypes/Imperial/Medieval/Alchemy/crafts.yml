@@ -74,3 +74,68 @@
   components:
   - type: SpawnAfterInteract
     prototype: MedievalAlchemyInfuse
+
+- type: CP14Recipe
+  id: MedievalAlchemyWhiskCraft
+  craftTime: 2
+  stacks:
+    WoodPlank: 5
+    MedievalIronIngot: 1
+  result: MedievalAlchemyWhiskCraft
+
+- type: CP14Recipe
+  id: MedievalAlchemyCoolCraft
+  craftTime: 4
+  stacks:
+    MedievalCoal: 2
+    MedievalIronPlateSmall: 4
+    MedievalTopaz: 1
+  result: MedievalAlchemyCoolCraft
+
+- type: CP14Recipe
+  id: MedievalAlchemyDistillCraft
+  craftTime: 4
+  stacks:
+    MedievalCoal: 2
+    MedievalIronPlateSmall: 3
+    MedievalIronIngot: 3
+  result: MedievalAlchemyDistillCraft
+
+- type: CP14Recipe
+  id: MedievalAlchemyRectifyCraft
+  craftTime: 8
+  stacks:
+    MedievalCoal: 10
+    MedievalStoneBrick: 10
+    MedievalIronPlate: 2
+    MedievalIronPlateSmall: 4
+    MedievalRivets: 2
+  result: MedievalAlchemyRectifyCraft
+
+- type: CP14Recipe
+  id: MedievalAlchemyExtractCraft
+  craftTime: 4
+  stacks:
+    MedievalCoal: 2
+    MedievalStoneBrick: 5
+    MedievalIronIngot: 3
+  result: MedievalAlchemyExtractCraft
+
+- type: CP14Recipe
+  id: MedievalAlchemyFilterCraft
+  craftTime: 3
+  stacks:
+    MedievalCoal: 6
+    MedievalIronIngot: 2
+  entities:
+    MedievalPaper: 4
+  result: MedievalAlchemyFilterCraft
+
+- type: CP14Recipe
+  id: MedievalAlchemyInfuseCraft
+  craftTime: 4
+  stacks:
+    MedievalCoal: 2
+    MedievalStoneBrick: 3
+    MedievalIronIngot: 2
+  result: MedievalAlchemyInfuseCraft
