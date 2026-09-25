@@ -73,6 +73,7 @@ public sealed partial class AlchemyRecipePrototype : IPrototype, IInheritingProt
 public sealed partial class AlchemyIngredientPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
+    [DataField] public FixedPoint2 ReagentAmount = 10;
     [DataField] public int MinYield = 4;
     [DataField] public int MaxYield = 8;
     [DataField] public int AspectCount = 1;
@@ -102,6 +103,7 @@ public sealed class AlchemyRecipe
 
 public sealed class AlchemyIngredient
 {
+    public FixedPoint2 ReagentAmount;
     public string Solvent = string.Empty;
     public Dictionary<string, FixedPoint2> Aspects = new();
 }

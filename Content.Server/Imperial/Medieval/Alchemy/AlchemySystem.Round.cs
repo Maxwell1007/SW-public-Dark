@@ -116,6 +116,7 @@ public sealed partial class AlchemySystem
             state.Ingredients.Clear();
             foreach (var profile in profiles)
             {
+                _prototypes.Index<ReagentPrototype>(profile.ID);
                 var ingredient = AlchemyGenerationSystem.GenerateIngredient(profile, random);
                 _prototypes.Index<ReagentPrototype>(ingredient.Solvent);
                 foreach (var aspect in ingredient.Aspects.Keys)

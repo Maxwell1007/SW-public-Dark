@@ -11,9 +11,15 @@ public sealed partial class AlchemySystem
     {
         if (!TryGetRoundState(out var state))
             return null;
+        var available = state.Recipes.Where(recipe => _prototypes.Index<AlchemyRecipePrototype>(recipe.Id).Randomized).ToList();
         if (scroll.RecipeId != null)
-            return state.Recipes.FirstOrDefault(r => r.Id == scroll.RecipeId);
-        var groups = scroll.Weights.Where(p => p.Value > 0 && state.Recipes.Any(r => r.Group == p.Key)).ToList();
+        {
+            var existing = available.FirstOrDefault(recipe => recipe.Id == scroll.RecipeId);
+            if (existing != null)
+                return existing;
+            scroll.RecipeId = null;
+        }
+        var groups = scroll.Weights.Where(p => p.Value > 0 && available.Any(r => r.Group == p.Key)).ToList();
         if (groups.Count == 0)
             return null;
         var choice = _random.NextFloat() * groups.Sum(p => p.Value);
@@ -26,13 +32,13 @@ public sealed partial class AlchemySystem
             group = entry.Key;
             break;
         }
-        var recipes = state.Recipes.Where(r => r.Group == group).ToList();
+        var recipes = available.Where(r => r.Group == group).ToList();
         var recipe = recipes[_random.Next(recipes.Count)];
         scroll.RecipeId = recipe.Id;
         return recipe;
     }
 
-    public string DescribeRecipe(AlchemyRecipe recipe)
+    public string DescribeRecipe(AlchemyRecipe recipe, bool includeRequirements = true)
     {
         var text = new StringBuilder();
         text.AppendLine(Loc.GetString("alchemy-recipe-products"));
@@ -45,17 +51,16 @@ public sealed partial class AlchemySystem
             text.AppendLine($"{ReagentName(id)}: {amount}");
         foreach (var (id, count) in recipe.Entities)
             text.AppendLine($"{_prototypes.Index<Robust.Shared.Prototypes.EntityPrototype>(id).Name}: {count}");
-        text.AppendLine(Loc.GetString(recipe.StrictRatio ? "alchemy-recipe-strict" : "alchemy-recipe-excess"));
-        text.AppendLine(Loc.GetString(recipe.AllowImpurities ? "alchemy-recipe-impurities" : "alchemy-recipe-pure"));
+        if (includeRequirements)
+        {
+            text.AppendLine(Loc.GetString(recipe.StrictRatio ? "alchemy-recipe-strict" : "alchemy-recipe-excess"));
+            text.AppendLine(Loc.GetString(recipe.AllowImpurities ? "alchemy-recipe-impurities" : "alchemy-recipe-pure"));
+        }
+        text.AppendLine(Loc.GetString("alchemy-recipe-steps"));
         for (var i = 0; i < recipe.Steps.Count; i++)
         {
             var step = _prototypes.Index<AlchemyOperationPrototype>(recipe.Steps[i]);
-            text.Append($"{i + 1}. {Loc.GetString(step.Name)}");
-            if (step.Temperature is { } temperature)
-                text.Append($" — {temperature - 273.15f:0.##} °C");
-            else
-                text.Append($" ({step.Duration} s)");
-            text.AppendLine();
+            text.AppendLine($"{i + 1}. {Loc.GetString(step.Name)}");
         }
         return text.ToString();
     }
@@ -69,7 +74,14 @@ public sealed partial class AlchemySystem
         {
             var recipe = state.Recipes.FirstOrDefault(r => r.Id == id);
             if (recipe != null)
-                result.Recipes[id] = DescribeRecipe(recipe);
+            {
+                result.Recipes.Add(new PotionBookRecipe
+                {
+                    Description = DescribeRecipe(recipe, false),
+                    Products = recipe.Products.Keys.ToList(),
+                    EntityProducts = recipe.EntityProducts.Keys.ToList(),
+                });
+            }
         }
         return result;
     }

@@ -24,11 +24,15 @@ public sealed class AlchemyGenerationSystem : EntitySystem
 
     public static AlchemyIngredient GenerateIngredient(AlchemyIngredientPrototype proto, System.Random random)
     {
-        if (proto.MinYield <= 0 || proto.MaxYield < proto.MinYield || proto.AspectCount <= 0 ||
+        if (proto.ReagentAmount <= 0 || proto.MinYield <= 0 || proto.MaxYield < proto.MinYield || proto.AspectCount <= 0 ||
             proto.Solvents.Count == 0 || proto.AspectWeights.Count(p => p.Value > 0) < proto.AspectCount ||
             proto.MinYield < proto.AspectCount)
             throw new InvalidOperationException($"Invalid alchemy ingredient {proto.ID}.");
-        var result = new AlchemyIngredient { Solvent = proto.Solvents[random.Next(proto.Solvents.Count)] };
+        var result = new AlchemyIngredient
+        {
+            ReagentAmount = proto.ReagentAmount,
+            Solvent = proto.Solvents[random.Next(proto.Solvents.Count)],
+        };
         var weights = new Dictionary<string, int>(proto.AspectWeights);
         var remaining = random.Next(proto.MinYield, proto.MaxYield + 1);
         for (var i = 0; i < proto.AspectCount; i++)

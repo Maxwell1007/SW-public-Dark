@@ -16,7 +16,6 @@ using Content.Server.Fluids.EntitySystems;
 using Content.Shared.Imperial.Medieval.GameTicking.Rules;
 using Content.Shared.Chemistry.Reaction;
 using Content.Shared.EntityEffects;
-using Content.Shared.Kitchen.Components;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
 
@@ -151,31 +150,31 @@ public sealed partial class AlchemySystem : EntitySystem
     private void Extract(AlchemyVesselComponent vessel, Entity<SolutionComponent> solution,
         AlchemyRoundComponent state)
     {
-        if (solution.Comp.Solution.Temperature < vessel.NigredoTemperature)
+        var mixture = solution.Comp.Solution;
+        if (mixture.Temperature < vessel.NigredoTemperature)
             return;
-        foreach (var reagent in solution.Comp.Solution.Contents.Select(entry => entry.Reagent.Prototype).Distinct().ToArray())
+        var changed = false;
+        foreach (var reagent in mixture.Contents.Select(entry => entry.Reagent.Prototype).Distinct().ToArray())
         {
-            if (!state.Ingredients.TryGetValue(reagent, out var profile) ||
-                !_prototypes.TryIndex<EntityPrototype>(reagent, out var prototype) ||
-                !prototype.TryGetComponent<ExtractableComponent>(out var extractable, EntityManager.ComponentFactory) ||
-                extractable.JuiceSolution == null)
-                continue;
-            var portion = extractable.JuiceSolution.GetTotalPrototypeQuantity(reagent);
-            if (portion <= 0)
+            if (!state.Ingredients.TryGetValue(reagent, out var profile))
                 continue;
             var output = profile.Aspects.Values.Aggregate(FixedPoint2.Zero, (a, b) => a + b);
             var cost = output * 0.25;
-            var available = solution.Comp.Solution.GetTotalPrototypeQuantity(profile.Solvent);
-            var count = solution.Comp.Solution.GetTotalPrototypeQuantity(reagent).Value / portion.Value;
-            count = Math.Min(count, available.Value / cost.Value);
-            if (count <= 0)
+            var available = mixture.GetTotalPrototypeQuantity(reagent);
+            var solvent = mixture.GetTotalPrototypeQuantity(profile.Solvent);
+            var scale = Math.Min(available.Double() / profile.ReagentAmount.Double(), solvent.Double() / cost.Double());
+            var consumedReagent = profile.ReagentAmount * scale;
+            var consumedSolvent = cost * scale;
+            if (consumedReagent <= 0 || consumedSolvent <= 0 || profile.Aspects.Values.Any(amount => amount * scale <= 0))
                 continue;
-            RemovePrototype(solution.Comp.Solution, profile.Solvent, cost * count);
-            RemovePrototype(solution.Comp.Solution, reagent, portion * count);
+            RemovePrototype(mixture, reagent, consumedReagent);
+            RemovePrototype(mixture, profile.Solvent, consumedSolvent);
             foreach (var (aspect, amount) in profile.Aspects)
-                solution.Comp.Solution.AddReagent(aspect, amount * count);
-            _solutions.UpdateChemicals(solution, false);
+                mixture.AddReagent(aspect, amount * scale);
+            changed = true;
         }
+        if (changed)
+            _solutions.UpdateChemicals(solution, false);
     }
 
     private void CompleteOperation(Entity<SolutionComponent> solution, AlchemyRoundComponent state, string operation,

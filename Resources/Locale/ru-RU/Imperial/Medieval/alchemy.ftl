@@ -29,6 +29,7 @@ alchemy-operation-infuse = Настаивание
 alchemy-ingredient-description = Растворитель: { $solvent }. Аспекты: { $aspects }.
 alchemy-recipe-products = Выход на одну порцию:
 alchemy-recipe-ingredients = Состав в частях:
+alchemy-recipe-steps = Шаги приготовления:
 alchemy-recipe-strict = Соотношение обязательных веществ должно быть точным.
 alchemy-recipe-excess = Излишки обязательных веществ разрешены.
 alchemy-recipe-impurities = Посторонние вещества разрешены и остаются в растворе.

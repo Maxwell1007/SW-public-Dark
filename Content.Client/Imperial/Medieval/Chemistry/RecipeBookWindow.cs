@@ -1,23 +1,14 @@
 using System.Numerics;
 using Content.Client.Guidebook.Controls;
 using Content.Client.Message;
-using Content.Client.Resources;
-using Content.Client.Stylesheets;
-using Content.Client.UserInterface.ControlExtensions;
 using Content.Client.UserInterface.Controls;
-using Content.Shared.Atmos.Components;
-using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Imperial.Medieval.Chemistry;
-using Content.Shared.Mobs;
-using Content.Shared.Timing;
+using Content.Shared.Imperial.Medieval.ChemistryRandomization;
 using Robust.Client.Graphics;
-using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
-using Robust.Client.UserInterface.CustomControls;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Timing;
 using static Robust.Client.UserInterface.Controls.BoxContainer;
 
 namespace Content.Client.Imperial.Chemistry;
@@ -105,15 +96,65 @@ public sealed class PotionBookWindow
     public void UpdateState(PotionBookUserInterfaceState state)
     {
         _container.DisposeAllChildren();
-        foreach (var recipe in state.Recipes.Values)
+        foreach (var recipe in state.Recipes)
         {
-            _container.AddChild(new Label { Text = recipe, HorizontalExpand = true });
+            foreach (var id in recipe.Products)
+                _container.AddChild(CreatePotionCard(_proto.Index<ReagentPrototype>(id), recipe.Description));
+            foreach (var id in recipe.EntityProducts)
+            {
+                var description = new RichTextLabel { HorizontalExpand = true };
+                description.SetMessage(recipe.Description);
+                _container.AddChild(new BoxContainer
+                {
+                    Margin = new Thickness(5),
+                    Children = { new GuideEntityEmbed(id, true, false), description },
+                });
+            }
         }
-        foreach (var id in state.Ids)
+        foreach (var entry in _container.Children)
+            entry.Visible = SearchForText(entry, _search.Text);
+    }
+
+    private GuideReagentEmbed CreatePotionCard(ReagentPrototype reagent, string recipe)
+    {
+        var card = new GuideReagentEmbed(reagent, true) { HorizontalExpand = true };
+        var color = SharedChemistryRandomizationSystem.GetColor(reagent);
+        card.FindControl<PanelContainer>("NameBackground").PanelOverride = new StyleBoxFlat
         {
-            var proto = _proto.Index<ReagentPrototype>(id);
-            _container.AddChild(new GuideReagentEmbed(proto, true) { HorizontalExpand = true });
-        }
+            BackgroundColor = color,
+        };
+        var textColor = 0.2126f * color.R + 0.7152f * color.G + 0.0722f * color.B > 0.5f
+            ? Color.Black
+            : Color.White;
+        card.FindControl<RichTextLabel>("ReagentName").SetMarkup(Loc.GetString("guidebook-reagent-name",
+            ("color", textColor), ("name", reagent.LocalizedName)));
+
+        var preview = new Control
+        {
+            MinSize = new Vector2(64),
+            VerticalAlignment = VAlignment.Top,
+            Children =
+            {
+                new TextureRect
+                {
+                    TexturePath = "/Textures/Objects/Specific/Chemistry/bottle.rsi/bottle-1.png",
+                    TextureScale = new Vector2(2),
+                },
+                new TextureRect
+                {
+                    TexturePath = "/Textures/Objects/Specific/Chemistry/bottle.rsi/bottle-1-6.png",
+                    TextureScale = new Vector2(2),
+                    ModulateSelfOverride = color,
+                },
+            },
+        };
+        var description = new RichTextLabel { HorizontalExpand = true, Margin = new Thickness(10, 0, 0, 0) };
+        description.SetMessage(recipe);
+        var recipes = card.FindControl<GridContainer>("RecipesDescriptionContainer");
+        recipes.DisposeAllChildren();
+        recipes.AddChild(new BoxContainer { HorizontalExpand = true, Children = { preview, description } });
+        card.FindControl<BoxContainer>("RecipesContainer").Visible = true;
+        return card;
     }
 
     protected override DragMode GetDragModeFor(Vector2 relativeMousePos)
