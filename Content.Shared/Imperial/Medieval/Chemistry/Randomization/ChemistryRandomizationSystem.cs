@@ -7,6 +7,7 @@ using Content.Shared.Database;
 using Content.Shared.Destructible.Thresholds;
 using Content.Shared.EntityEffects;
 using Content.Shared.FixedPoint;
+using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Nutrition;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Network;
@@ -623,6 +624,8 @@ public sealed class SharedChemistryRandomizationSystem : EntitySystem
     /// </summary>
     public void FullyReactSolution(Entity<SolutionComponent> soln, ReactionMixerComponent? mixerComponent = null)
     {
+        AlchemyRecipeSystem.MergeHistories(soln.Comp.Solution);
+
         // construct the initial set of reactions to check.
         SortedSet<ReactionData> reactions = new();
         foreach (var reactant in soln.Comp.Solution.Contents)

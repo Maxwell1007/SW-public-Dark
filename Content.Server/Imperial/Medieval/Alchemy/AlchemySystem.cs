@@ -33,6 +33,7 @@ public sealed partial class AlchemySystem : EntitySystem
     {
         InitializeApparatus();
         InitializeRound();
+        InitializeChemMaster();
         SubscribeLocalEvent<AlchemyIngredientComponent, ExaminedEvent>(OnExamineIngredient);
         SubscribeLocalEvent<ReactionMixerComponent, ComponentStartup>(OnReactionMixerStartup);
         SubscribeLocalEvent<AlchemyMixerComponent, ReactionMixDoAfterEvent>(OnReactionMixFinished,

@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.FixedPoint;
 
@@ -7,7 +8,28 @@ namespace Content.Shared.Imperial.Medieval.Alchemy;
 
 public sealed class AlchemyRecipeSystem : EntitySystem
 {
-    public static void MergeHistories(Solution solution)
+    public override void Initialize()
+    {
+        base.Initialize();
+        SubscribeLocalEvent<SolutionComponent, SolutionChangedEvent>(OnSolutionChanged,
+            before: new[] { typeof(SharedSolutionContainerSystem) });
+        SubscribeLocalEvent<SolutionComponent, SolutionOverflowEvent>(OnSolutionOverflow,
+            before: new[] { typeof(SharedSolutionContainerSystem) });
+    }
+
+    private void OnSolutionChanged(Entity<SolutionComponent> entity, ref SolutionChangedEvent args)
+    {
+        if (MergeHistories(entity.Comp.Solution))
+            Dirty(entity);
+    }
+
+    private void OnSolutionOverflow(Entity<SolutionComponent> entity, ref SolutionOverflowEvent args)
+    {
+        if (MergeHistories(entity.Comp.Solution))
+            Dirty(entity);
+    }
+
+    public static bool MergeHistories(Solution solution)
     {
         List<string>? history = null;
         var initialized = false;
@@ -30,7 +52,7 @@ public sealed class AlchemyRecipeSystem : EntitySystem
         }
 
         if (!mismatch)
-            return;
+            return false;
 
         var contents = new Dictionary<ReagentId, FixedPoint2>();
         foreach (var entry in solution.Contents)
@@ -43,6 +65,7 @@ public sealed class AlchemyRecipeSystem : EntitySystem
         }
 
         solution.SetContents(contents.Select(entry => new ReagentQuantity(entry.Key, entry.Value)).ToList());
+        return true;
     }
 
     public static void RecordOperation(Solution solution, string operation, int historyLimit)
