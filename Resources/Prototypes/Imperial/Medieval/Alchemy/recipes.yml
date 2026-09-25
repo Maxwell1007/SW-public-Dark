@@ -37,7 +37,7 @@
   strictRatio: true
   allowImpurities: false
   ingredientCount: 3
-  totalAspectAmount: 120
+  totalAspectAmount: 100
   minParts: 1
   maxParts: 48
   expectedSteps: 4
@@ -396,85 +396,85 @@
   id: Alchemymedievaladvancedhealeverything
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedhealeverything: 8
+    medievaladvancedhealeverything: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedhealslash
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedhealslash: 8
+    medievaladvancedhealslash: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedhealpiercing
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedhealpiercing: 8
+    medievaladvancedhealpiercing: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedhealblunt
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedhealblunt: 8
+    medievaladvancedhealblunt: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedhealburn
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedhealburn: 8
+    medievaladvancedhealburn: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedfast
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedfast: 8
+    medievaladvancedfast: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedslow
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedslow: 8
+    medievaladvancedslow: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedpacifism
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedpacifism: 8
+    medievaladvancedpacifism: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedradiation
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedradiation: 8
+    medievaladvancedradiation: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedteleport
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedteleport: 8
+    medievaladvancedteleport: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedhealandstopblood
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedhealandstopblood: 8
+    medievaladvancedhealandstopblood: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedstimulant
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedstimulant: 8
+    medievaladvancedstimulant: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedignite
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancedignite: 8
+    medievaladvancedignite: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancednocturnblood
   parent: BaseAlchemyRecipeT2
   products:
-    medievaladvancednocturnblood: 8
+    medievaladvancednocturnblood: 10
 
 - type: alchemyRecipe
   id: Alchemymedievaladvancedsmokeandexplosion
@@ -492,25 +492,25 @@
   id: Alchemymedievalbestheal
   parent: BaseAlchemyRecipeT3
   products:
-    medievalbestheal: 12
+    medievalbestheal: 10
 
 - type: alchemyRecipe
   id: Alchemymedievalbestpoison
   parent: BaseAlchemyRecipeT3
   products:
-    medievalbestpoison: 12
+    medievalbestpoison: 10
 
 - type: alchemyRecipe
   id: Alchemymedievalbestacidradiation
   parent: BaseAlchemyRecipeT3
   products:
-    medievalbestacidradiation: 12
+    medievalbestacidradiation: 10
 
 - type: alchemyRecipe
   id: Alchemymedievalbeststimulant
   parent: BaseAlchemyRecipeT3
   products:
-    medievalbeststimulant: 12
+    medievalbeststimulant: 10
 
 - type: alchemyRecipe
   id: AlchemyWine
