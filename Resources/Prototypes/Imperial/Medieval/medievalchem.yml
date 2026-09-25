@@ -14,15 +14,9 @@
   name: kotel
   description: Used to contain a large amount of chemicals or solutions.
   id: MedievalKotel
-  parent: BaseStorageItem
+  parent: BaseItem
   components:
   - type: AlchemyVessel
-  - type: Storage
-    grid:
-    - 0,0,3,3
-    whitelist:
-      components:
-      - AlchemyIngredient
   - type: RDWeight
     value: 4
   - type: MeleeWeapon

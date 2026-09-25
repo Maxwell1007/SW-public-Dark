@@ -3200,7 +3200,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootGoblin
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootGoblin
   - type: Sprite
@@ -3296,7 +3296,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootHog
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootHog
   - type: RDWeight
@@ -3341,7 +3341,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootHunter
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootHunter
   - type: RDWeight
@@ -3386,7 +3386,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootCrab
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootCrab
   - type: RDWeight
@@ -3431,7 +3431,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootCrabDevil
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootCrabDevil
   - type: RDWeight
@@ -3666,7 +3666,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootDevilMouse
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootDevilMouse
   - type: Sprite
@@ -3707,7 +3707,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootAnt
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootAnt
   - type: MyrmexStew
@@ -3907,7 +3907,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalLootEgg
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalLootEgg
   - type: Sprite

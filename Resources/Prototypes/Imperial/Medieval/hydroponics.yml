@@ -597,7 +597,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerVetr
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerVetr
   - type: RDWeight
@@ -641,7 +641,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerLipad
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerLipad
   - type: RDWeight
@@ -685,7 +685,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerLava
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerLava
   - type: RDWeight
@@ -729,7 +729,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerCryo
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerCryo
   - type: RDWeight
@@ -773,7 +773,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerLuna
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerLuna
   - type: RDWeight
@@ -817,7 +817,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerStar
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerStar
   - type: RDWeight
@@ -861,7 +861,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerDark
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerDark
   - type: RDWeight
@@ -905,7 +905,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerBlood
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerBlood
   - type: NocturnBloodFood
@@ -950,7 +950,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerWhite
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerWhite
   - type: RDWeight
@@ -994,7 +994,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalFlowerBlack
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalFlowerBlack
   - type: RDWeight
@@ -1038,7 +1038,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalMushroom1
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalMushroom1
   - type: Sprite
@@ -1083,7 +1083,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalMushroom2
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalMushroom2
   - type: Sprite
@@ -1128,7 +1128,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalMushroom3
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalMushroom3
   - type: Sprite
@@ -1173,7 +1173,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalMushroom4
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalMushroom4
   - type: Sprite
@@ -1217,7 +1217,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalMushroom5
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalMushroom5
   - type: Sprite
@@ -1261,7 +1261,7 @@
     juiceSolution:
       reagents:
       - ReagentId: MedievalMushroom6
-        Quantity: 35
+        Quantity: 10
   - type: AlchemyIngredient
     profile: MedievalMushroom6
   - type: Sprite

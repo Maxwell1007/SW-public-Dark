@@ -10,7 +10,6 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Popups;
 using Content.Shared.Stacks;
-using Content.Shared.Storage;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Content.Server.Fluids.EntitySystems;
@@ -126,7 +125,7 @@ public sealed partial class AlchemySystem : EntitySystem
         comp.Processing = true;
         try
         {
-            Extract(uid, comp, solution.Value, state);
+            Extract(comp, solution.Value, state);
             var apparatus = CompOrNull<AlchemyApparatusComponent>(uid);
             var items = apparatus is { IsProcessing: true } ? apparatus.Items : null;
             var user = apparatus?.User is { } actor && !TerminatingOrDeleted(actor) ? apparatus.User : null;
@@ -149,30 +148,32 @@ public sealed partial class AlchemySystem : EntitySystem
         args.Handled = true;
     }
 
-    private void Extract(EntityUid uid, AlchemyVesselComponent vessel, Entity<SolutionComponent> solution,
+    private void Extract(AlchemyVesselComponent vessel, Entity<SolutionComponent> solution,
         AlchemyRoundComponent state)
     {
-        if (solution.Comp.Solution.Temperature < vessel.NigredoTemperature || !TryComp<StorageComponent>(uid, out var storage))
+        if (solution.Comp.Solution.Temperature < vessel.NigredoTemperature)
             return;
-        foreach (var item in storage.Container.ContainedEntities.ToArray())
+        foreach (var reagent in solution.Comp.Solution.Contents.Select(entry => entry.Reagent.Prototype).Distinct().ToArray())
         {
-            if (TerminatingOrDeleted(item) || !TryComp<AlchemyIngredientComponent>(item, out var ingredient) ||
-                !state.Ingredients.TryGetValue(ingredient.Profile, out var profile))
+            if (!state.Ingredients.TryGetValue(reagent, out var profile) ||
+                !_prototypes.TryIndex<EntityPrototype>(reagent, out var prototype) ||
+                !prototype.TryGetComponent<ExtractableComponent>(out var extractable, EntityManager.ComponentFactory) ||
+                extractable.JuiceSolution == null)
+                continue;
+            var portion = extractable.JuiceSolution.GetTotalPrototypeQuantity(reagent);
+            if (portion <= 0)
                 continue;
             var output = profile.Aspects.Values.Aggregate(FixedPoint2.Zero, (a, b) => a + b);
             var cost = output * 0.25;
             var available = solution.Comp.Solution.GetTotalPrototypeQuantity(profile.Solvent);
-            var count = TryComp<StackComponent>(item, out var stack) ? stack.Count : 1;
+            var count = solution.Comp.Solution.GetTotalPrototypeQuantity(reagent).Value / portion.Value;
             count = Math.Min(count, available.Value / cost.Value);
             if (count <= 0)
                 continue;
             RemovePrototype(solution.Comp.Solution, profile.Solvent, cost * count);
+            RemovePrototype(solution.Comp.Solution, reagent, portion * count);
             foreach (var (aspect, amount) in profile.Aspects)
                 solution.Comp.Solution.AddReagent(aspect, amount * count);
-            if (stack != null)
-                _stacks.SetCount(item, stack.Count - count);
-            else
-                QueueDel(item);
             _solutions.UpdateChemicals(solution, false);
         }
     }
