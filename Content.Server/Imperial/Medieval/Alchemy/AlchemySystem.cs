@@ -162,15 +162,13 @@ public sealed partial class AlchemySystem : EntitySystem
             var cost = output * 0.25;
             var available = mixture.GetTotalPrototypeQuantity(reagent);
             var solvent = mixture.GetTotalPrototypeQuantity(profile.Solvent);
-            var scale = Math.Min(available.Double() / profile.ReagentAmount.Double(), solvent.Double() / cost.Double());
-            var consumedReagent = profile.ReagentAmount * scale;
-            var consumedSolvent = cost * scale;
-            if (consumedReagent <= 0 || consumedSolvent <= 0 || profile.Aspects.Values.Any(amount => amount * scale <= 0))
+            var portions = Math.Min(available.Value / profile.ReagentAmount.Value, solvent.Value / cost.Value);
+            if (portions <= 0)
                 continue;
-            RemovePrototype(mixture, reagent, consumedReagent);
-            RemovePrototype(mixture, profile.Solvent, consumedSolvent);
+            RemovePrototype(mixture, reagent, profile.ReagentAmount * portions);
+            RemovePrototype(mixture, profile.Solvent, cost * portions);
             foreach (var (aspect, amount) in profile.Aspects)
-                mixture.AddReagent(aspect, amount * scale);
+                mixture.AddReagent(aspect, amount * portions);
             changed = true;
         }
         if (changed)

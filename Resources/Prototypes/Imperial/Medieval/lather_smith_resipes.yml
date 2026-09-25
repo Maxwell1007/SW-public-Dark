@@ -1119,7 +1119,7 @@
 
 - type: CP14Recipe
   id: MedievalAlchemyGrenadeT1
-  craftTime: 13
+  craftTime: 1
   iconOverride: MedievalGrenade
   stacks:
     MedievalIronIngot: 2
@@ -1129,7 +1129,7 @@
 
 - type: CP14Recipe
   id: MedievalCryoGrenade
-  craftTime: 13
+  craftTime: 1
   iconOverride: MedievalCryoGrenade
   stacks:
     MedievalIronIngot: 2
@@ -1139,7 +1139,7 @@
 
 - type: CP14Recipe
   id: MedievalAlchemyGrenadeT2
-  craftTime: 13
+  craftTime: 2
   iconOverride: MedievalAlchemyGrenadeT2
   stacks:
     MedievalIronIngot: 4
@@ -1149,7 +1149,7 @@
 
 - type: CP14Recipe
   id: MedievalAlchemyGrenadeT3
-  craftTime: 13
+  craftTime: 4
   iconOverride: MedievalAlchemyGrenadeT3
   stacks:
     MedievalIronIngot: 6

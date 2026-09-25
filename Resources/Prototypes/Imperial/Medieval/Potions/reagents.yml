@@ -295,7 +295,7 @@
 - type: reagent
   id: medievalAmmonia
   showinbook: false
-  name: ""
+  name: alchemy-potion-medievalAmmonia
   desc: ""
   physicalDesc: ""
   evaporationSpeed: 0.3
@@ -373,7 +373,7 @@
 - type: reagent
   id: medievalPlantBGone
   showinbook: false
-  name: ""
+  name: alchemy-potion-medievalPlantBGone
   desc: ""
   evaporationSpeed: 0.3
   absorbent: true
@@ -406,7 +406,7 @@
 - type: reagent
   id: medievalLeft4Zed
   showinbook: false
-  name: ""
+  name: alchemy-potion-medievalLeft4Zed
   desc: ""
   evaporationSpeed: 0.3
   absorbent: true
@@ -439,7 +439,7 @@
 - type: reagent
   id: medievalDiethylamine
   showinbook: false
-  name: ""
+  name: alchemy-potion-medievalDiethylamine
   desc: ""
   evaporationSpeed: 0.3
   absorbent: true
@@ -610,7 +610,7 @@
 - type: reagent
   id: medievalAntihol
   showinbook: false
-  name: ""
+  name: alchemy-potion-medievalAntihol
   desc: ""
   physicalDesc: ""
   flavor: null

@@ -23,7 +23,7 @@ public sealed class GuideAlchemyRecipeTable : TableContainer, IDocumentTag
     public GuideAlchemyRecipeTable()
     {
         IoCManager.InjectDependencies(this);
-        Columns = 5;
+        Columns = 3;
         HorizontalExpand = true;
     }
 
@@ -69,8 +69,6 @@ public sealed class GuideAlchemyRecipeTable : TableContainer, IDocumentTag
         AddCell(Loc.GetString("alchemy-guide-products"), true);
         AddCell(Loc.GetString("alchemy-guide-ingredients"), true);
         AddCell(Loc.GetString("alchemy-guide-steps"), true);
-        AddCell(Loc.GetString("alchemy-guide-precision"), true);
-        AddCell(Loc.GetString("alchemy-guide-impurities"), true);
 
         var operations = _prototypes.EnumeratePrototypes<AlchemyOperationPrototype>().ToDictionary(p => p.ID);
         var recipes = _prototypes.EnumeratePrototypes<AlchemyRecipePrototype>()
@@ -87,11 +85,7 @@ public sealed class GuideAlchemyRecipeTable : TableContainer, IDocumentTag
             AddCell(DescribeContents(recipe.Ingredients, recipe.Entities));
             AddCell(string.Join("\n", recipe.Steps.Select((id, index) =>
                 Loc.GetString("alchemy-guide-step", ("number", index + 1),
-                    ("operation", DescribeOperation(operations[id]))))));
-            AddCell(Loc.GetString(recipe.StrictRatio ? "alchemy-guide-strict" : "alchemy-guide-excess"));
-            AddCell(Loc.GetString(recipe.AllowImpurities
-                ? "alchemy-guide-impurities-allowed"
-                : "alchemy-guide-impurities-forbidden"));
+                    ("operation", Loc.GetString(operations[id].Name))))));
         }
     }
 
@@ -104,15 +98,6 @@ public sealed class GuideAlchemyRecipeTable : TableContainer, IDocumentTag
             ("amount", pair.Value.ToString())));
         return string.Join("\n", lines.Concat(entities.Select(pair => Loc.GetString("alchemy-guide-entity",
             ("name", _prototypes.Index<EntityPrototype>(pair.Key).Name), ("amount", pair.Value)))));
-    }
-
-    private static string DescribeOperation(AlchemyOperationPrototype operation)
-    {
-        var name = Loc.GetString(operation.Name);
-        return operation.Temperature is { } temperature
-            ? Loc.GetString("alchemy-guide-temperature", ("operation", name),
-                ("temperature", (temperature - 273.15f).ToString("0.##")))
-            : Loc.GetString("alchemy-guide-duration", ("operation", name), ("seconds", operation.Duration));
     }
 
     private void AddCell(string text, bool header = false)

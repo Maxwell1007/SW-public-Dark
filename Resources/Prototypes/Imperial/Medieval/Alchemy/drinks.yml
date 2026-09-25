@@ -96,8 +96,7 @@
 
 - type: alchemyRecipe
   id: AlchemyLiquidButter
-  parent: BaseAlchemyRecipeT1
-  strictRatio: false
+  parent: BaseAlchemyRecipeDrink
   ingredients:
   - reagent: Milk
     amount: 15

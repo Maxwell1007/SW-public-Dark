@@ -7,9 +7,48 @@ namespace Content.Shared.Imperial.Medieval.Alchemy;
 
 public sealed class AlchemyRecipeSystem : EntitySystem
 {
+    public static void MergeHistories(Solution solution)
+    {
+        List<string>? history = null;
+        var initialized = false;
+        var mismatch = false;
+        foreach (var entry in solution.Contents)
+        {
+            var current = entry.Reagent.Data?.OfType<AlchemyReagentData>().FirstOrDefault()?.Operations;
+            if (!initialized)
+            {
+                history = current;
+                initialized = true;
+                continue;
+            }
+
+            if ((history ?? Enumerable.Empty<string>()).SequenceEqual(current ?? Enumerable.Empty<string>()))
+                continue;
+
+            mismatch = true;
+            break;
+        }
+
+        if (!mismatch)
+            return;
+
+        var contents = new Dictionary<ReagentId, FixedPoint2>();
+        foreach (var entry in solution.Contents)
+        {
+            var data = entry.Reagent.Data?.Where(d => d is not AlchemyReagentData)
+                .Select(d => d.Clone()).ToList();
+            var reagent = new ReagentId(entry.Reagent.Prototype, data);
+            contents.TryGetValue(reagent, out var quantity);
+            contents[reagent] = quantity + entry.Quantity;
+        }
+
+        solution.SetContents(contents.Select(entry => new ReagentQuantity(entry.Key, entry.Value)).ToList());
+    }
+
     public static void RecordOperation(Solution solution, string operation, int historyLimit)
     {
-        foreach (var entry in solution.Contents.ToArray())
+        var contents = new Dictionary<ReagentId, FixedPoint2>();
+        foreach (var entry in solution.Contents)
         {
             var data = entry.Reagent.Data?.Where(d => d is not AlchemyReagentData)
                 .Select(d => d.Clone()).ToList() ?? new List<ReagentData>();
@@ -21,9 +60,12 @@ public sealed class AlchemyRecipeSystem : EntitySystem
             if (next.Operations.Count > historyLimit)
                 next.Operations.RemoveRange(0, next.Operations.Count - historyLimit);
             data.Add(next);
-            solution.RemoveReagent(entry.Reagent, entry.Quantity);
-            solution.AddReagent(new ReagentId(entry.Reagent.Prototype, data), entry.Quantity);
+            var reagent = new ReagentId(entry.Reagent.Prototype, data);
+            contents.TryGetValue(reagent, out var quantity);
+            contents[reagent] = quantity + entry.Quantity;
         }
+
+        solution.SetContents(contents.Select(entry => new ReagentQuantity(entry.Key, entry.Value)).ToList());
     }
 
     public static bool HasSuffix(ReagentId reagent, IReadOnlyList<string> steps)
