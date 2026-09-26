@@ -5,7 +5,8 @@
 
   <GuideLocalizedText Key="alchemy-guide-quantities"/>
 
-  <GuideLocalizedText Key="alchemy-guide-requirements"/>
+  <GuideLocalizedText Key="alchemy-guide-aspects-title" Style="LabelHeading"/>
+  <GuideLocalizedText Key="alchemy-guide-aspects"/>
 
   <GuideLocalizedText Key="guide-entry-medieval-alchemy-potions" Style="LabelHeading"/>
   <GuideAlchemyRecipeTable Tag="Potion"/>

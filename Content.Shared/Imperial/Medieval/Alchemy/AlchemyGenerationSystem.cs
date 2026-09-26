@@ -152,16 +152,26 @@ public sealed class AlchemyGenerationSystem : EntitySystem
         var cheapest = candidates.Count == 0 ? 0 : candidates.Min(o => o.Complexity);
         if (missing * cheapest > budget)
             throw new InvalidOperationException($"Alchemy recipe {proto.ID} cannot fit its expected steps in its budget.");
-        foreach (var step in steps)
+        for (var index = 0; index < steps.Count; index++)
         {
+            var step = steps[index];
+            var previous = result.Steps.Count > 0 ? operations[result.Steps[^1]] : null;
+            var next = index + 1 < steps.Count && steps[index + 1].Operation is { } nextId
+                ? operations[nextId]
+                : null;
             if (step.Operation != null)
             {
+                if (RepeatsTemperatureOperation(previous, operations[step.Operation]))
+                    throw new InvalidOperationException($"Alchemy recipe {proto.ID} repeats a temperature operation.");
                 result.Steps.Add(step.Operation);
                 continue;
             }
             missing--;
-            var eligible = candidates.Where(o => o.Complexity <= budget - missing * cheapest)
+            var eligible = candidates.Where(o => o.Complexity <= budget - missing * cheapest &&
+                    !RepeatsTemperatureOperation(previous, o) && !RepeatsTemperatureOperation(o, next))
                 .ToDictionary(o => o.ID, o => o.Weight);
+            if (eligible.Count == 0)
+                throw new InvalidOperationException($"Alchemy recipe {proto.ID} has no valid next operation within its complexity budget.");
             var id = Pick(random, eligible);
             result.Steps.Add(id);
             budget -= operations[id].Complexity;
@@ -171,6 +181,11 @@ public sealed class AlchemyGenerationSystem : EntitySystem
 
     public static bool IsAspect(string reagent) => reagent is
         "AlchemyWater" or "AlchemyEarth" or "AlchemyFire" or "AlchemyLight" or "AlchemyDarkness";
+
+    private static bool RepeatsTemperatureOperation(AlchemyOperationPrototype? left, AlchemyOperationPrototype? right)
+    {
+        return left?.Temperature != null && right?.Temperature != null && left.Heating == right.Heating;
+    }
 
     public static bool Conflicts(AlchemyRecipe left, AlchemyRecipe right)
     {

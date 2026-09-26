@@ -101,15 +101,7 @@ public sealed class PotionBookWindow
             foreach (var id in recipe.Products)
                 _container.AddChild(CreatePotionCard(_proto.Index<ReagentPrototype>(id), recipe.Description));
             foreach (var id in recipe.EntityProducts)
-            {
-                var description = new RichTextLabel { HorizontalExpand = true };
-                description.SetMessage(recipe.Description);
-                _container.AddChild(new BoxContainer
-                {
-                    Margin = new Thickness(5),
-                    Children = { new GuideEntityEmbed(id, true, false), description },
-                });
-            }
+                _container.AddChild(CreateEntityCard(_proto.Index<EntityPrototype>(id), recipe.Description));
         }
         foreach (var entry in _container.Children)
             entry.Visible = SearchForText(entry, _search.Text);
@@ -155,6 +147,64 @@ public sealed class PotionBookWindow
         recipes.AddChild(new BoxContainer { HorizontalExpand = true, Children = { preview, description } });
         card.FindControl<BoxContainer>("RecipesContainer").Visible = true;
         return card;
+    }
+
+    private Control CreateEntityCard(EntityPrototype prototype, string recipe)
+    {
+        var name = new RichTextLabel { HorizontalAlignment = HAlignment.Center };
+        name.SetMarkup(Loc.GetString("guidebook-reagent-name", ("color", Color.White), ("name", prototype.Name)));
+        var description = new RichTextLabel { HorizontalExpand = true, Margin = new Thickness(10, 0, 0, 0) };
+        description.SetMessage(recipe);
+        var body = new CollapsibleBody
+        {
+            Children =
+            {
+                new BoxContainer
+                {
+                    HorizontalExpand = true,
+                    Margin = new Thickness(10, 0, 10, 0),
+                    Children =
+                    {
+                        new GuideEntityEmbed(prototype.ID, false, false)
+                        {
+                            MinSize = new Vector2(64),
+                            Scale = new Vector2(2),
+                            VerticalAlignment = VAlignment.Top,
+                        },
+                        description,
+                    },
+                },
+            },
+        };
+        var details = new RichTextLabel { HorizontalExpand = true, Margin = new Thickness(10, 5, 10, 10) };
+        details.SetMessage(prototype.Description);
+        return new PanelContainer
+        {
+            HorizontalExpand = true,
+            Margin = new Thickness(5),
+            PanelOverride = new StyleBoxFlat { BorderThickness = new Thickness(1), BorderColor = Color.FromHex("#777777") },
+            Children =
+            {
+                new BoxContainer
+                {
+                    Orientation = LayoutOrientation.Vertical,
+                    Children =
+                    {
+                        new PanelContainer
+                        {
+                            HorizontalExpand = true,
+                            PanelOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#303946") },
+                            Children = { name },
+                        },
+                        new Collapsible(new CollapsibleHeading(Loc.GetString("guidebook-reagent-recipes-header")), body)
+                        {
+                            HorizontalExpand = true,
+                        },
+                        details,
+                    },
+                },
+            },
+        };
     }
 
     protected override DragMode GetDragModeFor(Vector2 relativeMousePos)
