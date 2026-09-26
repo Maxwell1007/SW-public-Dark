@@ -53,7 +53,6 @@ public sealed partial class AlchemySystem
             text.AppendLine($"{_prototypes.Index<Robust.Shared.Prototypes.EntityPrototype>(id).Name}: {count}");
         if (includeRequirements)
         {
-            text.AppendLine(Loc.GetString(recipe.StrictRatio ? "alchemy-recipe-strict" : "alchemy-recipe-excess"));
             text.AppendLine(Loc.GetString(recipe.AllowImpurities ? "alchemy-recipe-impurities" : "alchemy-recipe-pure"));
         }
         text.AppendLine(Loc.GetString("alchemy-recipe-steps"));

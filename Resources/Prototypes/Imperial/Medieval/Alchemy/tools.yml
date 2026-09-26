@@ -33,7 +33,7 @@
   description: A sturdy station with a pestle for processing alchemical mixtures.
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    sprite: Imperial/Medieval/Chem/whisk.rsi
     state: icon
   - type: AlchemyApparatus
     operation: Whip
@@ -45,15 +45,29 @@
   description: A bath for gradually cooling alchemical vessels.
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Chem/fireplate.rsi
-    state: icon
+    sprite: Imperial/Medieval/Chem/cooling_bath.rsi
+    layers:
+    - state: icon
+      map: [ "base" ]
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.AlchemyCoolingBathVisuals.IsProcessing:
+        base:
+          True: { state: cooling }
+          False: { state: icon }
   - type: AlchemyCoolingBath
+  - type: ActivatableUI
+    key: enum.AlchemyCoolingBathUiKey.Key
   - type: Storage
     grid:
     - 0,0,9,5
     maxItemSize: Huge
+    openOnActivate: false
   - type: UserInterface
     interfaces:
+      enum.AlchemyCoolingBathUiKey.Key:
+        type: AlchemyCoolingBathBoundUserInterface
       enum.StorageUiKey.Key:
         type: StorageBoundUserInterface
   - type: ContainerContainer
@@ -67,7 +81,7 @@
   description: An apparatus for distilling alchemical mixtures.
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    sprite: Imperial/Medieval/Chem/distiller.rsi
     state: icon
   - type: AlchemyApparatus
     operation: Distill
@@ -78,6 +92,9 @@
   name: rectifier
   description: An apparatus for rectifying alchemical mixtures.
   components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Chem/rectifier.rsi
+    state: icon
   - type: AlchemyApparatus
     operation: Rectify
 
@@ -88,7 +105,7 @@
   description: An apparatus for preparing alchemical extracts.
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    sprite: Imperial/Medieval/Chem/extractor.rsi
     state: icon
   - type: AlchemyApparatus
     operation: Extract
@@ -100,7 +117,7 @@
   description: A station for filtering alchemical mixtures.
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    sprite: Imperial/Medieval/Chem/filter.rsi
     state: icon
   - type: AlchemyApparatus
     operation: Filter
@@ -112,7 +129,7 @@
   description: A station for preparing alchemical infusions.
   components:
   - type: Sprite
-    sprite: Imperial/Medieval/Chem/fireplate.rsi
+    sprite: Imperial/Medieval/Chem/infusion.rsi
     state: icon
   - type: AlchemyApparatus
     operation: Infuse
