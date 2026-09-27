@@ -81,6 +81,7 @@ public sealed partial class TradingSystem
                         StandardPrice = Math.Max(1, item.Cost),
                         BaselineStackCount = stack?.Count ?? 1,
                         HasStack = stack != null,
+                        StackTypeId = stack?.StackTypeId,
                         Permanent = true,
                         Signature = $"common:{product.Id}",
                         DisplayName = FormatStackName(prototype.Name, stack?.Count),
@@ -696,6 +697,19 @@ public sealed partial class TradingSystem
             stackCount = overrideCount;
         }
 
+        if (stack != null)
+        {
+            var stackCommon = market.Comp.Commodities.Values.FirstOrDefault(value =>
+                value.Permanent &&
+                value.StackTypeId == stack.StackTypeId &&
+                value.BaselineStackCount == stackCount);
+            if (stackCommon != null)
+            {
+                common = stackCommon;
+                hasCommon = true;
+            }
+        }
+
         var hasStack = stack != null;
         var isRecipe = HasComp<MedievalRandomChemistryRecipeComponent>(item);
         var isCanvas = HasComp<CanvasComponent>(item);
@@ -749,6 +763,7 @@ public sealed partial class TradingSystem
             StandardPrice = standardPrice,
             BaselineStackCount = stackCount,
             HasStack = hasStack,
+            StackTypeId = stack?.StackTypeId,
             IsDamagedEquipment = isDamagedEquipment,
             Signature = signature,
             DisplayName = FormatStackName(metadata.EntityName, hasStack ? stackCount : null),
@@ -789,6 +804,9 @@ public sealed partial class TradingSystem
         bool isEquipment,
         bool isDamagedEquipment)
     {
+        if (TryComp<StackComponent>(item, out var stack))
+            return $"stack:{stack.StackTypeId}\u001f{stackCount.ToString(CultureInfo.InvariantCulture)}";
+
         var values = new List<string>
         {
             product.Id,

@@ -188,6 +188,7 @@ public sealed class PublicListingState
     public string SellerName;
     public bool IsOwn;
     public NetEntity? PreviewEntity;
+    public int? StackCount;
 
     public PublicListingState(
         Guid id,
@@ -196,7 +197,8 @@ public sealed class PublicListingState
         int price,
         string sellerName,
         bool isOwn,
-        NetEntity? previewEntity)
+        NetEntity? previewEntity,
+        int? stackCount)
     {
         Id = id;
         ProductEntity = productEntity;
@@ -205,6 +207,7 @@ public sealed class PublicListingState
         SellerName = sellerName;
         IsOwn = isOwn;
         PreviewEntity = previewEntity;
+        StackCount = stackCount;
     }
 }
 

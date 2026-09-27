@@ -193,7 +193,7 @@ public sealed partial class TradingSystem
             Id = Guid.NewGuid(),
             Item = item,
             Product = MetaData(item).EntityPrototype?.ID ?? string.Empty,
-            DisplayName = MetaData(item).EntityName,
+            DisplayName = GetPublicItemDisplayName(item, MetaData(item).EntityName),
             OwnerMindId = ownerMindId,
             SellerName = MetaData(args.User).EntityName,
             Sequence = board.NextSequence++,
@@ -529,11 +529,12 @@ public sealed partial class TradingSystem
             .Select(listing => new PublicListingState(
                 listing.Id,
                 listing.Product,
-                listing.DisplayName,
+                GetPublicItemDisplayName(listing.Item, listing.DisplayName),
                 listing.Price,
                 listing.SellerName,
                 userMindId != default && listing.SellerMindId == userMindId,
-                Exists(listing.Item) ? GetNetEntity(listing.Item) : null))
+                Exists(listing.Item) ? GetNetEntity(listing.Item) : null,
+                TryComp<StackComponent>(listing.Item, out var stack) ? stack.Count : null))
             .ToList();
 
         if (userMindId != default && board.PendingSalesByMind.TryGetValue(userMindId, out var sales))
@@ -552,10 +553,20 @@ public sealed partial class TradingSystem
             .Select(staged => new PublicStagedItemState(
                 staged.Id,
                 staged.Product,
-                staged.DisplayName,
+                GetPublicItemDisplayName(staged.Item, staged.DisplayName),
                 Exists(staged.Item) ? GetNetEntity(staged.Item) : null,
                 GetInstantSellValue(staged.Item, currency) ?? 0,
                 Exists(staged.Item) && TryFindBestBuyOffer(market, staged.Item, out var bid) ? bid.Price : null))
             .ToList();
+    }
+
+    private string GetPublicItemDisplayName(EntityUid item, string fallback)
+    {
+        if (!Exists(item))
+            return fallback;
+
+        return FormatStackName(
+            MetaData(item).EntityName,
+            TryComp<StackComponent>(item, out var stack) ? stack.Count : null);
     }
 }

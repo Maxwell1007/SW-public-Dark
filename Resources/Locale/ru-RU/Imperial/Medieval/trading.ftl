@@ -69,6 +69,7 @@ trading-ui-collect-button = Получить
 trading-ui-empty-archive = Архив сделок пуст
 trading-ui-held-item = Выбран: {$item}
 trading-ui-stack-name = {$name} — {$count} шт.
+trading-ui-stack-count = {$count} шт.
 
 trading-ui-help-title = Помощь по торговле
 trading-ui-help-buying-title = Покупка

@@ -27,6 +27,7 @@ public sealed class TradingCommodity
     public int RemainingScarcitySteps;
     public int BaselineStackCount = 1;
     public bool HasStack;
+    public string? StackTypeId;
     public bool Permanent;
     public bool IsDamagedEquipment;
     public string Signature = string.Empty;

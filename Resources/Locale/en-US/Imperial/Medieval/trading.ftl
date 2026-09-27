@@ -85,6 +85,7 @@ trading-ui-collect-button = Collect
 trading-ui-empty-archive = The trade archive is empty
 trading-ui-held-item = Selected: {$item}
 trading-ui-stack-name = {$name} ×{$count}
+trading-ui-stack-count = ×{$count}
 
 trading-ui-help-title = Trading Help
 trading-ui-help-buying-title = Buying

@@ -381,17 +381,17 @@ public sealed partial class TradingMenu : DefaultWindow
             HorizontalExpand = true,
             VerticalExpand = true,
         };
-        var previewSlot = new BoxContainer
+        var previewSlot = new PanelContainer
         {
-            Orientation = BoxContainer.LayoutOrientation.Vertical,
             HorizontalExpand = true,
             MinHeight = 100,
             SetHeight = 100,
-            Align = BoxContainer.AlignMode.Center,
         };
         var preview = CreateItemPreview(listing.ProductEntity, listing.PreviewEntity, new Vector2(80, 80), null);
         preview.HorizontalAlignment = HAlignment.Center;
+        preview.VerticalAlignment = VAlignment.Center;
         previewSlot.AddChild(preview);
+        AddStackCount(previewSlot, listing.StackCount);
         content.AddChild(previewSlot);
         content.AddChild(CreateCardNamePanel(
             listing.DisplayName,
@@ -445,6 +445,19 @@ public sealed partial class TradingMenu : DefaultWindow
                 ContentMarginBottomOverride = 5,
             },
         };
+    }
+
+    private static void AddStackCount(Control preview, int? count)
+    {
+        if (count == null)
+            return;
+
+        preview.AddChild(new Label
+        {
+            Text = Loc.GetString("trading-ui-stack-count", ("count", count.Value)),
+            HorizontalAlignment = HAlignment.Right,
+            VerticalAlignment = VAlignment.Bottom,
+        });
     }
 
     private static PanelContainer CreateCardNamePanel(string displayName, string toolTip, Color color)
@@ -509,6 +522,7 @@ public sealed partial class TradingMenu : DefaultWindow
             SetHeight = 100,
         };
         select.AddChild(CreateItemPreview(item, new Vector2(80, 80)));
+        AddStackCount(select, item.StackCount);
         select.OnPressed += _ =>
         {
             _selected = item.CommodityId;
