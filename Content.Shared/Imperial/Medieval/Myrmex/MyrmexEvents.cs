@@ -65,6 +65,12 @@ public sealed partial class ActionMyrmexSpawnDoAfterEvent : DoAfterEvent
     [DataField(required: true)]
     public EntProtoId Proto;
 
+    // imperial medieval - the action entity, so cooldown can be started on DoAfter completion
+    // instead of immediately when the DoAfter starts (see OnSpawn/OnSpawnDoAfter)
+    // NetEntity, not EntityUid - this event is networked and raw EntityUid isn't serializable here. 
+    [DataField(required: true)]
+    public NetEntity ActionUid; 
+    
     public override DoAfterEvent Clone() => this;
 }
 
@@ -74,4 +80,8 @@ public sealed partial class ActionMyrmexHealEvent : EntityTargetActionEvent
 {
     [DataField(required: true)]
     public DamageSpecifier HealedDamage;
+
+    // imperial medieval - how much bleeding severity this heal staunches. 0 = no change.
+    [DataField]
+    public float BleedReduction;
 }

@@ -39,6 +39,12 @@ public sealed class NPCJukeSystem : EntitySystem
 
     private void OnJukeSteering(EntityUid uid, NPCJukeComponent component, ref NPCSteeringEvent args)
     {
+        // Imperial Medieval npc-obstacle-handling Start
+        // Juking sets CanSeek false, which skips the obstacle handling too.
+        if (args.Steering.ClearingObstacle)
+            return;
+        // Imperial Medieval npc-obstacle-handling End
+
         if (component.JukeType == JukeType.AdjacentTile)
         {
             if (_npcRangedQuery.TryGetComponent(uid, out var ranged) &&

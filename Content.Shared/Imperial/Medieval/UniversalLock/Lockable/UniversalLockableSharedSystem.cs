@@ -3,6 +3,7 @@ using Content.Shared.Doors.Systems;
 using Content.Shared.Imperial.Medieval.Ships.Anchor;
 using Content.Shared.Imperial.Medieval.UniversalSecurity;
 using Content.Shared.Interaction;
+using Content.Shared.Prying.Components;
 using Content.Shared.Storage;
 using Content.Shared.Storage.Components;
 using Content.Shared.Storage.EntitySystems;
@@ -22,6 +23,16 @@ public sealed class UniversalLockableSharedSystem : EntitySystem
         SubscribeLocalEvent<UniversalLockableComponent, ActivateInWorldEvent>(OnActivate, before: new[] { typeof(MedievalAnchorSystem), typeof(SharedStorageSystem), typeof(SharedDoorSystem), typeof(SharedStorageSystem) });
         SubscribeLocalEvent<UniversalLockableComponent, StorageCloseAttemptEvent>(OnStorageCloseAttempt);
         SubscribeLocalEvent<UniversalLockableComponent, StorageInteractUsingAttemptEvent>(OnStorageInteractUsingAttemptEvent);
+        SubscribeLocalEvent<UniversalLockableComponent, BeforePryEvent>(OnBeforePry);
+    }
+
+    private void OnBeforePry(Entity<UniversalLockableComponent> entity, ref BeforePryEvent args)
+    {
+        if (args.Cancelled || !IsLocked(entity))
+            return;
+
+        args.Cancelled = true;
+        args.Message = "universal-lock-pry-locked";
     }
 
     private void OnActivate(Entity<UniversalLockableComponent> entity, ref ActivateInWorldEvent args)

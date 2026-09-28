@@ -7,3 +7,10 @@ medieval-myrmex-buff-stamina-examine = [bold]Расход выносливост
 
 medieval-myrmex-queen-egg-no-buff = Вы должны поесть для откладывания яйца
 medieval-myrmex-buff-limit-reached = Достигнут лимит баффов
+medieval-myrmex-altar-limit-reached = Улей уже использует максимум алтарей ({$max}), этот ничего не даёт
+medieval-myrmex-lifesource-limit-reached = Улей уже использует максимум источников жизни ({$max}), этот ничего не даёт
+
+medieval-myrmex-speed-burst-name = Ускорение
+medieval-myrmex-speed-burst-description = Вы стали быстрее от съеденных грибов
+medieval-myrmex-shield-burst-name = Стойкость
+medieval-myrmex-shield-burst-description = Вы стали устойчивее к урону от съеденных корешков

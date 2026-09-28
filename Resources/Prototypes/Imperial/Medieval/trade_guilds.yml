@@ -346,6 +346,15 @@
   - productEntity: MedievalScrollsCrossbow
     cost: 150
     reputationForBuying: 1
+  - productEntity: PerfumeBottleRose
+    cost: 75
+    reputationForBuying: 1
+  - productEntity: PerfumeBottleLavender
+    cost: 75
+    reputationForBuying: 1
+  - productEntity: PerfumeBottleAmber
+    cost: 75
+    reputationForBuying: 1
 
 - type: guildName
   id: WeaponGuild

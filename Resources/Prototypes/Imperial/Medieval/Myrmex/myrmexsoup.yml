@@ -56,7 +56,7 @@
   components:
   - type: MyrmexStew
     buff:
-      damage: 1.02
+      damage: 1.03
       health: 1.02
       stamina: 0.98
   - type: Sprite
@@ -89,6 +89,12 @@
   description: Soup.
   components:
   - type: MyrmexStew
+    buff: 
+      damage: 1.0
+      health: 1.0
+      stamina: 1.0
+    shieldBurstMultiplier: 0.8
+    shieldBurstDuration: 40
   - type: Sprite
     sprite: Imperial/Medieval/Myrmex/Soups/rootsoup.rsi
     state: icon
@@ -103,9 +109,11 @@
   components:
   - type: MyrmexStew
     buff:
-      damage: 0.98
+      damage: 0.99
       health: 1.02
-      stamina: 0.84
+      stamina: 0.95
+    speedBurstMultiplier: 0.2
+    speedBurstDuration: 40
   - type: Sprite
     sprite: Imperial/Medieval/Myrmex/Soups/mushroomsoup.rsi
     state: icon
@@ -132,14 +140,14 @@
   id: MedievalSoupRoot
   craftTime: 3
   entities:
-    MedievalRootItem: 2
+    MedievalRootItem: 3
   result: MedievalSoupRoot
 
 - type: CP14Recipe
   id: MedievalSoupMushroom1
   craftTime: 3
   entities:
-    MedievalMushroom1: 1
+    MedievalMushroom1: 2
     MedievalMushroom2: 1
     MedievalMushroom3: 1
   result: MedievalSoupMushroom

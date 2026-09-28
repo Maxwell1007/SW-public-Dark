@@ -22,11 +22,11 @@
     icon: Imperial/Medieval/Myrmex/Icons/boost.png
     priority: -12
     checkCanAccess: false
-    useDelay: 90
+    useDelay: 70
   - type: InstantAction
     event: !type:ActionMyrmexBoostEvent
-      duration: 3.5
-      multiplier: 0.7
+      duration: 7
+      multiplier: 0.45
 
 - type: entity
   name: Toggle armor
@@ -86,16 +86,26 @@
     itemIconStyle: BigAction
     icon: Imperial/Medieval/Myrmex/Icons/heal.png
     priority: -12
-    useDelay: 40
+    useDelay: 32
   - type: TargetAction
     range: 2
     checkCanAccess: false
   - type: EntityTargetAction
     event: !type:ActionMyrmexHealEvent
       healedDamage:
-        groups:
-          Brute: -50
-          Burn: -50
+        types:
+          Blunt: -60
+          Slash: -60
+          Piercing: -60
+          Heat: -60
+          Shock: -60
+          Cold: -60
+          Asphyxiation: -15
+          Bloodloss: -15
+          Poison: -10
+          Radiation: -10
+          Cellular: -5
+      bleedReduction: 4 
     canTargetSelf: false
     whitelist:
       requireAll: true

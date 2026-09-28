@@ -8,6 +8,7 @@ using Content.Server.NPC.HTN.PrimitiveTasks;
 using Content.Server.NPC.Systems;
 using Content.Shared.Administration;
 using Content.Shared.Mobs;
+using Content.Shared.Movement.Pulling.Events; // Imperial Medieval npc-obstacle-handling
 using Content.Shared.NPC;
 using JetBrains.Annotations;
 using Robust.Shared.Player;
@@ -36,6 +37,10 @@ public sealed class HTNSystem : EntitySystem
         SubscribeLocalEvent<HTNComponent, PlayerAttachedEvent>(_npc.OnPlayerNPCAttach);
         SubscribeLocalEvent<HTNComponent, PlayerDetachedEvent>(_npc.OnPlayerNPCDetach);
         SubscribeLocalEvent<HTNComponent, ComponentShutdown>(OnHTNShutdown);
+        // Imperial Medieval npc-obstacle-handling start
+        SubscribeLocalEvent<HTNComponent, PullStartedMessage>(OnPullChanged);
+        SubscribeLocalEvent<HTNComponent, PullStoppedMessage>(OnPullChanged);
+        // Imperial Medieval npc-obstacle-handling end
         SubscribeNetworkEvent<RequestHTNMessage>(OnHTNMessage);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypeLoad);
         OnLoad();
@@ -174,7 +179,14 @@ public sealed class HTNSystem : EntitySystem
     {
         component.PlanAccumulator = 0f;
     }
-
+    // Imperial Medieval npc-obstacle-handling start
+    private void OnPullChanged(EntityUid uid, HTNComponent component, PullMessage args)
+    {
+        if (args.PulledUid != uid)
+            return;
+        Replan(component);
+    }
+    // Imperial Medieval npc-obstacle-handling end
     public void UpdateNPC(ref int count, int maxUpdates, float frameTime)
     {
         _planQueue.Process();

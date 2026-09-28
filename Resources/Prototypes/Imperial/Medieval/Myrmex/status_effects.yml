@@ -1,0 +1,23 @@
+- type: statusEffect
+  id: MedievalMyrmexSpeedBurst
+  alert: MedievalMyrmexSpeedBurst
+
+- type: statusEffect
+  id: MedievalMyrmexShieldBurst
+  alert: MedievalMyrmexShieldBurst
+
+- type: alert
+  id: MedievalMyrmexSpeedBurst
+  icons:
+    - sprite: /Textures/Imperial/Medieval/Myrmex/Soups/mushroomsoup.rsi
+      state: icon
+  name: medieval-myrmex-speed-burst-name
+  description: medieval-myrmex-speed-burst-description
+
+- type: alert
+  id: MedievalMyrmexShieldBurst
+  icons:
+    - sprite: /Textures/Imperial/Medieval/Myrmex/Soups/rootsoup.rsi
+      state: icon
+  name: medieval-myrmex-shield-burst-name
+  description: medieval-myrmex-shield-burst-description

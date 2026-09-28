@@ -6,3 +6,10 @@ medieval-myrmex-buff-stamina-examine = [bold]Stamina consumption[/bold] [color=c
 
 medieval-myrmex-queen-egg-no-buff = You must eat to lay an egg
 medieval-myrmex-buff-limit-reached = Buff limit reached
+medieval-myrmex-altar-limit-reached = The hive already has the max number of altars ({$max}), this one does nothing
+medieval-myrmex-lifesource-limit-reached = The hive already has the max number of life sources ({$max}), this one does nothing
+
+medieval-myrmex-speed-burst-name = Haste
+medieval-myrmex-speed-burst-description = You feel faster from the mushrooms you ate
+medieval-myrmex-shield-burst-name = Fortitude
+edieval-myrmex-shield-burst-description = You feel sturdier from the roots you ate

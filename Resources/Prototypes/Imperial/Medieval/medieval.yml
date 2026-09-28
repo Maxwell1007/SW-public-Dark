@@ -1140,6 +1140,7 @@
     damage:
       types:
         Blunt: 3
+        Parryable: 1
   - type: RDWeight
     value: 4
 
@@ -2474,7 +2475,7 @@
         layer:
         - WallLayer
   - type: Damageable
-    damageContainer: Inorganic
+    damageContainer: StructuralInorganic
     damageModifierSet: Wood
   - type: MeleeSound
     soundGroups:
@@ -4437,7 +4438,173 @@
     state: mira
 
 - type: entity
+  id: MedievalScrollBarrierNovice
+  name: Weak scroll of runes
+  parent: BaseItem
+  components:
+  - type: ActivatableUI
+    key: enum.MagicScrollUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.MagicScrollUiKey.Key:
+        type: MagicScrollBoundUserInterface
+  - type: Item
+    size: Small
+  - type: Sprite
+    sprite: Imperial/Medieval/Decor/medieval_decor.rsi
+    layers:
+    - state: scroll1
+  - type: MagicScroll
+    isPractice: true
+    requiredIntelligence: 9
+    basicPower: 1
+    pointsPerDecodedRune: 2
+    maxFails: 4
+    maxRestarts: -1
+  - type: Tag
+    tags:
+    - MagicScroll
+  - type: TrashClear # imperial medieval
+    safe: true # imperial medieval
+  - type: Explosive
+    explosionType: Default
+    maxIntensity: 1.1
+    intensitySlope: 8
+    totalIntensity: 36
+    maxTileBreak: 0
+    deleteAfterExplosion: true
+
+- type: entity
   id: MedievalScrollBarrier
+  name: scroll of runes
+  parent: BaseItem
+  components:
+  - type: ActivatableUI
+    key: enum.MagicScrollUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.MagicScrollUiKey.Key:
+        type: MagicScrollBoundUserInterface
+  - type: Item
+    size: Small
+  - type: Sprite
+    sprite: Imperial/Medieval/Decor/medieval_decor.rsi
+    layers:
+    - state: scroll1
+  - type: MagicScroll
+    convertScroll: true
+    maxRestarts: 5
+  - type: Tag
+    tags:
+    - MagicScroll
+  - type: TrashClear # imperial medieval
+    safe: true # imperial medieval
+  - type: Explosive
+    explosionType: Default
+    maxIntensity: 1.1
+    intensitySlope: 8
+    totalIntensity: 36
+    maxTileBreak: 0
+    deleteAfterExplosion: true
+
+- type: entity
+  id: MedievalScrollBarrierOverclocked
+  name: overclocked barrier rune scroll
+  parent: BaseItem
+  components:
+  - type: ActivatableUI
+    key: enum.MagicScrollUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.MagicScrollUiKey.Key:
+        type: MagicScrollBoundUserInterface
+  - type: Item
+    size: Small
+  - type: Sprite
+    sprite: Imperial/Medieval/Decor/medieval_decor.rsi
+    layers:
+    - state: scroll1
+  - type: PointLight
+    radius: 1.5
+    energy: 15
+    color: blue
+    castShadows: false
+  - type: MagicScroll
+    requiredIntelligence: 15
+    basicPower: 30
+    requiresRunePairs: true
+    maxEncryptedPairs: 4
+    gridSize: 9
+    totalMines: 11
+    moveTimeSeconds: 30
+    tipsAvailable: 3
+    maxRestarts: 2
+    powerPerSolvedPair: 20
+  - type: Tag
+    tags:
+    - MagicScroll
+  - type: TrashClear
+    safe: true
+  - type: Explosive
+    explosionType: Default
+    maxIntensity: 1.1
+    intensitySlope: 8
+    totalIntensity: 36
+    maxTileBreak: 0
+    deleteAfterExplosion: true
+
+- type: entity
+  id: MedievalScrollBarrierUnstable
+  name: unstable barrier rune scroll
+  parent: BaseItem
+  components:
+  - type: ActivatableUI
+    key: enum.MagicScrollUiKey.Key
+    inHandsOnly: true
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.MagicScrollUiKey.Key:
+        type: MagicScrollBoundUserInterface
+  - type: Item
+    size: Small
+  - type: Sprite
+    sprite: Imperial/Medieval/Decor/medieval_decor.rsi
+    layers:
+    - state: scroll1
+  - type: PointLight
+    radius: 1.5
+    energy: 15
+    color: red
+    castShadows: false
+  - type: MagicScroll
+    requiredIntelligence: 18
+    requiresRunePairs: true
+    maxRestarts: 0
+    moveTimeSeconds: 10
+    minimumMoveDelaySeconds: 1
+    isUnstable: true
+  - type: Tag
+    tags:
+    - MagicScroll
+  - type: TrashClear
+    safe: true
+  - type: RadiationSource
+    intensity: 5
+    slope: 2
+  - type: Explosive
+    explosionType: Default
+    maxIntensity: 1.1
+    intensitySlope: 8
+    totalIntensity: 36
+    maxTileBreak: 0
+    deleteAfterExplosion: true
+
+- type: entity
+  id: MedievalScrollBarrierDecoded
   name: scroll of runes
   parent: BaseItem
   components:
@@ -4454,11 +4621,12 @@
     layers:
     - state: scroll1
   - type: MagicScroll
+    maxRunes: 0
   - type: Tag
     tags:
     - MagicScroll
-  - type: TrashClear # imperial medieval
-    safe: true # imperial medieval
+  - type: TrashClear
+    safe: true
   - type: Explosive
     explosionType: Default
     maxIntensity: 1.1
@@ -4466,6 +4634,7 @@
     totalIntensity: 36
     maxTileBreak: 0
     deleteAfterExplosion: true
+
 
 - type: entity
   id: MedievalScrollBarrierBad
@@ -4480,7 +4649,7 @@
     - state: scroll1
   - type: MagicScroll
     bad: true
-    basicPower: -15
+    basicPower: -50
   - type: Tag
     tags:
     - MagicScroll
@@ -6214,7 +6383,7 @@
         layer:
         - WallLayer
   - type: Damageable
-    damageContainer: Inorganic
+    damageContainer: StructuralInorganic
     damageModifierSet: Wood
   - type: MeleeSound
     soundGroups:
@@ -9006,6 +9175,34 @@
       tags:
         - MedievalKey
 
+# Universal keys
+
+- type: entity
+  parent: MedievalKeyBase
+  id: MedievalHouseKeyBase
+  components:
+    - type: Sprite
+      sprite: Imperial/Medieval/Misc/keys.rsi
+      state: house
+    - type: Key
+      accesses: []
+    - type: Tag
+      tags:
+        - MedievalKey
+
+- type: entity
+  parent: MedievalKeyBase
+  id: MedievalRichHouseKeyBase
+  components:
+    - type: Sprite
+      sprite: Imperial/Medieval/Misc/keys.rsi
+      state: richhouse
+    - type: Key
+      accesses: []
+    - type: Tag
+      tags:
+        - MedievalKey
+
 - type: entity
   id: MedievalGussarFlagZablik
   description: A barricade made out of wood planks. It looks like it can take a few solid hits.
@@ -9333,3 +9530,54 @@
     - id: TowercapSeeds
     - id: TowercapSeeds
 
+- type: entity
+  id: SimpleMarker
+  parent: MarkerBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    layers:
+    - state: location
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        hard: false
+
+- type: entity
+  id: CitizenSpawnMarker
+  parent: MarkerBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    layers:
+    - state: location
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        hard: false
+  - type: CitizenSpawner
+    keyAccess: House

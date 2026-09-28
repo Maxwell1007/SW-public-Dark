@@ -106,7 +106,35 @@
   - type: Construction
     graph: MTerraAltar
     node: medievalMyrmexTerraAltar
-
+  # imperial medieval - overrides the parent's generic Destructible to also refund the exact
+  # materials used to build this altar. Same 150 threshold as the parent, just with a drop added.
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 150
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: WoodDestroy
+          params:
+            volume: -8
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalMyrmexResourceGum:
+            min: 1
+            max: 1
+          MedievalMushroom3:
+            min: 1
+            max: 1
+          MedievalRootItem:
+            min: 2
+            max: 2
+          MedievalMyrmexResourceYantGear:
+            min: 2
+            max: 2
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 - type: entity
   id: MedievalMyrmexRadar
   name: подземный радар
@@ -187,3 +215,32 @@
   - type: Construction
     graph: MLifeSource
     node: medievalMyrmexLifeSource
+  # imperial medieval - overrides the parent's generic Destructible to also refund the exact
+  # materials used to build this life source. Same 150 threshold as the parent, drop added.
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 150
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: WoodDestroy
+          params:
+            volume: -8
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalMyrmexResourceGum:
+            min: 1
+            max: 1
+          MedievalMushroom1:
+            min: 1
+            max: 1
+          MedievalRootItem:
+            min: 1
+            max: 1
+          MedievalMyrmexResourceYantGear:
+            min: 2
+            max: 2
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]

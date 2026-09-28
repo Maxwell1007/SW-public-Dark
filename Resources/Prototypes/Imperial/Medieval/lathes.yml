@@ -1094,7 +1094,10 @@
     - RecycleCrystalToEssenceFire
     - RecycleCrystalToEssenceLight
     - RecycleCrystalToEssenceEarth
+    - MedievalScrollBarrierNovice
     - MedievalScrollBarrier
+    - MedievalScrollBarrierOverclocked
+    - MedievalScrollBarrierUnstable
     - MedievalManaBurnGrenade
     - MedievalGlowStone
     - MedievalCompactDefibrillator
@@ -1354,6 +1357,7 @@
     - MedievalChemistryEmptyBottleTempering02Craft
     - MedievalChemistryEmptyBottleTempering03Craft
     - MedievalChemistryEmptyBottleTempering04Craft
+    - PerfumeBottleRecipe
     - MedievalKotel
     - Syringe
     - MedievalHorseLeatherArmor

@@ -22,4 +22,4 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 15
+        Blunt: 22.5

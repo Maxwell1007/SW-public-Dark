@@ -25,7 +25,7 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 16
+        Blunt: 24
 
 # Middle
 
@@ -54,7 +54,7 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 9
+        Blunt: 13.5
 
 # Senior
 
@@ -83,7 +83,7 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 7.5
+        Blunt: 11.25
 
 - type: entity
   id: MedievalProjectileMagicArrowCursorFolloverSenior2

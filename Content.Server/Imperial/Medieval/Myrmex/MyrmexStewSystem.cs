@@ -4,6 +4,7 @@ using Content.Shared.Myrmex.Hive;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Popups;
+using Content.Shared.StatusEffect;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
@@ -18,6 +19,7 @@ namespace Content.Server.Imperial.Medieval.Myrmex;
         [Dependency] private readonly SharedPopupSystem _popup = default!;
         [Dependency] private readonly SharedAudioSystem _audio = default!;
         [Dependency] private readonly SharedMyrmexHiveSystem _hive = default!;
+        [Dependency] private readonly StatusEffectsSystem _status = default!;
 
         public override void Initialize()
         {
@@ -128,6 +130,27 @@ namespace Content.Server.Imperial.Medieval.Myrmex;
                     _popup.PopupEntity(Loc.GetString("medieval-myrmex-buff-limit-reached"), args.User, args.User);
             }
 
+            // imperial medieval - fires regardless of the buff-linit check above. Uses
+            // StatusEffectsSystem for the alert icon, same as vanilla farmer boost. 
+            if (entity.Comp.SpeedBurstMultiplier is { } burstMultiplier)
+            {
+                if (_status.TryAddStatusEffect<MyrmexSpeedBurstComponent>(args.User, "MedievalMyrmexSpeedBurst", entity.Comp.SpeedBurstDuration, true)
+                    && TryComp<MyrmexSpeedBurstComponent>(args.User, out var speedBurst))
+                {
+                    speedBurst.Multiplier = burstMultiplier; 
+                }
+            }
+            
+            // imperial medieval - same idea. but a temporary damage-reduction marker instead. 
+            if (entity.Comp.ShieldBurstMultiplier is { } shieldMultiplier)
+            {
+                if (_status.TryAddStatusEffect<MyrmexTempShieldComponent>(args.User, "MedievalMyrmexShieldBurst", entity.Comp.ShieldBurstDuration, true)
+                    && TryComp<MyrmexTempShieldComponent>(args.User, out var shield))
+                {
+                    shield.Multiplier = shieldMultiplier;
+                }
+            }
+            
             hunger.Dirty();
 
             if (TryComp<LarvaComponent>(args.User, out _) &&

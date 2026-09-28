@@ -18,6 +18,7 @@
           path: /Audio/Effects/break_stone.ogg
           params:
             volume: -6
+  - type: NPCUnsmashable # Imperial Medieval npc-obstacle-handling
 
 # Ore veins
 - type: entity

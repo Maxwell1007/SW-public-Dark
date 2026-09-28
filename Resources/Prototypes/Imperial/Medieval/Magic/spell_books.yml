@@ -59,7 +59,7 @@
       MagicMedievalLight: 100
       MagicMedievalVodka: 100
       MagicMedievalEarth: 100
-      MagicMedievalDarkness: 20
+      MagicMedievalDarkness: 0
       ArchmagePoints: 4
 
 - type: entity

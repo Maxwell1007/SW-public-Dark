@@ -9,6 +9,7 @@ ent-MedievalDoorKeySuperKey = Божественный ключ
 
 universal-security-eject-lock = Отцепить замок
 
+universal-lock-pry-locked = Заперто на замок.
 universal-lock-examine-is-locked = закреплен
 universal-lock-examine-is-unlocked = не закреплен
 

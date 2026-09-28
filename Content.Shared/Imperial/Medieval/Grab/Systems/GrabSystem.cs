@@ -17,6 +17,7 @@ using Content.Shared.Movement.Events;
 using Content.Shared.Movement.Pulling.Components;
 using Content.Shared.Movement.Pulling.Systems;
 using Content.Shared.Movement.Systems;
+using Content.Shared.NPC;
 using Content.Shared.Popups;
 using Content.Shared.Pulling.Events;
 using Content.Shared.Standing;
@@ -122,6 +123,44 @@ public sealed class GrabSystem : EntitySystem
 
     #endregion
 
+    #region Update
+
+    private const float StruggleInterval = 1f;
+
+    private float _struggleAccumulator;
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        if (_net.IsClient)
+            return;
+
+        _struggleAccumulator += frameTime;
+
+        if (_struggleAccumulator < StruggleInterval)
+            return;
+
+        _struggleAccumulator -= StruggleInterval;
+
+        var query = EntityQueryEnumerator<GrabbableComponent, ActiveNPCComponent>();
+
+        while (query.MoveNext(out var uid, out var grabbable, out _))
+        {
+            if (grabbable.DoAfterRaised || grabbable.Grabber is not { Valid: true } grabber)
+                continue;
+
+            // Struggling is driven off move input, which an NPC never produces.
+            if (!_blocker.CanMove(uid))
+                continue;
+
+            grabbable.DoAfterRaised = TryStartEscapeDoAfter(uid, grabber);
+            Dirty(uid, grabbable);
+        }
+    }
+
+    #endregion
+
     #region Grabbable Events Handling
 
     private void OnGrabbableMoveInput(EntityUid uid, GrabbableComponent component, ref MoveInputEvent args)
@@ -138,8 +177,8 @@ public sealed class GrabSystem : EntitySystem
         if (component.Grabber is not { Valid: true } grabber)
             return;
 
-        component.DoAfterRaised = true;
-        TryStartEscapeDoAfter(uid, grabber);
+        component.DoAfterRaised = TryStartEscapeDoAfter(uid, grabber);
+        Dirty(uid, component);
     }
 
     private void OnGrabbableCollisionChange(EntityUid uid, GrabbableComponent component, ref CollisionChangeEvent args)
@@ -242,8 +281,8 @@ public sealed class GrabSystem : EntitySystem
         if (component.Grabber is not { Valid: true } grabber)
             return;
 
-        component.DoAfterRaised = true;
-        TryStartEscapeDoAfter(uid, grabber);
+        component.DoAfterRaised = TryStartEscapeDoAfter(uid, grabber);
+        Dirty(uid, component);
     }
 
     #endregion
@@ -650,7 +689,7 @@ public sealed class GrabSystem : EntitySystem
 
     #region Helpers
 
-    private void TryStartEscapeDoAfter(EntityUid victim, EntityUid grabber)
+    private bool TryStartEscapeDoAfter(EntityUid victim, EntityUid grabber)
     {
         var atkScore = GetStrength(grabber) * 3 + GetDexterity(grabber) * 3;
         var defScore = GetStrength(victim) * 4 + GetDexterity(victim) * 3;
@@ -669,7 +708,7 @@ public sealed class GrabSystem : EntitySystem
             BreakOnWeightlessMove = false,
         });
 
-        _doAfter.TryStartDoAfter(args);
+        return _doAfter.TryStartDoAfter(args);
     }
 
 

@@ -37,7 +37,15 @@ public sealed class UniversalKeyServerSystem : EntitySystem
 
     private void OnMapInit(Entity<UniversalKeyComponent> keyEntity, ref MapInitEvent args)
     {
-        if (!TryComp<KeyComponent>(keyEntity, out var keyComponent))
+        SetupKey(keyEntity);
+    }
+
+    public void SetupKey(EntityUid keyUid)
+    {
+        if (!TryComp<UniversalKeyComponent>(keyUid, out var universalKeyComponent))
+            return;
+
+        if (!TryComp<KeyComponent>(keyUid, out var keyComponent))
             return;
 
         var accessId = keyComponent.Accesses.FirstOrDefault();
@@ -51,7 +59,7 @@ public sealed class UniversalKeyServerSystem : EntitySystem
             UniversalLockableServerSystem.Factionlength
         );
 
-        SetupKeyFraction(keyEntity, newCode, UniversalLockableServerSystem.FactionmaxValue);
+        SetupKeyFraction((keyUid, universalKeyComponent), newCode, UniversalLockableServerSystem.FactionmaxValue);
     }
 
     private void OnKeyUsedOnLock(Entity<UniversalLockComponent> lockEntity, ref InteractUsingEvent args)

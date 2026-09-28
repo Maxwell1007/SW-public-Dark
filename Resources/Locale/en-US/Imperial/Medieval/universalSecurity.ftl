@@ -30,6 +30,7 @@ ent-MedievalDoorLockT3 = masterwork iron lock
 
 universal-security-eject-lock = Detach lock
 
+universal-lock-pry-locked = It's locked shut.
 universal-lock-examine-is-locked = attached
 universal-lock-examine-is-unlocked = not attached
 

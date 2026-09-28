@@ -5,6 +5,11 @@
     - tasks:
         - !type:HTNCompoundTask
           task: MeleeCombatCompound
+    # Imperial Medieval npc-obstacle-handling Start
+    - tasks:
+        - !type:HTNCompoundTask
+          task: InvestigateLastKnownCompound
+    # Imperial Medieval npc-obstacle-handling End
     - tasks:
         - !type:HTNCompoundTask
           task: IdleCompound

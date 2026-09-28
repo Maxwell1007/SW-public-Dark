@@ -22,7 +22,7 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 16
+        Blunt: 24
 
 # Middle
 
@@ -48,7 +48,7 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 15
+        Blunt: 22.5
 
 # Senior
 
@@ -74,4 +74,4 @@
   - type: Projectile
     damage:
       types:
-        Blunt: 18
+        Blunt: 27

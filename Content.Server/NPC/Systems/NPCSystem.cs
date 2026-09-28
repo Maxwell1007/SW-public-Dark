@@ -8,6 +8,7 @@ using Content.Shared.Mobs;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.NPC;
 using Content.Shared.NPC.Systems;
+using Content.Shared.Prying.Components; // Imperial Medieval npc-obstacle-handling
 using Prometheus;
 using Robust.Server.GameObjects;
 using Robust.Shared.Configuration;
@@ -48,6 +49,7 @@ namespace Content.Server.NPC.Systems
 
         public void OnPlayerNPCAttach(EntityUid uid, HTNComponent component, PlayerAttachedEvent args)
         {
+            RevokeNPCPrying(uid); // Imperial Medieval npc-obstacle-handling
             SleepNPC(uid, component);
         }
 
@@ -60,14 +62,38 @@ namespace Content.Server.NPC.Systems
             if (TryComp<MindContainerComponent>(uid, out var mindContainer) && mindContainer.HasMind)
                 return;
 
+            GrantNPCPrying(uid); // Imperial Medieval npc-obstacle-handling
             WakeNPC(uid, component);
         }
 
         public void OnNPCMapInit(EntityUid uid, HTNComponent component, MapInitEvent args)
         {
             component.Blackboard.SetValue(NPCBlackboard.Owner, uid);
+            // Imperial Medieval npc-obstacle-handling Start
+            GrantNPCPrying(uid);
+            EnsureComp<NPCTargetMemoryComponent>(uid);
+            // Imperial Medieval npc-obstacle-handling End
             WakeNPC(uid, component);
         }
+
+        // Imperial Medieval npc-obstacle-handling Start
+        private void GrantNPCPrying(EntityUid uid)
+        {
+            if (HasComp<PryingComponent>(uid))
+                return;
+
+            EnsureComp<PryingComponent>(uid);
+            EnsureComp<NPCGrantedPryingComponent>(uid);
+        }
+
+        private void RevokeNPCPrying(EntityUid uid)
+        {
+            if (!RemComp<NPCGrantedPryingComponent>(uid))
+                return;
+
+            RemComp<PryingComponent>(uid);
+        }
+        // Imperial Medieval npc-obstacle-handling End
 
         public void OnNPCShutdown(EntityUid uid, HTNComponent component, ComponentShutdown args)
         {

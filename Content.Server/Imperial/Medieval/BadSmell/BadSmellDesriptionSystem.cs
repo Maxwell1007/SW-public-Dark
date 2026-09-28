@@ -96,16 +96,31 @@ namespace Content.Server.BadSmell
         {
             if (TryComp<BadSmellFeelComponent>(args.Examiner, out var feel) && !feel.DescEnabled)
             {
-                args.PushMarkup("[color=gray]Вы не чувствуете запахи[/color]");
+                args.PushMarkup(Loc.GetString("bad-smell-cannot-smell"));
                 return;
             }
+
+            var ev = new BadSmellBeforeExamineEvent();
+            RaiseLocalEvent(uid, ev);
+
+            if (ev.Cancelled)
+                return;
+
+            if (ev.Scents.Count > 0)
+            {
+                var line = string.Join(", ", ev.Scents);
+                args.PushMarkup(Loc.GetString("bad-smell-scents-line", ("scents", line)));
+                return;
+            }
+
             if (component.SmellLevel > 60f && component.SmellLevel <= 80f)
-                args.PushMarkup("[color=sandybrown]Воняет помоями[/color]");
-            if (component.SmellLevel > 80f)
-                args.PushMarkup("[color=orange]Невероятно воняет помоями[/color]");
-            if (component.SmellLevel < 25f)
-                args.PushMarkup("[color=green]Пахнет свежестью[/color]");
+                args.PushMarkup(Loc.GetString("bad-smell-level-moderate"));
+            else if (component.SmellLevel > 80f)
+                args.PushMarkup(Loc.GetString("bad-smell-level-heavy"));
+            else if (component.SmellLevel < 25f)
+                args.PushMarkup(Loc.GetString("bad-smell-level-fresh"));
         }
+        
         TimeSpan StartTime = TimeSpan.FromSeconds(0f);
         TimeSpan EndTime = TimeSpan.FromSeconds(0f);
         TimeSpan ReloadTime = TimeSpan.FromSeconds(25f);
