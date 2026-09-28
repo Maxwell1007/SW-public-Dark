@@ -1,4 +1,17 @@
 - type: alchemyRecipe
+  id: AlchemyWine
+  parent: BaseAlchemyRecipeDrink
+  ingredients:
+  - reagent: JuiceGrape
+    amount: 3
+  - reagent: Sugar
+    amount: 1
+  steps:
+  - operation: Infuse
+  products:
+    Wine: 4
+
+- type: alchemyRecipe
   id: AlchemyBeer
   parent: BaseAlchemyRecipeDrink
   ingredients:

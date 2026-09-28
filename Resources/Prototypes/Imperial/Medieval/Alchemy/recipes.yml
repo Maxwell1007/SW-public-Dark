@@ -21,7 +21,7 @@
   strictRatio: true
   allowImpurities: false
   ingredientCount: 2
-  totalAspectAmount: 10
+  totalAspectAmount: 20
   minParts: 1
   maxParts: 9
   expectedSteps: 3
@@ -37,9 +37,9 @@
   strictRatio: true
   allowImpurities: false
   ingredientCount: 3
-  totalAspectAmount: 100
+  totalAspectAmount: 35
   minParts: 1
-  maxParts: 48
+  maxParts: 14
   expectedSteps: 4
   maxComplexity: 15
 
@@ -106,7 +106,7 @@
   steps:
   - operation: Stir
   products:
-    medievalacid: 2
+    medievalacid: 3
 
 - type: alchemyRecipe
   id: Alchemymedievaldrughealmech
@@ -257,7 +257,7 @@
   steps:
   - operation: Whip
   products:
-    medievalAntihol: 4
+    medievalAntihol: 3
 
 - type: alchemyRecipe
   id: Alchemymedievalcryoexplosion
@@ -511,16 +511,3 @@
   parent: BaseAlchemyRecipeT3
   products:
     medievalbeststimulant: 10
-
-- type: alchemyRecipe
-  id: AlchemyWine
-  parent: BaseAlchemyRecipeDrink
-  ingredients:
-  - reagent: JuiceGrape
-    amount: 3
-  - reagent: Sugar
-    amount: 1
-  steps:
-  - operation: Infuse
-  products:
-    Wine: 4
