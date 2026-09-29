@@ -3,6 +3,9 @@
   parent: BaseStructure
   id: BaseMedievalAlchemyApparatus
   components:
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: Metallic
   - type: AlchemyApparatus
   - type: AlchemyVessel
     solution: alchemy_input
@@ -37,6 +40,19 @@
     state: icon
   - type: AlchemyApparatus
     operation: Whip
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MaterialWoodPlank1:
+            min: 2
+            max: 3
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
 - type: entity
   parent: BaseStructure
@@ -44,6 +60,9 @@
   name: cooling bath
   description: A bath for gradually cooling alchemical vessels.
   components:
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: Metallic
   - type: Sprite
     sprite: Imperial/Medieval/Chem/cooling_bath.rsi
     layers:
@@ -73,6 +92,19 @@
   - type: ContainerContainer
     containers:
       storagebase: !type:Container
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalTopaz:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
 - type: entity
   parent: BaseMedievalAlchemyApparatus
@@ -85,6 +117,22 @@
     state: icon
   - type: AlchemyApparatus
     operation: Distill
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 400
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalIronPlateSmall:
+            min: 1
+            max: 1
+          MedievalIronIngot:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
 - type: entity
   parent: MedievalAlchemyDistill
@@ -97,6 +145,22 @@
     state: icon
   - type: AlchemyApparatus
     operation: Rectify
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 1000
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalStoneBrick:
+            min: 3
+            max: 4
+          MedievalIronPlate:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
 - type: entity
   parent: BaseMedievalAlchemyApparatus
@@ -109,6 +173,22 @@
     state: icon
   - type: AlchemyApparatus
     operation: Extract
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 400
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalStoneBrick:
+            min: 2
+            max: 3
+          MedievalIronIngot:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
 - type: entity
   parent: BaseMedievalAlchemyApparatus
@@ -121,6 +201,22 @@
     state: icon
   - type: AlchemyApparatus
     operation: Filter
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 400
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalIronIngot:
+            min: 1
+            max: 1
+          MedievalPaper:
+            min: 1
+            max: 2
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
 - type: entity
   parent: BaseMedievalAlchemyApparatus
@@ -134,4 +230,20 @@
   - type: AlchemyApparatus
     operation: Infuse
     outputToInput: true
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 400
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MedievalStoneBrick:
+            min: 1
+            max: 1
+          MedievalIronIngot:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 

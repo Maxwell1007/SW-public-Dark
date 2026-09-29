@@ -43,12 +43,6 @@
                         ModulateSelfOverride="#FF0000"
                         MinSize="100 128">
                         <BoxContainer Orientation="Vertical">
-                            <Label
-                                Name="TimeLabel"
-                                Access="Public"
-                                Align="Center"
-                                Modulate="#FFFFFF"
-                                VAlign="Center" />
                             <BoxContainer  Orientation="Vertical">
                                 <GridContainer
                                     Name="DurationButtons"

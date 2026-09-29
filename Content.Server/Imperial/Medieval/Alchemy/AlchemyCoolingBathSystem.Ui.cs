@@ -3,7 +3,6 @@ using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Storage;
 using Robust.Shared.Containers;
-using Robust.Shared.Timing;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
 
@@ -12,7 +11,6 @@ public sealed partial class AlchemyCoolingBathSystem
     [Dependency] private readonly SharedUserInterfaceSystem _ui = default!;
     [Dependency] private readonly SharedHandsSystem _hands = default!;
     [Dependency] private readonly SharedContainerSystem _containers = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
 
     private void InitializeUi()
     {
@@ -90,6 +88,6 @@ public sealed partial class AlchemyCoolingBathSystem
             : Array.Empty<EntityUid>();
         _ui.SetUiState(uid, AlchemyCoolingBathUiKey.Key, new AlchemyCoolingBathUiState(
             GetNetEntityArray(contents), comp.Durations.Where(duration => duration > 0).Distinct().ToArray(),
-            comp.SelectedDuration, comp.IsProcessing, _timing.CurTime + TimeSpan.FromSeconds(comp.RemainingTime)));
+            comp.SelectedDuration, comp.IsProcessing));
     }
 }

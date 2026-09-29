@@ -2,7 +2,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
-using Content.Shared.Examine;
 using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Interaction;
 using Content.Shared.Storage;
@@ -18,7 +17,6 @@ public sealed partial class AlchemySystem
         InitializeApparatusUi();
         SubscribeLocalEvent<AlchemyApparatusComponent, ActivateInWorldEvent>(OnApparatusActivate);
         SubscribeLocalEvent<AlchemyApparatusComponent, GetVerbsEvent<ActivationVerb>>(OnApparatusVerbs);
-        SubscribeLocalEvent<AlchemyApparatusComponent, ExaminedEvent>(OnApparatusExamine);
         SubscribeLocalEvent<AlchemyApparatusComponent, ContainerIsInsertingAttemptEvent>(OnApparatusInsert);
         SubscribeLocalEvent<AlchemyApparatusComponent, ContainerIsRemovingAttemptEvent>(OnApparatusRemove);
         SubscribeLocalEvent<AlchemyApparatusComponent, ComponentShutdown>(OnApparatusShutdown);
@@ -99,12 +97,6 @@ public sealed partial class AlchemySystem
     {
         if (comp.IsProcessing && !comp.Completing)
             args.Cancel();
-    }
-
-    private void OnApparatusExamine(EntityUid uid, AlchemyApparatusComponent comp, ExaminedEvent args)
-    {
-        if (comp.IsProcessing)
-            args.PushText(Loc.GetString(_prototypes.Index<AlchemyOperationPrototype>(comp.Operation).RunningMessage));
     }
 
     private void OnApparatusActivate(EntityUid uid, AlchemyApparatusComponent comp, ActivateInWorldEvent args)

@@ -10,14 +10,13 @@ public enum AlchemyCoolingBathUiKey : byte
 
 [Serializable, NetSerializable]
 public sealed class AlchemyCoolingBathUiState(
-    NetEntity[] contents, int[] durations, int selectedDuration, bool isProcessing, TimeSpan endTime)
+    NetEntity[] contents, int[] durations, int selectedDuration, bool isProcessing)
     : BoundUserInterfaceState
 {
     public NetEntity[] Contents = contents;
     public int[] Durations = durations;
     public int SelectedDuration = selectedDuration;
     public bool IsProcessing = isProcessing;
-    public TimeSpan EndTime = endTime;
 }
 
 [Serializable, NetSerializable]

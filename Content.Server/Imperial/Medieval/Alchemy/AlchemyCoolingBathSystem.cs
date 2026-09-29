@@ -3,7 +3,6 @@ using Content.Server.Temperature.Components;
 using Content.Server.Temperature.Systems;
 using Content.Shared.Chemistry.Components.SolutionManager;
 using Content.Shared.Chemistry.EntitySystems;
-using Content.Shared.Examine;
 using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Storage;
 using Robust.Shared.Containers;
@@ -21,7 +20,6 @@ public sealed partial class AlchemyCoolingBathSystem : EntitySystem
     public override void Initialize()
     {
         InitializeUi();
-        SubscribeLocalEvent<AlchemyCoolingBathComponent, ExaminedEvent>(OnExamine);
         SubscribeLocalEvent<AlchemyCoolingBathComponent, ContainerIsInsertingAttemptEvent>(OnInsert);
         SubscribeLocalEvent<AlchemyCoolingBathComponent, ContainerIsRemovingAttemptEvent>(OnRemove);
     }
@@ -36,12 +34,6 @@ public sealed partial class AlchemyCoolingBathSystem : EntitySystem
         comp.IsProcessing = true;
         _appearance.SetData(uid, AlchemyCoolingBathVisuals.IsProcessing, true);
         UpdateUi(uid, comp);
-    }
-
-    private void OnExamine(EntityUid uid, AlchemyCoolingBathComponent comp, ExaminedEvent args)
-    {
-        if (comp.IsProcessing)
-            args.PushText(Loc.GetString("alchemy-cooling-bath-running", ("seconds", (int) Math.Ceiling(comp.RemainingTime))));
     }
 
     private void OnInsert(EntityUid uid, AlchemyCoolingBathComponent comp, ContainerIsInsertingAttemptEvent args)
