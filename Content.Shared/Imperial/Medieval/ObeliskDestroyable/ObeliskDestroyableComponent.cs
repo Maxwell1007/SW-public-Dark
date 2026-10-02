@@ -24,6 +24,12 @@ public sealed partial class ObeliskDestroyableComponent : Component
     public TimeSpan InvincibilityDuration = TimeSpan.FromMinutes(5);
 
     [DataField]
+    public bool AnnouncePhaseChanges = true;
+
+    [DataField]
+    public bool DeleteOnDestruction;
+
+    [DataField]
     public LocId AnnouncementSender = "obelisk-destructable-announcer";
 
     [DataField]

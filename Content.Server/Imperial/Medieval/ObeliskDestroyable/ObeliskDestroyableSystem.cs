@@ -47,10 +47,17 @@ public sealed class ObeliskDestroyableSystem : EntitySystem
         if (damageable.TotalDamage < requiredDamage)
             return;
 
-        SendAnnouncement(component, phase);
+        if (component.AnnouncePhaseChanges)
+            SendAnnouncement(component, phase);
 
         if (phase.DestroyOnReached)
         {
+            if (component.DeleteOnDestruction)
+            {
+                DestroyObelisk(uid, component);
+                return;
+            }
+
             var trueOrigin = _achievement.GetPlayerFromOrigin(args.Origin); // xd
             
             if (trueOrigin != null && TryComp<MedievalFactionMemberComponent>(trueOrigin, out var trueOriginFaction))
@@ -101,6 +108,13 @@ public sealed class ObeliskDestroyableSystem : EntitySystem
     {
         if (component.DestroyedEffect is { } effect)
             Spawn(effect, Transform(uid).Coordinates);
+
+        if (component.DeleteOnDestruction)
+        {
+            RemComp<ObeliskDestroyableComponent>(uid);
+            QueueDel(uid);
+            return;
+        }
 
         _metaData.SetEntityDescription(uid, Loc.GetString(component.DestroyedDescription));
         _lateJoinLock.LockDepartment(component.LockedDepartment);

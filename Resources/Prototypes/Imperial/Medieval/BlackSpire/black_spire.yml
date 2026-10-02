@@ -1,0 +1,80 @@
+- type: entity
+  id: MedievalBlackSpire
+  parent: BaseStructure
+  name: black spire
+  description: A sinister spire spreading a curse across the sector.
+  suffix: Medieval
+  components:
+  - type: SpriteFade
+  - type: Sprite
+    sprite: Imperial/Medieval/obelisks/layerobelisks.rsi
+    drawdepth: Overdoors
+    offset: 0,0.9
+    layers:
+    - state: state-0
+      map: ["base"]
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: StructuralMetallicStrong
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        density: 1000
+        mask:
+        - FullTileMask
+        layer:
+        - Impassable
+        - HighImpassable
+        - MidImpassable
+        - LowImpassable
+        - BulletImpassable
+        - InteractImpassable
+  - type: ObeliskDestroyable
+    announcePhaseChanges: false
+    deleteOnDestruction: true
+    invincibilityDuration: 60
+    destroyedEffect: MagicMedievalDarkness
+    baseLayerStates:
+    - state-0
+    - state-1
+    - state-2
+    - state-2
+    outerLayerState: collegia
+    phases:
+    - threshold: 1000
+      announcement: damaged
+    - threshold: 1000
+      announcement: damaged
+    - threshold: 1000
+      announcement: critical
+    - threshold: 1000
+      announcement: destroyed
+      destroyOnReached: true
+  - type: BlackSpire
+    stageDurations: [300, 300, 300]
+    effectInterval: 300
+    curseDuration: 300
+    needsMultiplier: 1.3
+    skeletonChance: 0.1
+    weakSkeleton: MedievalMobSkeletWeak
+    characterSpawnMinRadius: 2
+    characterSpawnMaxRadius: 4
+    radiationDamage:
+      types:
+        Radiation: 5
+    aggressionInterval: 20
+    aggressionRadius: 15
+    damageAggressionDuration: 120
+    spawnMinRadius: 1.5
+    spawnMaxRadius: 6
+    invincibilityEndedSpawnCount: 5
+    skeletonPool:
+      MedievalMobSkeletHalberdSpell: 1
+      MedievalMobSkeletDaggerSpell: 1
+      MedievalMobSkeletLegionSpell: 1
+      MedievalMobSkeletSpearSpell: 1
+      MedievalMobSkeletFighterSpell: 1
+      MedievalMobSkeletMeatSpell: 10
+      MedievalMobSkeletWeakSpell: 20

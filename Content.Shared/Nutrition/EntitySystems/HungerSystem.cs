@@ -4,6 +4,7 @@ using Content.Shared.Damage;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Nutrition.Components;
+using Content.Shared.Nutrition.Events;
 using Content.Shared.Rejuvenate;
 using Content.Shared.StatusIcon;
 using Robust.Shared.Network;
@@ -157,15 +158,26 @@ public sealed class HungerSystem : EntitySystem
             _alerts.ClearAlertCategory(uid, component.HungerAlertCategory);
         }
 
-        if (component.HungerThresholdDecayModifiers.TryGetValue(component.CurrentThreshold, out var modifier))
+        if (component.HungerThresholdDecayModifiers.ContainsKey(component.CurrentThreshold))
         {
-            component.ActualDecayRate = component.BaseDecayRate * modifier;
-            DirtyField(uid, component, nameof(HungerComponent.ActualDecayRate));
-            SetAuthoritativeHungerValue((uid, component), GetHunger(component));
+            RefreshDecayRate(uid, component);
         }
 
         component.LastThreshold = component.CurrentThreshold;
         DirtyField(uid, component, nameof(HungerComponent.LastThreshold));
+    }
+
+    public void RefreshDecayRate(EntityUid uid, HungerComponent? component = null)
+    {
+        if (!Resolve(uid, ref component, false))
+            return;
+
+        SetAuthoritativeHungerValue((uid, component), GetHunger(component));
+        var ev = new GetNeedsDecayModifiersEvent(1f);
+        RaiseLocalEvent(uid, ref ev);
+        var thresholdModifier = component.HungerThresholdDecayModifiers.GetValueOrDefault(component.CurrentThreshold, 1f);
+        component.ActualDecayRate = component.BaseDecayRate * thresholdModifier * ev.Modifier;
+        DirtyField(uid, component, nameof(HungerComponent.ActualDecayRate));
     }
 
     private void DoContinuousHungerEffects(EntityUid uid, HungerComponent? component = null)
