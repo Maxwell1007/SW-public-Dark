@@ -12,4 +12,8 @@ public sealed partial class BlackSpireCurseComponent : Component
     public TimeSpan Duration = TimeSpan.FromMinutes(5);
 
     public bool Active = true;
+
+    public float LastHunger = float.NaN;
+
+    public float LastThirst = float.NaN;
 }
