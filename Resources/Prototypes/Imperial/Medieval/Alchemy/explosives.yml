@@ -61,8 +61,8 @@
   - type: Sprite
     sprite: Imperial/Medieval/Misc/Bombs/Medium_bomb.rsi
   - type: Explosive
-    maxIntensity: 6.4
-    intensitySlope: 1.6
+    maxIntensity: 8
+    intensitySlope: 1
     totalIntensity: 96
 
 - type: entity
