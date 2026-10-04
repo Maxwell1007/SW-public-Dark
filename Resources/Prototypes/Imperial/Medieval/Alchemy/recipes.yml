@@ -23,7 +23,7 @@
   ingredientCount: 2
   totalAspectAmount: 20
   minParts: 1
-  maxParts: 9
+  maxParts: 18
   expectedSteps: 3
   maxComplexity: 8
 
@@ -39,7 +39,7 @@
   ingredientCount: 3
   totalAspectAmount: 35
   minParts: 1
-  maxParts: 14
+  maxParts: 20
   expectedSteps: 4
   maxComplexity: 15
 
@@ -485,6 +485,8 @@
 - type: alchemyRecipe
   id: Alchemymedievalbestexplosion
   parent: BaseAlchemyRecipeT3
+  totalAspectAmount: 100
+  maxParts: 50
   entityProducts:
     MedievalExplosiveMixtureT3: 1
 

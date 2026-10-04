@@ -4,8 +4,8 @@
   id: BaseMedievalExplosiveMixture
   components:
   - type: Sprite
-    sprite: Objects/Consumable/Food/ingredients.rsi
-    state: dough
+    sprite: Imperial/Medieval/Misc/Bombs/Explosive_Mix.rsi
+    state: icon
   - type: Item
     size: Small
 
@@ -22,25 +22,19 @@
   description: An alchemical charge for a frost bomb.
   components:
   - type: Sprite
-    color: "#80CFFF"
+    sprite: Imperial/Medieval/Misc/Bombs/Freezing_Mix.rsi
 
 - type: entity
   parent: BaseMedievalExplosiveMixture
   id: MedievalExplosiveMixtureT2
   name: potent explosive mixture
   description: A potent alchemical charge for an explosive bomb.
-  components:
-  - type: Sprite
-    color: "#FFAA60"
 
 - type: entity
   parent: BaseMedievalExplosiveMixture
   id: MedievalExplosiveMixtureT3
   name: powerful explosive mixture
   description: A concentrated alchemical charge for a powerful explosive bomb.
-  components:
-  - type: Sprite
-    color: "#FF6060"
 
 - type: entity
   parent: MedievalGrenade
@@ -49,12 +43,14 @@
   description: A bomb filled with an alchemical frost mixture.
   components:
   - type: Sprite
-    color: "#80CFFF"
+    sprite: Imperial/Medieval/Misc/Bombs/Ice_bomb.rsi
   - type: Explosive
     explosionType: Cryo
     maxIntensity: 4
     intensitySlope: 1
     totalIntensity: 60
+  - type: SpawnOnTrigger
+    proto: MedievalCryoExplosionEffect
 
 - type: entity
   parent: MedievalGrenade
@@ -63,7 +59,7 @@
   description: A bomb filled with a potent alchemical mixture.
   components:
   - type: Sprite
-    color: "#FFAA60"
+    sprite: Imperial/Medieval/Misc/Bombs/Medium_bomb.rsi
   - type: Explosive
     maxIntensity: 6.4
     intensitySlope: 1.6
@@ -76,8 +72,15 @@
   description: A bomb filled with a concentrated alchemical mixture.
   components:
   - type: Sprite
-    color: "#FF6060"
+    sprite: Imperial/Medieval/Misc/Bombs/Big_bomb.rsi
   - type: Explosive
     maxIntensity: 80
     intensitySlope: 1
     totalIntensity: 1200
+
+- type: entity
+  parent: MedievalExplosionEffect
+  id: MedievalCryoExplosionEffect
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Effects/Explosions/cryo.rsi

@@ -1204,7 +1204,7 @@
     totalIntensity: 60
     canCreateVacuum: false
   - type: Sprite
-    sprite: Imperial/Medieval/Misc/medieval_grenade.rsi
+    sprite: Imperial/Medieval/Misc/Bombs/Small_bomb.rsi
     layers:
     - state: icon
       map: ["enum.TriggerVisualLayers.Base"]

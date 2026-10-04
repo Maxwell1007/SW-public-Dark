@@ -103,6 +103,7 @@
     weights:
       EasyPack: 70
       MediumPack: 30
+      HardPack: 10
 
 - type: entity
   name: mortar
