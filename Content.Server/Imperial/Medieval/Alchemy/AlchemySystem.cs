@@ -16,6 +16,7 @@ using Content.Server.Fluids.EntitySystems;
 using Content.Shared.Imperial.Medieval.GameTicking.Rules;
 using Content.Shared.Chemistry.Reaction;
 using Content.Shared.EntityEffects;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
 
@@ -28,6 +29,7 @@ public sealed partial class AlchemySystem : EntitySystem
     [Dependency] private readonly StackSystem _stacks = default!;
     [Dependency] private readonly PuddleSystem _puddles = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
+    [Dependency] private readonly SharedAudioSystem _audio = default!;
 
     public override void Initialize()
     {
@@ -84,7 +86,7 @@ public sealed partial class AlchemySystem : EntitySystem
         vessel.Processing = true;
         try
         {
-            CompleteOperation(solution.Value, state, "Stir", args.User);
+            CompleteOperation(solution.Value, vessel, state, "Stir", args.User);
         }
         finally
         {
@@ -130,9 +132,9 @@ public sealed partial class AlchemySystem : EntitySystem
             var items = apparatus is { IsProcessing: true } ? apparatus.Items : null;
             var user = apparatus?.User is { } actor && !TerminatingOrDeleted(actor) ? apparatus.User : null;
             if (comp.Hot && !wasHot)
-                CompleteOperation(solution.Value, state, comp.HeatOperation.Id, user, items, apparatus != null ? uid : null);
+                CompleteOperation(solution.Value, comp, state, comp.HeatOperation.Id, user, items, apparatus != null ? uid : null);
             else if (comp.Cold && !wasCold)
-                CompleteOperation(solution.Value, state, comp.CoolOperation.Id, user, items, apparatus != null ? uid : null);
+                CompleteOperation(solution.Value, comp, state, comp.CoolOperation.Id, user, items, apparatus != null ? uid : null);
         }
         finally
         {
@@ -176,11 +178,14 @@ public sealed partial class AlchemySystem : EntitySystem
             _solutions.UpdateChemicals(solution, false);
     }
 
-    private void CompleteOperation(Entity<SolutionComponent> solution, AlchemyRoundComponent state, string operation,
+    private void CompleteOperation(Entity<SolutionComponent> solution, AlchemyVesselComponent vessel,
+        AlchemyRoundComponent state, string operation,
         EntityUid? user = null,
         IReadOnlyList<EntityUid>? items = null, EntityUid? apparatus = null)
     {
         AlchemyRecipeSystem.RecordOperation(solution.Comp.Solution, operation, state.HistoryLimit);
+        if (solution.Comp.Solution.Volume > 0)
+            _audio.PlayPvs(vessel.StepSound, solution.Owner);
         if (items != null)
         {
             items = items.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToList();

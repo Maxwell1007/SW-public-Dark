@@ -184,7 +184,7 @@ public sealed partial class AlchemySystem
             inputVessel.Processing = true;
             try
             {
-                CompleteOperation(input, state, comp.Operation, user, items, uid);
+                CompleteOperation(input, inputVessel, state, comp.Operation, user, items, uid);
             }
             finally
             {

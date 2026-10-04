@@ -1,4 +1,5 @@
 using Content.Shared.FixedPoint;
+using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Imperial.Medieval.Alchemy;
@@ -16,6 +17,7 @@ public sealed partial class AlchemyVesselComponent : Component
     [DataField] public float NigredoTemperature = 350;
     [DataField] public ProtoId<AlchemyOperationPrototype> HeatOperation = "Heat";
     [DataField] public ProtoId<AlchemyOperationPrototype> CoolOperation = "Cool";
+    [DataField] public SoundSpecifier StepSound = new SoundPathSpecifier("/Audio/Effects/Chemistry/bubbles.ogg");
     [DataField] public bool Processing;
     [DataField] public bool Hot;
     [DataField] public bool Cold;
