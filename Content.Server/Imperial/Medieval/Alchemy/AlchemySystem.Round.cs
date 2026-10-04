@@ -24,8 +24,10 @@ public sealed partial class AlchemySystem
         if (TryGetRoundState(out _))
             return;
 
-        var state = GenerateRoundState();
+        var generation = new AlchemyGenerationComponent();
+        var state = GenerateRoundState(generation);
         var uid = Spawn(null, new MapCoordinates(Vector2.Zero, _gameTicker.DefaultMap));
+        AddComp(uid, generation);
         AddComp(uid, state);
     }
 
@@ -45,13 +47,13 @@ public sealed partial class AlchemySystem
         return false;
     }
 
-    private AlchemyRoundComponent GenerateRoundState()
+    private AlchemyRoundComponent GenerateRoundState(AlchemyGenerationComponent generation)
     {
         var state = new AlchemyRoundComponent();
         var random = new System.Random(_random.Next());
         var operations = GetOperations();
-        GenerateRecipes(state, operations, random);
-        GenerateIngredients(state, random);
+        GenerateRecipes(state, operations, random, generation);
+        GenerateIngredients(state, random, generation);
         return state;
     }
 
@@ -68,7 +70,8 @@ public sealed partial class AlchemySystem
     }
 
     private void GenerateRecipes(AlchemyRoundComponent state,
-        IReadOnlyDictionary<string, AlchemyOperationPrototype> operations, System.Random random)
+        IReadOnlyDictionary<string, AlchemyOperationPrototype> operations, System.Random random,
+        AlchemyGenerationComponent generation)
     {
         var prototypes = _prototypes.EnumeratePrototypes<AlchemyRecipePrototype>()
             .Where(prototype => !prototype.Abstract)
@@ -76,7 +79,7 @@ public sealed partial class AlchemySystem
             .ThenBy(prototype => prototype.ID, StringComparer.Ordinal);
         foreach (var prototype in prototypes)
         {
-            var recipe = GenerateUniqueRecipe(prototype, state.Recipes, operations, random);
+            var recipe = GenerateUniqueRecipe(prototype, state.Recipes, operations, random, generation);
             foreach (var reagent in recipe.Ingredients.Keys.Concat(recipe.Products.Keys))
                 _prototypes.Index<ReagentPrototype>(reagent);
             foreach (var entity in recipe.Entities.Keys.Concat(recipe.EntityProducts.Keys))
@@ -91,13 +94,13 @@ public sealed partial class AlchemySystem
 
     private static AlchemyRecipe GenerateUniqueRecipe(AlchemyRecipePrototype prototype,
         IReadOnlyList<AlchemyRecipe> recipes, IReadOnlyDictionary<string, AlchemyOperationPrototype> operations,
-        System.Random random)
+        System.Random random, AlchemyGenerationComponent generation)
     {
         AlchemyRecipe? conflict = null;
         var attempts = prototype.Randomized ? 512 : 1;
         for (var attempt = 0; attempt < attempts; attempt++)
         {
-            var candidate = AlchemyGenerationSystem.GenerateRecipe(prototype, operations, random);
+            var candidate = AlchemyGenerationSystem.GenerateRecipe(prototype, operations, random, generation);
             conflict = recipes.FirstOrDefault(recipe => AlchemyGenerationSystem.Conflicts(recipe, candidate));
             if (conflict == null)
                 return candidate;
@@ -105,12 +108,13 @@ public sealed partial class AlchemySystem
         throw new InvalidOperationException($"Alchemy recipe {prototype.ID} conflicts with {conflict?.Id} after {attempts} generation attempts.");
     }
 
-    private void GenerateIngredients(AlchemyRoundComponent state, System.Random random)
+    private void GenerateIngredients(AlchemyRoundComponent state, System.Random random,
+        AlchemyGenerationComponent generation)
     {
         var profiles = _prototypes.EnumeratePrototypes<AlchemyIngredientPrototype>()
             .OrderBy(profile => profile.ID, StringComparer.Ordinal).ToArray();
         var requiredAspects = state.Recipes.SelectMany(recipe => recipe.Ingredients.Keys)
-            .Where(AlchemyGenerationSystem.IsAspect).ToHashSet();
+            .Where(reagent => AlchemyGenerationSystem.IsAspect(reagent, generation)).ToHashSet();
         for (var attempt = 0; attempt < 512; attempt++)
         {
             state.Ingredients.Clear();

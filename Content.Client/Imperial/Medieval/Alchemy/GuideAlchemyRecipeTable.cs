@@ -71,10 +71,11 @@ public sealed class GuideAlchemyRecipeTable : TableContainer, IDocumentTag
         AddCell(Loc.GetString("alchemy-guide-steps"), true);
 
         var operations = _prototypes.EnumeratePrototypes<AlchemyOperationPrototype>().ToDictionary(p => p.ID);
+        var generation = new AlchemyGenerationComponent();
         var recipes = _prototypes.EnumeratePrototypes<AlchemyRecipePrototype>()
             .Where(p => !p.Abstract && !p.Randomized && p.Tag == _tag &&
                 (p.Tag != AlchemyRecipeTag.Potion || p.Tier == 1))
-            .Select(p => AlchemyGenerationSystem.GenerateRecipe(p, operations, new Random(0)))
+            .Select(p => AlchemyGenerationSystem.GenerateRecipe(p, operations, new Random(0), generation))
             .Select(recipe => (Recipe: recipe, Products: DescribeContents(recipe.Products, recipe.EntityProducts)))
             .OrderBy(entry => entry.Products)
             .ThenBy(entry => entry.Recipe.Id);

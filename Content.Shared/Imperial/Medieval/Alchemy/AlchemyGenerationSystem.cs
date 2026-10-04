@@ -47,7 +47,8 @@ public sealed class AlchemyGenerationSystem : EntitySystem
     }
 
     public static AlchemyRecipe GenerateRecipe(AlchemyRecipePrototype proto,
-        IReadOnlyDictionary<string, AlchemyOperationPrototype> operations, System.Random random)
+        IReadOnlyDictionary<string, AlchemyOperationPrototype> operations, System.Random random,
+        AlchemyGenerationComponent generation)
     {
         if (proto.Abstract || proto.MaxComplexity < 0 || proto.ExpectedSteps < 0 || proto.ExpectedSteps > 64 ||
             proto.MinParts <= 0 || proto.MaxParts < proto.MinParts || (proto.Products.Count == 0 && proto.EntityProducts.Count == 0) ||
@@ -70,8 +71,11 @@ public sealed class AlchemyGenerationSystem : EntitySystem
         var ingredients = proto.Ingredients ?? Enumerable.Range(0, proto.IngredientCount)
             .Select(_ => new AlchemyIngredientRequirement()).ToList();
         var weights = new Dictionary<string, int>(proto.AspectWeights);
-        if (proto.Tier < 3)
-            weights.Remove("AlchemyDarkness");
+        foreach (var (aspect, minimumTier) in generation.AspectMinimumTiers)
+        {
+            if (proto.Tier < minimumTier)
+                weights.Remove(aspect);
+        }
         foreach (var ingredient in ingredients)
         {
             if (ingredient.Reagent != null)
@@ -94,7 +98,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
                 throw new InvalidOperationException($"Invalid aspect total in alchemy recipe {proto.ID}.");
             foreach (var (reagent, amount) in selected)
             {
-                if (!IsAspect(reagent))
+                if (!IsAspect(reagent, generation))
                     continue;
                 if (amount is { } fixedAmount)
                     remainingAspects -= fixedAmount;
@@ -110,7 +114,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
             var amount = specifiedAmount ?? FixedPoint2.Zero;
             if (specifiedAmount == null)
             {
-                if (remainingAspects is { } remaining && IsAspect(reagent))
+                if (remainingAspects is { } remaining && IsAspect(reagent, generation))
                 {
                     missingAspects--;
                     var minimum = FixedPoint2.Max(FixedPoint2.New(proto.MinParts), remaining - FixedPoint2.New(proto.MaxParts) * missingAspects);
@@ -126,7 +130,7 @@ public sealed class AlchemyGenerationSystem : EntitySystem
                     amount = FixedPoint2.New(random.Next(proto.MinParts, proto.MaxParts + 1));
             }
             if (amount <= 0 || !result.Ingredients.TryAdd(reagent, amount) ||
-                (reagent == "AlchemyDarkness" && proto.Tier < 3))
+                (generation.AspectMinimumTiers.TryGetValue(reagent, out var minimumTier) && proto.Tier < minimumTier))
                 throw new InvalidOperationException($"Invalid ingredient in alchemy recipe {proto.ID}.");
         }
         if (result.Ingredients.Count == 0)
@@ -179,8 +183,8 @@ public sealed class AlchemyGenerationSystem : EntitySystem
         return result;
     }
 
-    public static bool IsAspect(string reagent) => reagent is
-        "AlchemyWater" or "AlchemyEarth" or "AlchemyFire" or "AlchemyLight" or "AlchemyDarkness";
+    public static bool IsAspect(string reagent, AlchemyGenerationComponent generation) =>
+        generation.AspectMinimumTiers.ContainsKey(reagent);
 
     private static bool RepeatsTemperatureOperation(AlchemyOperationPrototype? left, AlchemyOperationPrototype? right)
     {

@@ -3,6 +3,7 @@
   parent: BaseStructure
   id: BaseMedievalAlchemyApparatus
   components:
+  - type: InteractionOutline
   - type: Damageable
     damageContainer: StructuralInorganic
     damageModifierSet: Metallic
@@ -60,6 +61,7 @@
   name: cooling bath
   description: A bath for gradually cooling alchemical vessels.
   components:
+  - type: InteractionOutline
   - type: Damageable
     damageContainer: StructuralInorganic
     damageModifierSet: Metallic

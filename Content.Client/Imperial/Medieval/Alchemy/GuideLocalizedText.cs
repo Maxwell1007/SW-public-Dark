@@ -1,10 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using Content.Client.Guidebook.Richtext;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Utility;
 
-namespace Content.Client.Guidebook.Richtext;
+namespace Content.Client.Imperial.Medieval.Alchemy;
 
 [UsedImplicitly]
 public sealed class GuideLocalizedText : BoxContainer, IDocumentTag
