@@ -1,7 +1,6 @@
 using System.Linq;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Imperial.Medieval.Alchemy;
-using Content.Shared.Storage;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
 
@@ -18,18 +17,18 @@ public sealed partial class AlchemySystem
                 _alchemyContainers.Insert(product, output);
             return;
         }
-        if (!TryComp<StorageComponent>(uid, out var storage))
+        if (!TryComp<AlchemyStationComponent>(uid, out var station))
             return;
         var completing = comp.Completing;
         comp.Completing = true;
         try
         {
-            foreach (var item in storage.Container.ContainedEntities.ToArray())
+            foreach (var item in station.Container.ContainedEntities.ToArray())
             {
                 if (!TerminatingOrDeleted(item) && EntityManager.IsQueuedForDeletion(item))
-                    _alchemyContainers.Remove(item, storage.Container, force: true);
+                    _alchemyContainers.Remove(item, station.Container, force: true);
             }
-            _alchemyStorage.Insert(uid, product, out _, storageComp: storage);
+            _alchemyContainers.Insert(product, station.Container);
         }
         finally
         {
@@ -39,8 +38,8 @@ public sealed partial class AlchemySystem
 
     private void DistributeApparatusSolution(EntityUid uid, AlchemyApparatusComponent comp, Entity<SolutionComponent> input)
     {
-        var recipients = comp.OutputToInput && TryComp<StorageComponent>(uid, out var storage)
-            ? storage.Container.ContainedEntities.ToArray()
+        var recipients = comp.OutputToInput && TryComp<AlchemyStationComponent>(uid, out var station)
+            ? station.Container.ContainedEntities.ToArray()
             : _alchemyContainers.TryGetContainer(uid, comp.OutputContainer, out var output)
                 ? output.ContainedEntities.ToArray()
                 : Array.Empty<EntityUid>();

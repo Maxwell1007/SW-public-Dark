@@ -4,7 +4,6 @@ using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Interaction;
-using Content.Shared.Storage;
 using Content.Shared.Verbs;
 using Robust.Shared.Containers;
 
@@ -63,9 +62,9 @@ public sealed partial class AlchemySystem
             if (!_solutions.TryGetSolution(uid, comp.Solution, out var input, out _) || input == null ||
                 input.Value.Owner != comp.Input || TerminatingOrDeleted(input.Value.Owner) ||
                 EntityManager.IsQueuedForDeletion(input.Value.Owner) ||
-                !HasComp<AlchemyVesselComponent>(uid) || !TryComp<StorageComponent>(uid, out var storage) ||
+                !HasComp<AlchemyVesselComponent>(uid) || !TryComp<AlchemyStationComponent>(uid, out var station) ||
                 comp.Items.Any(item => TerminatingOrDeleted(item) || EntityManager.IsQueuedForDeletion(item) ||
-                    !storage.Container.Contains(item)))
+                    !station.Container.Contains(item)))
                 return;
 
             FinishApparatus(uid, comp, input.Value);
@@ -122,14 +121,14 @@ public sealed partial class AlchemySystem
     private void StartApparatus(EntityUid uid, AlchemyApparatusComponent comp, EntityUid user)
     {
         if (TerminatingOrDeleted(uid) || EntityManager.IsQueuedForDeletion(uid) ||
-            comp.IsProcessing || !TryComp<StorageComponent>(uid, out var storage))
+            comp.IsProcessing || !TryComp<AlchemyStationComponent>(uid, out var station))
             return;
         var operation = _prototypes.Index<AlchemyOperationPrototype>(comp.Operation);
         if (operation.Temperature != null || !TryGetRoundState(out _))
             return;
         if (!_solutions.TryGetSolution(uid, comp.Solution, out var input, out var mixture) || input == null || mixture == null)
             return;
-        if (storage.Container.ContainedEntities.Count == 0 && mixture.Volume <= 0)
+        if (station.Container.ContainedEntities.Count == 0 && mixture.Volume <= 0)
         {
             _popup.PopupEntity(Loc.GetString(operation.EmptyMessage), uid, user);
             return;
@@ -141,7 +140,7 @@ public sealed partial class AlchemySystem
         comp.Items.Clear();
         try
         {
-            foreach (var item in storage.Container.ContainedEntities.ToArray())
+            foreach (var item in station.Container.ContainedEntities.ToArray())
             {
                 if (_solutions.TryGetDrainableSolution(item, out var source, out var liquid) && source != null && liquid != null)
                     mixture.AddSolution(_solutions.SplitSolution(source.Value, liquid.Volume), _prototypes);

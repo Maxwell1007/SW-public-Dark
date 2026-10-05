@@ -1,8 +1,6 @@
 using System.Linq;
-using Content.Server.Storage.EntitySystems;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Imperial.Medieval.Alchemy;
-using Content.Shared.Storage;
 using Robust.Shared.Containers;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
@@ -12,7 +10,6 @@ public sealed partial class AlchemySystem
     [Dependency] private readonly SharedUserInterfaceSystem _alchemyUi = default!;
     [Dependency] private readonly SharedContainerSystem _alchemyContainers = default!;
     [Dependency] private readonly SharedHandsSystem _alchemyHands = default!;
-    [Dependency] private readonly StorageSystem _alchemyStorage = default!;
 
     private void InitializeApparatusUi()
     {
@@ -64,10 +61,11 @@ public sealed partial class AlchemySystem
         }
         else
         {
-            if (comp.IsProcessing || !_alchemyStorage.CanInsert(uid, item.Value, out _) ||
+            if (comp.IsProcessing || !TryComp<AlchemyStationComponent>(uid, out var station) ||
+                !_alchemyContainers.CanInsert(item.Value, station.Container) ||
                 !_alchemyHands.TryDrop(args.Actor, item.Value))
                 return;
-            _alchemyStorage.Insert(uid, item.Value, out _, user: args.Actor);
+            _alchemyContainers.Insert(item.Value, station.Container);
         }
     }
 
@@ -78,7 +76,7 @@ public sealed partial class AlchemySystem
         var item = GetEntity(args.Item);
         if (TerminatingOrDeleted(item) || EntityManager.IsQueuedForDeletion(item))
             return;
-        var inInput = TryComp<StorageComponent>(uid, out var storage) && storage.Container.Contains(item);
+        var inInput = TryComp<AlchemyStationComponent>(uid, out var station) && station.Container.Contains(item);
         var inOutput = !comp.OutputToInput &&
             _alchemyContainers.TryGetContainer(uid, comp.OutputContainer, out var output) && output.Contains(item);
         if (inInput || inOutput)
@@ -89,8 +87,8 @@ public sealed partial class AlchemySystem
     {
         if (TerminatingOrDeleted(uid))
             return;
-        var input = TryComp<StorageComponent>(uid, out var storage)
-            ? storage.Container.ContainedEntities.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToArray()
+        var input = TryComp<AlchemyStationComponent>(uid, out var station)
+            ? station.Container.ContainedEntities.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToArray()
             : Array.Empty<EntityUid>();
         var output = !comp.OutputToInput && _alchemyContainers.TryGetContainer(uid, comp.OutputContainer, out var container)
             ? container.ContainedEntities.Where(item => !TerminatingOrDeleted(item) && !EntityManager.IsQueuedForDeletion(item)).ToArray()

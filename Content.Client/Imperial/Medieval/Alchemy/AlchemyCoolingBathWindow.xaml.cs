@@ -39,7 +39,7 @@ public sealed partial class AlchemyCoolingBathWindow : FancyWindow
         }
 
         var disabled = state.IsProcessing || state.Contents.Length == 0;
-        BusyOverlay.Visible = disabled;
+        BusyOverlay.Visible = state.IsProcessing;
         StartButton.Disabled = disabled || state.SelectedDuration <= 0;
         EjectButton.Disabled = disabled;
         ContentsPanel.PanelOverride = new StyleBoxFlat

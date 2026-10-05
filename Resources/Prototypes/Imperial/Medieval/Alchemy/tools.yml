@@ -10,20 +10,14 @@
   - type: AlchemyApparatus
   - type: AlchemyVessel
     solution: alchemy_input
-  - type: Storage
-    grid:
-    - 0,0,9,5
-    maxItemSize: Huge
-    openOnActivate: false
+  - type: AlchemyStation
   - type: UserInterface
     interfaces:
-      enum.StorageUiKey.Key:
-        type: StorageBoundUserInterface
       enum.AlchemyUiKey.Key:
         type: AlchemyBoundUserInterface
   - type: ContainerContainer
     containers:
-      storagebase: !type:Container
+      alchemy_items: !type:Container
   - type: SolutionContainerManager
     solutions:
       alchemy_input:
@@ -80,20 +74,14 @@
   - type: AlchemyCoolingBath
   - type: ActivatableUI
     key: enum.AlchemyCoolingBathUiKey.Key
-  - type: Storage
-    grid:
-    - 0,0,9,5
-    maxItemSize: Huge
-    openOnActivate: false
+  - type: AlchemyStation
   - type: UserInterface
     interfaces:
       enum.AlchemyCoolingBathUiKey.Key:
         type: AlchemyCoolingBathBoundUserInterface
-      enum.StorageUiKey.Key:
-        type: StorageBoundUserInterface
   - type: ContainerContainer
     containers:
-      storagebase: !type:Container
+      alchemy_items: !type:Container
   - type: Destructible
     thresholds:
     - trigger:

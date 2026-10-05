@@ -4,7 +4,6 @@ using Content.Server.Temperature.Systems;
 using Content.Shared.Chemistry.Components.SolutionManager;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Imperial.Medieval.Alchemy;
-using Content.Shared.Storage;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 
@@ -27,8 +26,8 @@ public sealed partial class AlchemyCoolingBathSystem : EntitySystem
     private void Start(EntityUid uid, AlchemyCoolingBathComponent comp, int duration)
     {
         if (comp.IsProcessing || duration <= 0 || !comp.Durations.Contains(duration) ||
-            !TryComp<StorageComponent>(uid, out var storage) ||
-            storage.Container.ContainedEntities.Count == 0)
+            !TryComp<AlchemyStationComponent>(uid, out var station) ||
+            station.Container.ContainedEntities.Count == 0)
             return;
         comp.RemainingTime = duration;
         comp.IsProcessing = true;
@@ -51,13 +50,13 @@ public sealed partial class AlchemyCoolingBathSystem : EntitySystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-        var query = EntityQueryEnumerator<AlchemyCoolingBathComponent, StorageComponent>();
-        while (query.MoveNext(out var uid, out var comp, out var storage))
+        var query = EntityQueryEnumerator<AlchemyCoolingBathComponent, AlchemyStationComponent>();
+        while (query.MoveNext(out var uid, out var comp, out var station))
         {
             if (!comp.IsProcessing)
                 continue;
             var elapsed = Math.Min(frameTime, comp.RemainingTime);
-            CoolContents(comp, storage, elapsed);
+            CoolContents(comp, station, elapsed);
             comp.RemainingTime = Math.Max(0, comp.RemainingTime - elapsed);
             if (comp.RemainingTime <= 0)
             {
@@ -68,12 +67,12 @@ public sealed partial class AlchemyCoolingBathSystem : EntitySystem
         }
     }
 
-    private void CoolContents(AlchemyCoolingBathComponent comp, StorageComponent storage, float elapsed)
+    private void CoolContents(AlchemyCoolingBathComponent comp, AlchemyStationComponent station, float elapsed)
     {
         var energy = comp.CoolingPower * elapsed;
         if (energy <= 0)
             return;
-        foreach (var item in storage.Container.ContainedEntities.ToArray())
+        foreach (var item in station.Container.ContainedEntities.ToArray())
         {
             if (TerminatingOrDeleted(item))
                 continue;
