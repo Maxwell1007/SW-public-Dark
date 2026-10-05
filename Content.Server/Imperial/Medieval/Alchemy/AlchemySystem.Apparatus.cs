@@ -4,7 +4,6 @@ using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Imperial.Medieval.Alchemy;
 using Content.Shared.Interaction;
-using Content.Shared.Verbs;
 using Robust.Shared.Containers;
 
 namespace Content.Server.Imperial.Medieval.Alchemy;
@@ -15,7 +14,6 @@ public sealed partial class AlchemySystem
     {
         InitializeApparatusUi();
         SubscribeLocalEvent<AlchemyApparatusComponent, ActivateInWorldEvent>(OnApparatusActivate);
-        SubscribeLocalEvent<AlchemyApparatusComponent, GetVerbsEvent<ActivationVerb>>(OnApparatusVerbs);
         SubscribeLocalEvent<AlchemyApparatusComponent, ContainerIsInsertingAttemptEvent>(OnApparatusInsert);
         SubscribeLocalEvent<AlchemyApparatusComponent, ContainerIsRemovingAttemptEvent>(OnApparatusRemove);
         SubscribeLocalEvent<AlchemyApparatusComponent, ComponentShutdown>(OnApparatusShutdown);
@@ -105,17 +103,6 @@ public sealed partial class AlchemySystem
         args.Handled = true;
         UpdateApparatusUi(uid, comp);
         _alchemyUi.TryOpenUi(uid, AlchemyUiKey.Key, args.User);
-    }
-
-    private void OnApparatusVerbs(EntityUid uid, AlchemyApparatusComponent comp, GetVerbsEvent<ActivationVerb> args)
-    {
-        if (!args.CanAccess || !args.CanInteract || comp.IsProcessing)
-            return;
-        args.Verbs.Add(new ActivationVerb
-        {
-            Text = Loc.GetString(_prototypes.Index<AlchemyOperationPrototype>(comp.Operation).StartMessage),
-            Act = () => StartApparatus(uid, comp, args.User),
-        });
     }
 
     private void StartApparatus(EntityUid uid, AlchemyApparatusComponent comp, EntityUid user)
