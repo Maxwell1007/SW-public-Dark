@@ -59,6 +59,15 @@ ent-MedievalMobSkeletDaggerGhost = skeleton with daggers
     .desc = Fast on its feet and armed for close work. Keep it away, or the cuts will come faster than you expect.
     .suffix = { "Medieval, mob, ghost role" }
 
+ent-MedievalMobSkeletHalberdSpell = magical halberd skeleton
+    .desc = A revenant that sweeps its long halberd in heavy, measured arcs.
+ent-MedievalMobSkeletDaggerSpell = magical dagger skeleton
+    .desc = A quick-footed revenant that closes the distance and strikes with both daggers.
+ent-MedievalMobSkeletLegionSpell = magical legionary skeleton
+    .desc = A veteran legionary risen by sorcery, advancing in step and refusing to yield ground.
+ent-MedievalMobSkeletSpearSpell = magical spear skeleton
+    .desc = A tireless sentry that keeps its spear between itself and anyone who comes near.
+
 
 ghost-role-information-skelet-rules = You are a skeleton. Let frail flesh fall. Glory to necromancers and dark mages!
 ghost-role-information-skelet-weak-name = Weak skeleton
@@ -90,16 +99,3 @@ ghost-role-information-skelet-hightier-rules = You are a skeleton. Let frail fle
 
 ent-MedievalMobSkeletFighterSpell = skeleton warrior
     .desc = Sorcery put a fighter's memory back into these bones. It handles itself better than a corpse should.
-
-
-ent-MedievalMobSkeletHalberdSpell = magical halberd skeleton
-    .desc = A halberd skeleton conjured by dark magic. Its remains crumble without leaving any loot.
-
-ent-MedievalMobSkeletDaggerSpell = magical dagger skeleton
-    .desc = An agile dagger skeleton conjured by dark magic. Its remains crumble without leaving any loot.
-
-ent-MedievalMobSkeletLegionSpell = magical legionary skeleton
-    .desc = A legionary skeleton conjured by dark magic. Its remains crumble without leaving any loot.
-
-ent-MedievalMobSkeletSpearSpell = magical spear skeleton
-    .desc = A spear skeleton conjured by dark magic. Its remains crumble without leaving any loot.
