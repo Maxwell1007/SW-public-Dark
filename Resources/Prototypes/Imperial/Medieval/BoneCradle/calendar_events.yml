@@ -1,0 +1,89 @@
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector1
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-1-name
+  text: calendar-event-bone-cradle-sector-1-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector2
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-2-name
+  text: calendar-event-bone-cradle-sector-2-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector3
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-3-name
+  text: calendar-event-bone-cradle-sector-3-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector4
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-4-name
+  text: calendar-event-bone-cradle-sector-4-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector5
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-5-name
+  text: calendar-event-bone-cradle-sector-5-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector6
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-6-name
+  text: calendar-event-bone-cradle-sector-6-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector7
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-7-name
+  text: calendar-event-bone-cradle-sector-7-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector8
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-8-name
+  text: calendar-event-bone-cradle-sector-8-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]
+
+- type: calendarEvent
+  id: CalendarEventBoneCradleSector9
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/sun.png
+  name: calendar-event-bone-cradle-sector-9-name
+  text: calendar-event-bone-cradle-sector-9-desc
+  sound:
+    path: /Audio/Effects/day.ogg
+  weight: 0
+  tags: [Day]

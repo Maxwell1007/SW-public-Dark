@@ -3,18 +3,20 @@
   id: MedievalSkeletonInvasionRule
   components:
   - type: GameRule
-    delay:
-      min: 4800
-      max: 6000
   - type: SkeletonInvasionRule
     arena: /Maps/Imperial/Medieval/boss-test-arena.yml
-    spawnDelay: [12, 17]
-    skullParts:
-    - SkeletonSkullPart1
-    - SkeletonSkullPart2
-    - SkeletonSkullPart3
-    - SkeletonSkullPart4
-    - SkeletonSkullPart5
-    - SkeletonSkullPart6
-    - SkeletonSkullPart7
-    - SkeletonSkullPart8
+    skeletonPrototype: MedievalMobSkeletonNecroFighter
+  - type: AntagSelection
+    selectionTime: PrePlayerSpawn
+    agentName: roles-antag-morbius-skeleton-name
+    definitions:
+    - prefRoles: [ MorbiusSkeleton ]
+      min: 1
+      max: 2147483647
+      playerRatio: 25
+      lateJoinAdditional: false
+      mindRoles:
+      - MindRoleMorbiusSkeleton
+      briefing:
+        text: morbius-skeleton-intro-text
+        color: crimson

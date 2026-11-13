@@ -1,0 +1,43 @@
+- type: entity
+  id: MedievalBoneCradle
+  parent: BaseStructure
+  name: bone cradle
+  description: A cradle of ancient bones, summoned to the archipelago for a short time.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Structures/skull-stand.rsi
+    state: stand
+  - type: BoneCradle
+  - type: TimedDespawn
+    lifetime: 600
+
+- type: entity
+  id: MedievalBoneCradleSpawnMarker
+  parent: MarkerBase
+  name: bone cradle spawn marker
+  description: A possible location for a bone cradle. Its sector is determined by the parent grid.
+  components:
+  - type: Sprite
+    layers:
+    - sprite: Imperial/Medieval/Markers/cross.rsi
+      state: def
+  - type: BoneCradleSpawnMarker
+
+- type: entity
+  id: MedievalBoneCradleRule
+  parent: BaseGameRule
+  components:
+  - type: GameRule
+  - type: BoneCradleRule
+    firstDay: 2
+    dayInterval: 2
+    events:
+      CalendarEventBoneCradleSector1: sector1
+      CalendarEventBoneCradleSector2: sector2
+      CalendarEventBoneCradleSector3: sector3
+      CalendarEventBoneCradleSector4: sector4
+      CalendarEventBoneCradleSector5: sector5
+      CalendarEventBoneCradleSector6: sector6
+      CalendarEventBoneCradleSector7: sector7
+      CalendarEventBoneCradleSector8: sector8
+      CalendarEventBoneCradleSector9: sector9

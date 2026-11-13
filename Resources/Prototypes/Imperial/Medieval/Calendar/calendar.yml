@@ -1,0 +1,10 @@
+- type: entity
+  id: MedievalCalendar
+  name: archipelago calendar
+  components:
+  - type: CalendarState
+    cycleDuration: 1440
+    dayDuration: 720
+    daysCount: 12
+    dayStageNumber: 1
+    nightStageNumber: 6

@@ -6,6 +6,15 @@
   noSpawn: false
   description: A dummy skeleton meant to be used in character setup.
   components:
+  - type: SkeletonProgression
+    availableUpgrades:
+    - MorbiusSwiftBones
+    - MorbiusEnduringBones
+    - MorbiusRestlessBones
+  - type: UserInterface
+    interfaces:
+      enum.SkeletonProgressionUiKey.Key:
+        type: SkeletonProgressionBoundUserInterface
   - type: HumanoidAppearance
     species: Skeleton
   - type: NpcFactionMember
@@ -194,9 +203,6 @@
     jumpsuit: MedievalClothingUniformJumpsuitShitCloth13Necro
     back: ClothingBackpackSatchelNecro
     pocket2: MedievalCursedMarkNecro
-  storage:
-    back:
-    - BaseMagicNecroShop
 
 
 
@@ -249,9 +255,6 @@
     jumpsuit: MedievalClothingUniformJumpsuitShitCloth13Necro
     back: ClothingBackpackSatchelNecro
     pocket2: MedievalCursedMarkNecro
-  storage:
-    back:
-    - BaseMagicNecroShopLeader
 
 
 

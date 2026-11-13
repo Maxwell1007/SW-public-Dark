@@ -1,0 +1,16 @@
+- type: antag
+  id: MorbiusSkeleton
+  name: roles-antag-morbius-skeleton-name
+  antagonist: true
+  setPreference: true
+  objective: roles-antag-morbius-skeleton-objective
+
+- type: entity
+  id: MindRoleMorbiusSkeleton
+  parent: BaseMindRoleAntag
+  name: Morbius skeleton role
+  components:
+  - type: MindRole
+    antagPrototype: MorbiusSkeleton
+    exclusiveAntag: true
+    roleType: TeamAntagonist

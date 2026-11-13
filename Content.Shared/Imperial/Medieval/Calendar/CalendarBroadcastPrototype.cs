@@ -1,5 +1,6 @@
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared.Imperial.Medieval.Calendar;
 
@@ -94,6 +95,7 @@ public sealed partial class CalendarEventPrototype : IPrototype
     }
 }
 
+[Serializable, NetSerializable]
 public enum CalendarDayType : byte
 {
     Day,

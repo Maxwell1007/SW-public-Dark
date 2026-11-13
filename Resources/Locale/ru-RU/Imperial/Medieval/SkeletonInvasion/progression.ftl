@@ -1,0 +1,17 @@
+ent-ActionMorbiusSkeletonProgression = Дары Морбиуса
+    .desc = Посмотреть очки навыков и улучшить своего скелета.
+morbius-progression-title = Дары Морбиуса
+morbius-progression-points = Очки навыков: { $points }
+morbius-progression-refund = После смерти улучшения сбрасываются, а потраченные очки возвращаются.
+morbius-progression-recenter = Центрировать
+morbius-progression-cost = Цена: { $points }
+morbius-progression-buy = Изучить
+morbius-progression-purchased = Изучено
+morbius-progression-no-requirements = Начальное улучшение
+morbius-progression-requirements = Требуется: { $upgrades }
+morbius-upgrade-swift-bones-name = Лёгкая поступь
+morbius-upgrade-swift-bones-description = Скорость ходьбы и бега увеличена на 10%.
+morbius-upgrade-enduring-bones-name = Костяная выносливость
+morbius-upgrade-enduring-bones-description = Получаемый урон выносливости снижен на 15%.
+morbius-upgrade-restless-bones-name = Неутомимый рывок
+morbius-upgrade-restless-bones-description = Затраты выносливости на рывок снижены на 20%.

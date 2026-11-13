@@ -1,0 +1,23 @@
+ent-MedievalBoneCradle = bone cradle
+    .desc = A cradle of ancient bones
+ent-MedievalBoneCradleSpawnMarker = bone cradle spawn marker
+    .desc = location for a bone cradle.
+
+calendar-event-bone-cradle-sector-1-name = Bone cradle in the northwest of the archipelago
+calendar-event-bone-cradle-sector-1-desc = A bone cradle will appear in the northwestern part of the archipelago.
+calendar-event-bone-cradle-sector-2-name = Bone cradle in the north of the archipelago
+calendar-event-bone-cradle-sector-2-desc = A bone cradle will appear in the northern part of the archipelago.
+calendar-event-bone-cradle-sector-3-name = Bone cradle in the northeast of the archipelago
+calendar-event-bone-cradle-sector-3-desc = A bone cradle will appear in the northeastern part of the archipelago.
+calendar-event-bone-cradle-sector-4-name = Bone cradle in the west of the archipelago
+calendar-event-bone-cradle-sector-4-desc = A bone cradle will appear in the western part of the archipelago.
+calendar-event-bone-cradle-sector-5-name = Bone cradle in the center of the archipelago
+calendar-event-bone-cradle-sector-5-desc = A bone cradle will appear in the central part of the archipelago.
+calendar-event-bone-cradle-sector-6-name = Bone cradle in the east of the archipelago
+calendar-event-bone-cradle-sector-6-desc = A bone cradle will appear in the eastern part of the archipelago.
+calendar-event-bone-cradle-sector-7-name = Bone cradle in the southwest of the archipelago
+calendar-event-bone-cradle-sector-7-desc = A bone cradle will appear in the southwestern part of the archipelago.
+calendar-event-bone-cradle-sector-8-name = Bone cradle in the south of the archipelago
+calendar-event-bone-cradle-sector-8-desc = A bone cradle will appear in the southern part of the archipelago.
+calendar-event-bone-cradle-sector-9-name = Bone cradle in the southeast of the archipelago
+calendar-event-bone-cradle-sector-9-desc = A bone cradle will appear in the southeastern part of the archipelago.

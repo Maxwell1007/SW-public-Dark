@@ -18,5 +18,16 @@ calendar-board-tab-nights = Ночи
 
 calendar-board-day = День {$day}
 calendar-board-night = Ночь {$day}
+calendar-board-current-day = Сейчас день {$day}
+calendar-board-current-night = Сейчас ночь {$day}
+
+calendar-event-day-announcement = День {$day}: {$event}
+calendar-event-night-announcement = Ночь {$day}: {$event}
+
+cmd-trigger-next-day-cycle-desc = Перевести календарь вперёд на указанное число суток.
+cmd-trigger-next-day-cycle-help = Использование: {$command} <число суток>
+cmd-trigger-next-day-cycle-success = Календарь переведён вперёд на {$days} сут.
+cmd-trigger-next-day-cycle-invalid-days = Укажите положительное целое число суток.
+cmd-trigger-next-day-cycle-not-running = Календарь ещё не запущен или указан слишком большой сдвиг.
 
 calendar-board-announcement-admin-info = [{ $ckey } ({ $character })]

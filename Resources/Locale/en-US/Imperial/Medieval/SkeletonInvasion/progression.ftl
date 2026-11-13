@@ -1,0 +1,17 @@
+ent-ActionMorbiusSkeletonProgression = Gifts of Morbius
+    .desc = View your skill points and upgrade your skeleton.
+morbius-progression-title = Gifts of Morbius
+morbius-progression-points = Skill points: { $points }
+morbius-progression-refund = Upgrades reset on death and spent points are refunded.
+morbius-progression-recenter = Recenter
+morbius-progression-cost = Cost: { $points }
+morbius-progression-buy = Learn
+morbius-progression-purchased = Learned
+morbius-progression-no-requirements = Initial upgrade
+morbius-progression-requirements = Requires: { $upgrades }
+morbius-upgrade-swift-bones-name = Light Step
+morbius-upgrade-swift-bones-description = Walking and running speed is increased by 10%.
+morbius-upgrade-enduring-bones-name = Bone Endurance
+morbius-upgrade-enduring-bones-description = Incoming stamina damage is reduced by 15%.
+morbius-upgrade-restless-bones-name = Tireless Dash
+morbius-upgrade-restless-bones-description = Dash stamina cost is reduced by 20%.

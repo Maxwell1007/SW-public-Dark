@@ -1,4 +1,3 @@
-using System;
 using Content.Client.Administration.Managers;
 using Content.Client.Imperial.Medieval.Calendar.Board.Elements;
 using Content.Client.Imperial.Medieval.Factions.UI.Elements;
@@ -8,9 +7,6 @@ using Robust.Client.Player;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
 using Robust.Client.UserInterface.XAML;
-using Robust.Shared.GameObjects;
-using Robust.Shared.IoC;
-using Robust.Shared.Localization;
 
 namespace Content.Client.Imperial.Medieval.Calendar.Board;
 
@@ -59,6 +55,10 @@ public sealed partial class CalendarBoardWindow : DefaultWindow
 
     public void Populate(CalendarBoardBoundUserInterfaceState state)
     {
+        CurrentDayLabel.Text = Loc.GetString(
+            state.CurrentDayType == CalendarDayType.Day ? "calendar-board-current-day" : "calendar-board-current-night",
+            ("day", state.CurrentCycle + 1));
+
         WantedGrid.RemoveAllChildren();
         foreach (var item in state.Wanted)
         {
@@ -70,11 +70,12 @@ public sealed partial class CalendarBoardWindow : DefaultWindow
         if (state.DayDeck != null)
         {
             var daysCount = state.DayDeck.Count;
+            var firstDay = daysCount == 0 ? 0 : state.CurrentCycle / daysCount * daysCount;
             for (var i = 0; i < daysCount; i++)
             {
-                var isCurrent = i == (state.CurrentCycle % daysCount);
+                var isCurrent = state.CurrentDayType == CalendarDayType.Day && i == state.CurrentCycle % daysCount;
 
-                var entry = new CalendarDayEntry(i + 1, state.DayDeck[i], isCurrent, "calendar-board-day");
+                var entry = new CalendarDayEntry(firstDay + i + 1, state.DayDeck[i], isCurrent, "calendar-board-day");
                 DayCalendarGrid.AddChild(entry);
             }
         }
@@ -83,11 +84,12 @@ public sealed partial class CalendarBoardWindow : DefaultWindow
         if (state.NightDeck != null)
         {
             var nightsCount = state.NightDeck.Count;
+            var firstNight = nightsCount == 0 ? 0 : state.CurrentCycle / nightsCount * nightsCount;
             for (var i = 0; i < nightsCount; i++)
             {
-                var isCurrent = i == (state.CurrentCycle % nightsCount);
+                var isCurrent = state.CurrentDayType == CalendarDayType.Night && i == state.CurrentCycle % nightsCount;
 
-                var entry = new CalendarDayEntry(i + 1, state.NightDeck[i], isCurrent, "calendar-board-night");
+                var entry = new CalendarDayEntry(firstNight + i + 1, state.NightDeck[i], isCurrent, "calendar-board-night");
                 NightCalendarGrid.AddChild(entry);
             }
         }

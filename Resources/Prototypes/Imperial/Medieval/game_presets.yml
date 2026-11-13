@@ -42,6 +42,7 @@
   - TDM
   - MedievalStatsCounter
   - MedievalSkeletonInvasionRule
+  - MedievalBoneCradleRule
   - MedievalFactionGoalsRule
 
 - type: gamePreset

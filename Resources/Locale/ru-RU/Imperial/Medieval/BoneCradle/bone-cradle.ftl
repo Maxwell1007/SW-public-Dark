@@ -1,0 +1,23 @@
+ent-MedievalBoneCradle = костяная колыбель
+    .desc = Колыбель из древних костей, ненадолго призванная на архипелаг.
+ent-MedievalBoneCradleSpawnMarker = спавнер костяной колыбели
+    .desc = Место появления костяной колыбели. Сектор определяется по родительскому гриду.
+
+calendar-event-bone-cradle-sector-1-name = Костяная колыбель на северо-западе архипелага
+calendar-event-bone-cradle-sector-1-desc = В северо-западной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-2-name = Костяная колыбель на севере архипелага
+calendar-event-bone-cradle-sector-2-desc = В северной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-3-name = Костяная колыбель на северо-востоке архипелага
+calendar-event-bone-cradle-sector-3-desc = В северо-восточной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-4-name = Костяная колыбель на западе архипелага
+calendar-event-bone-cradle-sector-4-desc = В западной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-5-name = Костяная колыбель в центре архипелага
+calendar-event-bone-cradle-sector-5-desc = В центральной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-6-name = Костяная колыбель на востоке архипелага
+calendar-event-bone-cradle-sector-6-desc = В восточной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-7-name = Костяная колыбель на юго-западе архипелага
+calendar-event-bone-cradle-sector-7-desc = В юго-западной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-8-name = Костяная колыбель на юге архипелага
+calendar-event-bone-cradle-sector-8-desc = В южной части архипелага появится костяная колыбель.
+calendar-event-bone-cradle-sector-9-name = Костяная колыбель на юго-востоке архипелага
+calendar-event-bone-cradle-sector-9-desc = В юго-восточной части архипелага появится костяная колыбель.
