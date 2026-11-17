@@ -1,0 +1,13 @@
+- type: calendarEvent
+  id: CalendarEventBoneCradle
+  texture: /Textures/Imperial/Medieval/Calendar/indicators/moon.png
+  name: calendar-event-bone-cradle-name
+  text: calendar-event-bone-cradle-desc
+  sound:
+    path: /Audio/Imperial/Medieval/Werewolf/howl-far.ogg
+  weight: 5
+  minOccurrences: 4
+  maxOccurrences: 6
+  minPhaseGap: 2
+  phases: Night
+  requiredGameRules: [ MedievalBoneCradleRule ]

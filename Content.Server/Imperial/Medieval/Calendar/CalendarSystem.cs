@@ -1,47 +1,171 @@
 using Content.Server.Administration;
-using Content.Server.Imperial.DayTime;
+using Content.Server.GameTicking;
+using Content.Server.Imperial.Medieval.Calendar;
+using Content.Server.Imperial.Medieval.DayNight;
 using Content.Shared.Administration;
 using Content.Shared.GameTicking;
+using Content.Shared.GameTicking.Components;
 using Robust.Shared.Console;
 using Robust.Shared.Map;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
-using System;
-using System.Collections.Generic;
 
 namespace Content.Shared.Imperial.Medieval.Calendar;
 
-public sealed class CalendarSystem : EntitySystem
+public sealed partial class CalendarSystem : EntitySystem
 {
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly ISharedPlayerManager _playerManager = default!;
+    [Dependency] private readonly GameTicker _ticker = default!;
+    [Dependency] private readonly MedievalDayNightSystem _dayNight = default!;
 
-    public const int DayStageNumber = 1;
-    public const int NightStageNumber = 6;
+    public IReadOnlyList<ProtoId<CalendarEventPrototype>> DayDeck =>
+        GetState()?.DayDeck ?? (IReadOnlyList<ProtoId<CalendarEventPrototype>>) Array.Empty<ProtoId<CalendarEventPrototype>>();
 
-    public const string DayTag = "Day";
-    public const string NightTag = "Night";
+    public IReadOnlyList<ProtoId<CalendarEventPrototype>> NightDeck =>
+        GetState()?.NightDeck ?? (IReadOnlyList<ProtoId<CalendarEventPrototype>>) Array.Empty<ProtoId<CalendarEventPrototype>>();
 
-    public const int TargetDaysCount = 12;
-
-    private int _curCycle;
-    private readonly List<ProtoId<CalendarEventPrototype>> _dayDeck = new();
-    private readonly List<ProtoId<CalendarEventPrototype>> _nightDeck = new();
-
-    public IReadOnlyList<ProtoId<CalendarEventPrototype>> DayDeck => _dayDeck;
-    public IReadOnlyList<ProtoId<CalendarEventPrototype>> NightDeck => _nightDeck;
-    public int CurrentCycle => _curCycle;
+    public int CurrentCycle => _dayNight.CurrentPhase / 2;
+    public int CurrentDayNumber => CurrentCycle + 1;
+    public int FirstDeckDay => (GetState()?.DeckStartPhase ?? 0) / 2 + 1;
+    public CalendarDayType CurrentDayType => _dayNight.CurrentPhase % 2 == 0 ? CalendarDayType.Day : CalendarDayType.Night;
+    public bool IsInitialized => GetState() is { ScheduleReady: true };
 
     public override void Initialize()
     {
         base.Initialize();
-
-        SubscribeLocalEvent<DayCycleStageChangedEvent>(OnDayCycleChanged);
-        SubscribeLocalEvent<RoundStartedEvent>(OnRoundStart);
+        SubscribeLocalEvent<RoundStartedEvent>(OnRoundStart, after: [typeof(MedievalDayNightSystem)]);
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestartCleanup);
+        SubscribeLocalEvent<MedievalDayNightChangedEvent>(OnTimeChanged);
+        SubscribeLocalEvent<GameRuleStartedEvent>(OnRuleStarted);
+        SubscribeLocalEvent<GameRuleEndedEvent>(OnRuleEnded);
         SubscribeLocalEvent<CalendarEventStartedEvent>(OnCalendarEventStarted);
-        SubscribeLocalEvent<DayCycleFinishedEvent>(OnNewDayCycle);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (_ticker.RunLevel == GameRunLevel.InRound && GetState() is { ScheduleReady: true, RebuildRequested: true } state)
+            GenerateSchedule(state, true);
+    }
+
+    private void OnRoundStart(RoundStartedEvent args)
+    {
+        ClearState();
+        if (!_dayNight.IsInitialized)
+            return;
+
+        var uid = Spawn("MedievalCalendar", MapCoordinates.Nullspace);
+        var state = Comp<CalendarStateComponent>(uid);
+        if (state.PhasesCount < 2 || state.PhasesCount % 2 != 0 || state.GenerationSearchLimit < 1)
+        {
+            Log.Error("Cannot initialize calendar: schedule size must be positive and even, and search limit must be positive.");
+            QueueDel(uid);
+            return;
+        }
+
+        GenerateSchedule(state, false);
+        state.ScheduleReady = true;
+        TriggerDayStageNotification();
+    }
+
+    private void OnRoundRestartCleanup(RoundRestartCleanupEvent args)
+    {
+        ClearState();
+    }
+
+    private void ClearState()
+    {
+        var query = EntityManager.AllEntityQueryEnumerator<CalendarStateComponent>();
+        while (query.MoveNext(out var uid, out _))
+            QueueDel(uid);
+    }
+
+    private void OnRuleStarted(ref GameRuleStartedEvent args)
+    {
+        OnRuleAvailabilityChanged(args.RuleId);
+    }
+
+    private void OnRuleEnded(ref GameRuleEndedEvent args)
+    {
+        OnRuleAvailabilityChanged(args.RuleId);
+    }
+
+    private void OnRuleAvailabilityChanged(string ruleId)
+    {
+        if (GetState() is not { ScheduleReady: true } state)
+            return;
+
+        foreach (var prototype in _prototype.EnumeratePrototypes<CalendarEventPrototype>())
+        {
+            foreach (var rule in prototype.RequiredGameRules)
+            {
+                if (rule.Id != ruleId)
+                    continue;
+
+                state.RebuildRequested = true;
+                return;
+            }
+        }
+    }
+
+    private void OnTimeChanged(MedievalDayNightChangedEvent args)
+    {
+        if (GetState() is not { ScheduleReady: true } state)
+            return;
+
+        if (args.PhaseIndex < state.DeckStartPhase || args.PhaseIndex - state.DeckStartPhase >= state.Deck.Count)
+            GenerateSchedule(state, false);
+        else if (state.RebuildRequested)
+            GenerateSchedule(state, true);
+
+        TriggerDayStageNotification();
+    }
+
+    public void SetOverrideEvent(int dayNumber, ProtoId<CalendarEventPrototype> eventId, bool isNight = false)
+    {
+        if (GetState() is not { ScheduleReady: true } state)
+            return;
+
+        var index = (long) (dayNumber - 1) * 2 + (isNight ? 1 : 0);
+        if (index < 0 || index >= state.Deck.Count || !_prototype.HasIndex(eventId))
+        {
+            Log.Error($"Cannot assign calendar event {eventId} to day {dayNumber}: invalid day or event prototype.");
+            return;
+        }
+
+        if (state.DeckStartPhase + index <= _dayNight.CurrentPhase)
+            return;
+
+        state.Deck[(int) index] = eventId;
+        state.DisplayDeck[(int) index] = eventId;
+        UpdateDeckViews(state);
+        RaiseLocalEvent(new CalendarUpdatedEvent());
+    }
+
+    public bool TrySkipPhase() => _dayNight.TrySkipPhase();
+
+    public bool TryAdvanceDays(int days) => _dayNight.TryAdvanceDays(days);
+
+    public void TriggerDayStageNotification(ProtoId<CalendarEventPrototype>? protoId = null)
+    {
+        if (_ticker.RunLevel != GameRunLevel.InRound || GetState() is not { ScheduleReady: true } state)
+            return;
+
+        var index = _dayNight.CurrentPhase - state.DeckStartPhase;
+        if (index < 0 || index >= state.Deck.Count)
+            return;
+
+        var id = protoId ?? state.DisplayDeck[index];
+        if (!_prototype.TryIndex(id, out var proto))
+            return;
+
+        state.LastOccurrence[state.Deck[index].Id] = _dayNight.CurrentPhase;
+        RaiseLocalEvent(new CalendarUpdatedEvent());
+        RaiseNetworkEvent(new CalendarBroadcastNotificationEvent(id, CurrentDayNumber, CurrentDayType), Filter.Broadcast());
+        RaiseLocalEvent(new CalendarEventStartedEvent(CurrentDayNumber, id, proto, CurrentDayType));
     }
 
     private void OnCalendarEventStarted(CalendarEventStartedEvent args)
@@ -49,9 +173,7 @@ public sealed class CalendarSystem : EntitySystem
         if (args.Prototype.Spawns == null || args.Prototype.Spawns.Count == 0)
             return;
 
-
         var markerToSpawns = new Dictionary<string, List<(EntProtoId Proto, int Amount)>>(StringComparer.OrdinalIgnoreCase);
-
         foreach (var (entProto, entries) in args.Prototype.Spawns)
         {
             foreach (var entry in entries)
@@ -62,9 +184,7 @@ public sealed class CalendarSystem : EntitySystem
                 if (string.IsNullOrWhiteSpace(entry.Marker) || entry.Marker.Equals("Global", StringComparison.OrdinalIgnoreCase))
                 {
                     for (var i = 0; i < entry.Amount; i++)
-                    {
                         Spawn(entProto, MapCoordinates.Nullspace);
-                    }
                     continue;
                 }
 
@@ -78,9 +198,6 @@ public sealed class CalendarSystem : EntitySystem
             }
         }
 
-        if (markerToSpawns.Count == 0)
-            return;
-
         var query = EntityQueryEnumerator<CalendarSpawnMarkerComponent, TransformComponent>();
         while (query.MoveNext(out _, out var marker, out var xform))
         {
@@ -90,187 +207,23 @@ public sealed class CalendarSystem : EntitySystem
             foreach (var (proto, amount) in spawns)
             {
                 for (var i = 0; i < amount; i++)
-                {
                     Spawn(proto, xform.Coordinates);
-                }
             }
         }
     }
 
-    private void OnRoundStart(RoundStartedEvent args)
+    private CalendarStateComponent? GetState()
     {
-        _curCycle = 0;
-        InitializeCalendarDecks();
-
-        if (_dayDeck.Count > 0)
-            TriggerDayStageNotification(_dayDeck[0]);
-        else
-            TriggerDayStageNotification("DefaultCalendarEvent");
-    }
-
-    private void InitializeCalendarDecks()
-    {
-        GenerateDeck(_dayDeck, DayTag, "DefaultCalendarEvent");
-        GenerateDeck(_nightDeck, NightTag, "DefaultCalendarNightEvent");
-
-        // Модифицировать колоду календаря можно после этого ивента
-        RaiseLocalEvent(new CalendarDecksGeneratedEvent());
-    }
-
-    /// <summary>
-    /// Позволяет внешним системам (например, игровым режимам) перезаписать конкретный день в колоде.
-    /// </summary>
-    /// <param name="dayNumber">Номер дня (начиная с 1)</param>
-    /// <param name="eventId">ID прототипа события</param>
-    /// <param name="isNight">Заменить событие в колоде ночей (true) или дней (false)</param>
-    public void SetOverrideEvent(int dayNumber, ProtoId<CalendarEventPrototype> eventId, bool isNight = false)
-    {
-        var index = dayNumber - 1;
-
-        if (isNight)
+        var query = EntityManager.AllEntityQueryEnumerator<CalendarStateComponent>();
+        while (query.MoveNext(out var uid, out var state))
         {
-            if (index >= 0 && index < _nightDeck.Count)
-                _nightDeck[index] = eventId;
-        }
-        else
-        {
-            if (index >= 0 && index < _dayDeck.Count)
-                _dayDeck[index] = eventId;
-        }
-    }
-
-    private void GenerateDeck(List<ProtoId<CalendarEventPrototype>> deck, string filterTag, string fallbackEventId)
-    {
-        deck.Clear();
-
-        var pool = new List<CalendarEventPrototype>();
-        var playerCount = _playerManager.PlayerCount;
-
-        foreach (var proto in _prototype.EnumeratePrototypes<CalendarEventPrototype>())
-        {
-            if (proto.Tags.Contains(filterTag) &&
-                proto.Weight > 0f &&
-                playerCount >= proto.MinPlayers &&
-                playerCount <= proto.MaxPlayers)
-            {
-                pool.Add(proto);
-            }
+            if (!TerminatingOrDeleted(uid) && !EntityManager.IsQueuedForDeletion(uid))
+                return state;
         }
 
-        if (pool.Count == 0)
-        {
-            for (var day = 1; day <= TargetDaysCount; day++)
-            {
-                deck.Add(fallbackEventId);
-            }
-            return;
-        }
-
-        var counts = new Dictionary<string, int>(pool.Count);
-        var lastOccurrence = new Dictionary<string, int>(pool.Count);
-
-        for (var day = 1; day <= TargetDaysCount; day++)
-        {
-            var candidates = pool.FindAll(p =>
-                p.MinDay <= day &&
-                counts.GetValueOrDefault(p.ID) < p.MaxOccurrences &&
-                (day - lastOccurrence.GetValueOrDefault(p.ID, -999)) >= p.MinOffset
-            );
-
-            if (candidates.Count == 0)
-            {
-                candidates = pool.FindAll(p =>
-                    p.MaxOccurrences >= TargetDaysCount &&
-                    (day - lastOccurrence.GetValueOrDefault(p.ID, -999)) >= p.MinOffset
-                );
-            }
-
-            if (candidates.Count == 0)
-            {
-                deck.Add(fallbackEventId);
-                continue;
-            }
-
-            var totalWeight = 0f;
-            for (var i = 0; i < candidates.Count; i++)
-            {
-                totalWeight += candidates[i].GetWeight(day);
-            }
-
-            var roll = _random.NextFloat() * totalWeight;
-            var acc = 0f;
-            var selected = candidates[0];
-
-            for (var i = 0; i < candidates.Count; i++)
-            {
-                acc += candidates[i].GetWeight(day);
-                if (roll <= acc)
-                {
-                    selected = candidates[i];
-                    break;
-                }
-            }
-
-            deck.Add(selected.ID);
-            counts[selected.ID] = counts.GetValueOrDefault(selected.ID) + 1;
-            lastOccurrence[selected.ID] = day;
-        }
-    }
-
-    private void OnDayCycleChanged(ref DayCycleStageChangedEvent args)
-    {
-        TriggerNextDayStageNotification(args.NextStage);
-    }
-
-    private void OnNewDayCycle(ref DayCycleFinishedEvent args)
-    {
-        _curCycle++;
-    }
-
-    public void TriggerNextDayStageNotification(int stageNumber)
-    {
-        switch (stageNumber)
-        {
-            case DayStageNumber:
-                {
-                    if (_dayDeck.Count == 0)
-                    {
-                        TriggerDayStageNotification("DefaultCalendarEvent");
-                        return;
-                    }
-
-                    var index = _curCycle % _dayDeck.Count;
-                    TriggerDayStageNotification(_dayDeck[index]);
-                    break;
-                }
-
-            case NightStageNumber:
-                {
-                    if (_nightDeck.Count == 0)
-                    {
-                        TriggerDayStageNotification("DefaultCalendarNightEvent");
-                        return;
-                    }
-
-                    var index = _curCycle % _nightDeck.Count;
-                    TriggerDayStageNotification(_nightDeck[index]);
-                    break;
-                }
-        }
-    }
-
-    public void TriggerDayStageNotification(ProtoId<CalendarEventPrototype>? protoId = null)
-    {
-        var id = protoId ?? "DefaultCalendarEvent";
-
-        if (!_prototype.TryIndex(id, out var proto))
-            return;
-
-        RaiseNetworkEvent(new CalendarBroadcastNotificationEvent(id), Filter.Broadcast());
-        RaiseLocalEvent(new CalendarEventStartedEvent(_curCycle, id, proto));
+        return null;
     }
 }
-
 
 [AdminCommand(AdminFlags.VarEdit)]
 public sealed class TriggerNextDayCycleCommand : IConsoleCommand
@@ -288,16 +241,13 @@ public sealed class TriggerNextDayCycleCommand : IConsoleCommand
             return;
         }
 
-        if (!int.TryParse(args[0], out var dayCount))
+        if (!int.TryParse(args[0], out var dayCount) || dayCount < 1)
         {
-            shell.WriteError(Loc.GetString("shell-argument-must-be-number"));
+            shell.WriteError(Loc.GetString("cmd-trigger-next-day-cycle-invalid-days"));
             return;
         }
 
-        var entSys = IoCManager.Resolve<IEntitySystemManager>();
-        var daySystem = entSys.GetEntitySystem<CalendarSystem>();
-
-        daySystem.TriggerNextDayStageNotification(dayCount);
-        shell.WriteLine(Loc.GetString("cmd-trigger-next-day-cycle-success", ("days", dayCount)));
+        if (!IoCManager.Resolve<IEntitySystemManager>().GetEntitySystem<MedievalDayNightSystem>().TryAdvanceDays(dayCount))
+            shell.WriteError(Loc.GetString("cmd-trigger-next-day-cycle-not-running"));
     }
 }

@@ -1,0 +1,10 @@
+- type: entity
+  id: MedievalSkeletonGlow
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: PointLight
+    color: red
+    energy: 1.8
+    radius: 2.5
+    netsync: true
+    enabled: true

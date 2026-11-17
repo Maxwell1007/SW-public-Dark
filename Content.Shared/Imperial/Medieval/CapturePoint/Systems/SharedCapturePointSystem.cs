@@ -61,7 +61,11 @@ public abstract class SharedCapturePointSystem : EntitySystem
 
     public string GetFactionDisplayName(ProtoId<MedievalFactionPrototype> faction)
     {
-        var name = ProtoManager.Index(faction).Name;
+        var prototype = ProtoManager.Index(faction);
+        if (prototype.CaptureOnly)
+            return Loc.GetString(prototype.Name);
+
+        var name = prototype.Name;
         return string.IsNullOrEmpty(name)
             ? faction.Id
             : CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name);

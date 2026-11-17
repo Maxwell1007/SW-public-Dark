@@ -2,7 +2,6 @@ using Content.Shared.Imperial.Medieval.AreaMarker;
 using Content.Shared.Imperial.Medieval.Calendar;
 using Robust.Client.UserInterface.Controllers;
 using Robust.Shared.Audio.Systems;
-using Robust.Shared.GameObjects;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 
@@ -26,10 +25,14 @@ public sealed class CalendarNotificationUiController : UIController
         if (!_prototype.TryIndex(ev.ProtoId, out CalendarEventPrototype? proto))
             return;
 
-        var text = !string.IsNullOrEmpty(proto.Name) ? Loc.GetString("wrapped-area-marker-message", ("area", Loc.GetString(proto.Name)), ("fontSize", 24)) : string.Empty;
+        var announcement = Loc.GetString(
+            ev.DayType == CalendarDayType.Day ? "calendar-event-day-announcement" : "calendar-event-night-announcement",
+            ("day", ev.DayNumber),
+            ("event", Loc.GetString(proto.Name)));
+        var text = Loc.GetString("wrapped-area-marker-message", ("area", announcement), ("fontSize", 24));
 
-        var even = new AreaMarkerAnnounceEvent(text);
-        _entManager.EventBus.RaiseEvent(EventSource.Local, ref even);
+        var announceEvent = new AreaMarkerAnnounceEvent(text);
+        _entManager.EventBus.RaiseEvent(EventSource.Local, ref announceEvent);
 
         BroadcastReceived?.Invoke(proto.Texture, text);
 

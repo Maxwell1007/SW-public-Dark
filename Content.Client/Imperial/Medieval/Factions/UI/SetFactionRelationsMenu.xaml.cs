@@ -60,7 +60,7 @@ public sealed partial class SetFactionRelationsMenu : DefaultWindow
             return;
         }
 
-        var factions = _proto.EnumeratePrototypes<MedievalFactionPrototype>().Where(x => x.ID != userFaction && !x.BlockedRelations.Contains(userFaction))
+        var factions = _proto.EnumeratePrototypes<MedievalFactionPrototype>().Where(x => !x.CaptureOnly && x.ID != userFaction && !x.BlockedRelations.Contains(userFaction))
             .ToList();
         factions.OrderBy(x => x.Name);
         for (var i = 0; i < factions.Count(); i++)

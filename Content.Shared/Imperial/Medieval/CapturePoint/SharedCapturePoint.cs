@@ -25,11 +25,13 @@ public sealed class CapturePointResultEvent : EntityEventArgs
 {
     public NetEntity Point;
     public ProtoId<MedievalFactionPrototype>? WinnerFaction;
+    public string? PointName;
 
-    public CapturePointResultEvent(NetEntity point, ProtoId<MedievalFactionPrototype>? winnerFaction)
+    public CapturePointResultEvent(NetEntity point, ProtoId<MedievalFactionPrototype>? winnerFaction, string? pointName = null)
     {
         Point = point;
         WinnerFaction = winnerFaction;
+        PointName = pointName;
     }
 }
 

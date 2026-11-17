@@ -1,4 +1,3 @@
-using System.Globalization;
 using Content.Client.Imperial.Medieval.CapturePoint.UI.MedievalWindow;
 using Content.Shared.Imperial.Medieval.CapturePoint;
 using Content.Shared.Imperial.Medieval.CapturePoint.Components;
@@ -26,8 +25,7 @@ public sealed partial class CapturePointMessengerWindow : MedievalWindow
 
         CaptureInfoLabel.Text = Loc.GetString("medieval-capture-point-messenger-info", ("pointName", pointName));
 
-        var name = factionProto.Name;
-        AttackingFactionLabel.Text = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name);
+        AttackingFactionLabel.Text = entMan.System<CapturePointSystem>().GetFactionDisplayName(ev.AttackingFaction);
         AttackingFactionLabel.FontColorOverride = factionProto.Color;
 
         AcknowledgeButton.OnPressed += _ => Close();

@@ -1,0 +1,14 @@
+- type: entity
+  id: MedievalCalendar
+  name: archipelago calendar
+  components:
+  - type: CalendarState
+    phasesCount: 24
+
+- type: entity
+  id: MedievalDayNightClock
+  name: archipelago time
+  components:
+  - type: MedievalDayNightClock
+    dayDuration: 720
+    nightDuration: 720

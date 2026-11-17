@@ -1,0 +1,90 @@
+- type: entity
+  id: MedievalBoneCradle
+  parent: BaseStructure
+  name: bone cradle
+  description: A cradle of ancient bones, summoned to the archipelago for a short time.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Structures/skull-stand.rsi
+    state: stand
+  - type: InteractionOutline
+  - type: BoneCradleTeleport
+  - type: CapturePoint
+    radius: 5.5
+    allowedFactions:
+    - BoneCradleMorbius
+    - BoneCradleOpponents
+    owningFaction: BoneCradleMorbius
+    notifyAllDefenders: true
+  - type: Appearance
+  - type: UserInterface
+    interfaces:
+      enum.CapturePointUiKey.Key:
+        type: CapturePointBoundUi
+  - type: BoneCradle
+    gracePeriod: 360
+    pointsPerReward: 1
+    rewardInterval: 60
+  - type: TimedDespawn
+    lifetime: 1440
+
+- type: entity
+  id: MedievalBoneCradleSpawnMarker
+  parent: MarkerBase
+  name: bone cradle spawn marker
+  description: A possible location for a bone cradle.
+  components:
+  - type: Sprite
+    layers:
+    - sprite: Imperial/Medieval/Markers/cross.rsi
+      state: def
+  - type: BoneCradleSpawnMarker
+
+- type: entity
+  id: MedievalBoneCradleRule
+  parent: BaseGameRule
+  components:
+  - type: GameRule
+  - type: BoneCradleRule
+    sectorLocations:
+      sector1: bone-cradle-location-sector-1
+      sector2: bone-cradle-location-sector-2
+      sector3: bone-cradle-location-sector-3
+      sector4: bone-cradle-location-sector-4
+      sector5: bone-cradle-location-sector-5
+      sector6: bone-cradle-location-sector-6
+      sector7: bone-cradle-location-sector-7
+      sector8: bone-cradle-location-sector-8
+      sector9: bone-cradle-location-sector-9
+
+- type: medievalFaction
+  id: BoneCradleMorbius
+  name: bone-cradle-morbius-faction-name
+  captureOnly: true
+  showKnown: false
+  allowHeadhunt: false
+  color: "#38C74A"
+
+- type: medievalFaction
+  id: BoneCradleOpponents
+  name: bone-cradle-opponents-faction-name
+  captureOnly: true
+  showKnown: false
+  allowHeadhunt: false
+  color: "#E8C76A"
+
+- type: entity
+  id: ActionBoneCradleTeleport
+  name: Return to the bone cradle
+  description: Teleport to the bone cradle before it awakens. Movement or damage interrupts the ritual.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Action
+    useDelay: 1
+    temporary: true
+    itemIconStyle: BigAction
+    icon:
+      sprite: Imperial/Medieval/Structures/skull-stand.rsi
+      state: stand
+  - type: InstantAction
+    event: !type:BoneCradleTeleportActionEvent

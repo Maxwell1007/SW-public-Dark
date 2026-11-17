@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using Robust.Shared.Serialization;
 using Content.Shared.Imperial.Medieval.Factions;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared.Imperial.Medieval.Calendar;
 
@@ -18,6 +16,8 @@ public sealed class CalendarBoardBoundUserInterfaceState : BoundUserInterfaceSta
     public List<string> DayDeck;
     public List<string> NightDeck;
     public int CurrentCycle;
+    public int FirstDeckDay;
+    public CalendarDayType CurrentDayType;
     public List<AnnouncementData> Announcements;
 
     public CalendarBoardBoundUserInterfaceState(
@@ -25,12 +25,16 @@ public sealed class CalendarBoardBoundUserInterfaceState : BoundUserInterfaceSta
         List<string> dayDeck,
         List<string> nightDeck,
         int currentCycle,
+        int firstDeckDay,
+        CalendarDayType currentDayType,
         List<AnnouncementData> announcements)
     {
         Wanted = wanted;
         DayDeck = dayDeck;
         NightDeck = nightDeck;
         CurrentCycle = currentCycle;
+        FirstDeckDay = firstDeckDay;
+        CurrentDayType = currentDayType;
         Announcements = announcements;
     }
 }

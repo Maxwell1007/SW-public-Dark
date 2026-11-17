@@ -1,59 +1,43 @@
-using Content.Shared.GameTicking.Components;
-using Content.Shared.Mobs.Systems;
-using Content.Server.GameTicking.Rules;
-using System.Linq;
-using Content.Server.Chat.Systems;
-using Robust.Shared.Random;
-using Content.Server.MagicBarrier.Components;
-using Robust.Shared.Timing;
-using Robust.Shared.Map;
-using Content.Server.Imperial.Medieval.SkeletonInvasion;
-using Content.Shared.Humanoid;
-using Content.Server.Imperial.Medieval.Boss;
-using Robust.Shared.EntitySerialization.Systems;
-using Robust.Shared.EntitySerialization;
-using Content.Server.GameTicking;
+using Content.Server.Antag;
+using Content.Server.Antag.Components;
 using Content.Server.Flash;
+using Content.Server.GameTicking;
+using Content.Server.GameTicking.Rules;
+using Content.Server.GameTicking.Systems;
+using Content.Server.Imperial.Medieval.Boss;
+using Content.Server.Imperial.Medieval.SkeletonInvasion;
+using Content.Server.MagicBarrier.Components;
+using Content.Shared.Chat;
+using Content.Shared.GameTicking.Components;
+using Content.Shared.Humanoid;
+using Content.Shared.Mobs.Systems;
 using Robust.Server.Audio;
 using Robust.Shared.Audio;
-using Robust.Shared.Utility;
-using Content.Shared.Inventory;
-using Content.Shared.Storage;
-using Content.Server.Storage.EntitySystems;
-using Content.Server.Chat.Managers;
-using Content.Shared.Chat;
+using Robust.Shared.EntitySerialization;
+using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Player;
-using Content.Server.Ghost.Roles.Events;
-using Content.Shared.Imperial.Medieval.SkeletonInvasion;
-using Content.Server.GameTicking.Systems;
+using Robust.Shared.Random;
+using Robust.Shared.Utility;
 
 namespace Content.Server.Imperial.Medieval.GameTicking.Rules;
 
 public sealed class SkeletonInvasionRuleSystem : GameRuleSystem<SkeletonInvasionRuleComponent>
 {
-    [Dependency] private readonly ChatSystem _chat = default!;
-    [Dependency] private readonly IChatManager _chatMan = default!;
-    [Dependency] private readonly IRobustRandom _random = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly AntagSelectionSystem _antagSelection = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly BossSystem _boss = default!;
     [Dependency] private readonly MapLoaderSystem _mapLoader = default!;
     [Dependency] private readonly FlashSystem _flash = default!;
     [Dependency] private readonly AudioSystem _audio = default!;
-    [Dependency] private readonly InventorySystem _inventory = default!;
-    [Dependency] private readonly StorageSystem _storage = default!;
-
     [Dependency] private readonly AutoRoundExtendSystem _autoRoundExtend = default!;
-
-    private EntityUid _bossUid = EntityUid.Invalid;
-    private RoundResult _result = RoundResult.NoBoss;
-    private TimeSpan? _endTime;
 
     public override void Initialize()
     {
         base.Initialize();
 
-        SubscribeLocalEvent<IgnoreBossStartComponent, GhostRoleSpawnerUsedEvent>(OnSkeletonSpawn);
+        SubscribeLocalEvent<RulePlayerSpawningEvent>(OnPlayerSpawning,
+            before: [typeof(AntagSelectionSystem)], after: [typeof(TDMRuleSystem)]);
+        SubscribeLocalEvent<SkeletonInvasionRuleComponent, AntagSelectEntityEvent>(OnSelectSkeleton);
         SubscribeLocalEvent<SkullBossStandCompletedEvent>(OnSkullStandCompleted);
         SubscribeLocalEvent<BossDefeatedEvent>(OnBossDefeated);
         SubscribeLocalEvent<BossWonEvent>(OnBossWin);
@@ -63,59 +47,104 @@ public sealed class SkeletonInvasionRuleSystem : GameRuleSystem<SkeletonInvasion
     {
         base.Added(uid, component, gameRule, args);
 
-        if (!_mapLoader.TryLoadMap(component.Arena, out var map, out var grids, new DeserializationOptions() { InitializeMaps = true }))
+        if (!_mapLoader.TryLoadMap(component.Arena, out var map, out _, new DeserializationOptions { InitializeMaps = true }))
+        {
+            Log.Error($"Failed to load skeleton invasion arena {component.Arena} for {ToPrettyString(uid)}.");
             return;
+        }
 
-        _bossUid = EntityManager.AllEntities<BossComponent>().Where(x => Transform(x).MapUid == map.Value.Owner).First();
+        var query = EntityQueryEnumerator<BossComponent, TransformComponent>();
+        while (query.MoveNext(out var boss, out _, out var xform))
+        {
+            if (xform.MapUid != map.Value.Owner)
+                continue;
+
+            component.Boss = boss;
+            return;
+        }
+
+        Log.Error($"No boss found in skeleton invasion arena {component.Arena} for {ToPrettyString(uid)}.");
     }
 
-    protected override void Started(EntityUid uid, SkeletonInvasionRuleComponent component, GameRuleComponent gameRule, GameRuleStartedEvent args)
+    private void OnPlayerSpawning(RulePlayerSpawningEvent args)
     {
-        base.Started(uid, component, gameRule, args);
+        var playerCount = _antagSelection.GetTotalPlayerCount(args.PlayerPool);
+        var query = QueryActiveRules();
+        while (query.MoveNext(out var uid, out _, out _, out var gameRule))
+        {
+            if (!TryComp<AntagSelectionComponent>(uid, out var selection) || selection.AssignmentComplete)
+                continue;
 
-        var cursespawners = EntityManager.AllEntities<MagicBarrierCurseSpawnComponent>().Select(x => x.Owner).ToList();
-        _chat.DispatchGlobalAnnouncement("Посланники темного повелителя замечен на этих землях.", playSound: true, colorOverride: Color.DeepPink, sender: "Барьер");
-        component.NextSpawn = _timing.CurTime;
+            if (GetSpawnMarkers().Count == 0)
+            {
+                Log.Error($"Cannot spawn skeletons for {ToPrettyString(uid)}: no MagicBarrierCurseSpawn markers found.");
+                GameTicker.EndGameRule(uid, gameRule);
+                continue;
+            }
+
+            foreach (var definition in selection.Definitions)
+            {
+                var count = Math.Clamp(definition.Min + playerCount / definition.PlayerRatio, definition.Min, definition.Max);
+                var candidates = _antagSelection.GetPlayerPool((uid, selection), args.PlayerPool, definition);
+                while (count > 0 && candidates.TryPickAndTake(RobustRandom, out var session))
+                {
+                    if (_antagSelection.TryMakeAntag((uid, selection), session, definition, onlyPreSelect: true))
+                        count--;
+                }
+            }
+        }
+    }
+
+    private void OnSelectSkeleton(Entity<SkeletonInvasionRuleComponent> ent, ref AntagSelectEntityEvent args)
+    {
+        if (args.Handled || args.Session == null)
+            return;
+
+        var markers = GetSpawnMarkers();
+        if (markers.Count == 0)
+        {
+            Log.Error($"Cannot spawn skeleton for {ToPrettyString(ent)}: no MagicBarrierCurseSpawn markers found.");
+            return;
+        }
+
+        args.Entity = Spawn(ent.Comp.SkeletonPrototype, Transform(RobustRandom.Pick(markers)).Coordinates);
+    }
+
+    private List<EntityUid> GetSpawnMarkers()
+    {
+        var markers = new List<EntityUid>();
+        var query = EntityQueryEnumerator<MagicBarrierCurseSpawnComponent, TransformComponent>();
+        while (query.MoveNext(out var uid, out _, out var xform))
+        {
+            if (xform.MapUid != null)
+                markers.Add(uid);
+        }
+
+        return markers;
     }
 
     protected override void ActiveTick(EntityUid uid, SkeletonInvasionRuleComponent component, GameRuleComponent gameRule, float frameTime)
     {
         base.ActiveTick(uid, component, gameRule, frameTime);
 
-        if (_endTime != null && _endTime <= _timing.CurTime)
-        {
-            _endTime = null;
-            GameTicker.EndRound();
-            GameTicker.RestartRound();
-            return;
-        }
-
-        if (component.NextSpawn > _timing.CurTime)
+        if (component.EndTime == null || component.EndTime > Timing.CurTime)
             return;
 
-        var cursespawners = EntityManager.AllEntities<MagicBarrierCurseSpawnComponent>();
-
-        for (var i = 0; i < component.SpawnCount; i++)
-        {
-            var fighter = Spawn("MedievalSpawnNecroFighterPreset", Transform(_random.Pick(cursespawners).Owner).Coordinates);
-            var comp = EnsureComp<SpawnSkullPartOnGhostRoleTakeComponent>(fighter);
-            comp.Prototypes = component.SkullParts.Where(x => !EntityManager.AllEntities<SkullBossStandComponent>().First().Comp.AttachedProtos.Contains(x)).ToList();
-        }
-
-        component.SpawnCount++;
-        component.NextSpawn = _timing.CurTime + TimeSpan.FromMinutes(_random.NextFloat(component.SpawnDelay.Item1, component.SpawnDelay.Item2));
+        component.EndTime = null;
+        GameTicker.EndRound();
+        GameTicker.RestartRound();
     }
 
     protected override void AppendRoundEndText(EntityUid uid, SkeletonInvasionRuleComponent component, GameRuleComponent gameRule, ref RoundEndTextAppendEvent args)
     {
         base.AppendRoundEndText(uid, component, gameRule, ref args);
 
-        var resultText = _result switch
+        var resultText = component.Result switch
         {
-            RoundResult.NoBoss => Loc.GetString("skeletron-roundend-no-boss"),
-            RoundResult.BossDefeated => Loc.GetString("skeletron-roundend-defeated"),
-            RoundResult.BossWon => Loc.GetString("skeletron-roundend-lost"),
-            RoundResult.SkeletonsWon => Loc.GetString("skeletron-roundend-skeletons"),
+            SkeletonInvasionRoundResult.NoBoss => Loc.GetString("skeletron-roundend-no-boss"),
+            SkeletonInvasionRoundResult.BossDefeated => Loc.GetString("skeletron-roundend-defeated"),
+            SkeletonInvasionRoundResult.BossWon => Loc.GetString("skeletron-roundend-lost"),
+            SkeletonInvasionRoundResult.SkeletonsWon => Loc.GetString("skeletron-roundend-skeletons"),
             _ => ""
         };
 
@@ -126,115 +155,77 @@ public sealed class SkeletonInvasionRuleSystem : GameRuleSystem<SkeletonInvasion
     {
         base.Ended(uid, component, gameRule, args);
 
-        _endTime = null;
-    }
-
-    private void OnSkeletonSpawn(EntityUid uid, IgnoreBossStartComponent comp, GhostRoleSpawnerUsedEvent args)
-    {
-        if (!TryComp<SpawnSkullPartOnGhostRoleTakeComponent>(args.Spawner, out var list))
-            return;
-
-        if (!list.Prototypes.Any())
-            return;
-
-        _inventory.TryGetSlotEntity(uid, "back", out var fighterBack);
-        if (HasComp<StorageComponent>(fighterBack))
-        {
-            var item = Spawn(_random.Pick(list.Prototypes));
-            _storage.Insert(fighterBack.Value, item, out _);
-        }
+        component.EndTime = null;
     }
 
     private void OnSkullStandCompleted(SkullBossStandCompletedEvent args)
     {
-        if (args.PurifiedParts < args.Parts / 2)
+        var query = QueryActiveRules();
+        while (query.MoveNext(out _, out var component, out _))
         {
-            var msg = "Проклятый череп полностью собран. Трепещите смертные,  армия тьмы грядет и мир уже не будет прежним. Объединение - единственный шанс на спасение...";
-            _chatMan.ChatMessageToAll(ChatChannel.Radio, msg, msg, EntityUid.Invalid, false, true, colorOverride: Color.OrangeRed);
-            _audio.PlayGlobal(new SoundPathSpecifier(new ResPath("/Audio/Imperial/Medieval/Effects/skull-announce.ogg")), Filter.Broadcast(), true);
-            _result = RoundResult.SkeletonsWon;
-
-            var cursespawners = EntityManager.AllEntities<MagicBarrierCurseSpawnComponent>();
-
-            Spawn("MedievalSpawnNecroSenderPreset", Transform(_random.Pick(cursespawners).Owner).Coordinates);
-            for (var i = 0; i < 40; i++)
+            if (args.PurifiedParts < args.Parts / 2)
             {
-                Spawn("MedievalSpawnNecroFighterPreset", Transform(_random.Pick(cursespawners).Owner).Coordinates);
+                var msg = Loc.GetString("morbius-skull-completed-announcement");
+                ChatManager.ChatMessageToAll(ChatChannel.Radio, msg, msg, EntityUid.Invalid, false, true, colorOverride: Color.OrangeRed);
+                _audio.PlayGlobal(new SoundPathSpecifier(new ResPath("/Audio/Imperial/Medieval/Effects/skull-announce.ogg")), Filter.Broadcast(), true);
+                component.Result = SkeletonInvasionRoundResult.SkeletonsWon;
+                component.EndTime = Timing.CurTime + component.VictoryRoundEndDelay;
+                continue;
             }
 
-            _endTime = _timing.CurTime + TimeSpan.FromMinutes(25);
-
-            return;
-        }
-
-        if (!_bossUid.IsValid())
-            return;
-
-        var xform = Transform(args.Stand);
-        var players = EntityManager.AllEntities<HumanoidAppearanceComponent>().Where(x => !HasComp<IgnoreBossStartComponent>(x.Owner) && Transform(x).MapUid == Transform(args.Stand).MapUid);
-
-        var bossfightPlayers = new List<EntityUid>();
-        foreach (var item in players)
-        {
-            if (!_mobState.IsAlive(item.Owner))
+            if (component.Boss is not { } boss || !Exists(boss))
                 continue;
 
-            bossfightPlayers.Add(item.Owner);
-            _flash.Flash(item.Owner, null, null, TimeSpan.FromSeconds(5), 0.3f, false);
-            _audio.PlayGlobal(new SoundPathSpecifier(new ResPath("/Audio/Imperial/Medieval/Effects/teleport.ogg")), item.Owner);
+            var standMap = Transform(args.Stand).MapUid;
+            var bossfightPlayers = new List<EntityUid>();
+            var players = EntityQueryEnumerator<HumanoidAppearanceComponent, TransformComponent>();
+            while (players.MoveNext(out var player, out _, out var xform))
+            {
+                if (HasComp<IgnoreBossStartComponent>(player) || xform.MapUid != standMap || !_mobState.IsAlive(player))
+                    continue;
+
+                bossfightPlayers.Add(player);
+                _flash.Flash(player, null, null, TimeSpan.FromSeconds(5), 0.3f, false);
+                _audio.PlayGlobal(new SoundPathSpecifier(new ResPath("/Audio/Imperial/Medieval/Effects/teleport.ogg")), player);
+            }
+
+            if (bossfightPlayers.Count == 0)
+                continue;
+
+            var msgBoss = "Древний череп собран. Его проклятие не сломлено, но искажено святым пламенем. Равновесие пало, и теперь судьба этого острова решится в битве!";
+            ChatManager.ChatMessageToAll(ChatChannel.Radio, msgBoss, msgBoss, EntityUid.Invalid, false, true, colorOverride: Color.OrangeRed);
+            _audio.PlayGlobal(new SoundPathSpecifier(new ResPath("/Audio/Imperial/Medieval/Effects/skull-announce.ogg")), Filter.Broadcast(), true);
+
+            _boss.StartBossfight(bossfightPlayers, boss);
+            component.Result = SkeletonInvasionRoundResult.BossWon;
+            _autoRoundExtend.ForceExtendRound(component.BossfightRoundExtension);
         }
-
-        if (bossfightPlayers.Count == 0)
-            return;
-
-        var msgBoss = "Древний череп собран. Его проклятие не сломлено, но искажено святым пламенем. Равновесие пало, и теперь судьба этого острова решится в битве!";
-        _chatMan.ChatMessageToAll(ChatChannel.Radio, msgBoss, msgBoss, EntityUid.Invalid, false, true, colorOverride: Color.OrangeRed);
-        _audio.PlayGlobal(new SoundPathSpecifier(new ResPath("/Audio/Imperial/Medieval/Effects/skull-announce.ogg")), Filter.Broadcast(), true);
-
-        _boss.StartBossfight(bossfightPlayers, _bossUid);
-        _result = RoundResult.BossWon;
-
-        _autoRoundExtend.ForceExtendRound(TimeSpan.FromMinutes(10));
     }
 
     private void OnBossDefeated(ref BossDefeatedEvent args)
     {
-        _result = RoundResult.BossDefeated;
+        var query = QueryActiveRules();
+        while (query.MoveNext(out _, out var component, out _))
+        {
+            if (component.Boss != args.Boss)
+                continue;
 
-        if (!TryComp<BossComponent>(args.Boss, out var bossComponent))
-            return;
-
-        if (!bossComponent.IsEndGame)
-            return;
-
-        _endTime = _timing.CurTime + TimeSpan.FromMinutes(10);
+            component.Result = SkeletonInvasionRoundResult.BossDefeated;
+            if (TryComp<BossComponent>(args.Boss, out var bossComponent) && bossComponent.IsEndGame)
+                component.EndTime = Timing.CurTime + component.DefeatRoundEndDelay;
+        }
     }
 
     private void OnBossWin(ref BossWonEvent args)
     {
-        if (!TryComp<BossComponent>(args.Boss, out var bossComponent))
+        if (!TryComp<BossComponent>(args.Boss, out var bossComponent) || !bossComponent.IsEndGame)
             return;
 
-        if (!bossComponent.IsEndGame)
-            return;
-
-        var cursespawners = EntityManager.AllEntities<MagicBarrierCurseSpawnComponent>();
-
-        Spawn("MedievalSpawnNecroSenderPreset", Transform(_random.Pick(cursespawners).Owner).Coordinates);
-
-        for (var i = 0; i < 40; i++)
+        var query = QueryActiveRules();
+        while (query.MoveNext(out _, out var component, out _))
         {
-            Spawn("MedievalSpawnNecroFighterPreset", Transform(_random.Pick(cursespawners).Owner).Coordinates);
+            if (component.Boss == args.Boss)
+                component.EndTime = Timing.CurTime + component.VictoryRoundEndDelay;
         }
-
-        _endTime = _timing.CurTime + TimeSpan.FromMinutes(25);
-    }
-
-    private enum RoundResult
-    {
-        NoBoss,
-        BossDefeated,
-        BossWon,
-        SkeletonsWon
     }
 }

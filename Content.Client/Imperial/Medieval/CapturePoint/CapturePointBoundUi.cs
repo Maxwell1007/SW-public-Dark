@@ -1,4 +1,3 @@
-using System.Globalization;
 using Content.Shared.Imperial.Medieval.CapturePoint;
 using Content.Shared.Imperial.Medieval.CapturePoint.Components;
 using JetBrains.Annotations;
@@ -50,7 +49,7 @@ public sealed class CapturePointBoundUi : BoundUserInterface
 
         var factionProto = _protoManager.Index(state.PlayerFaction);
 
-        _window.FactionLabel.Text = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(factionProto.Name);
+        _window.FactionLabel.Text = EntMan.System<CapturePointSystem>().GetFactionDisplayName(state.PlayerFaction);
         _window.FactionLabel.FontColorOverride = factionProto.Color;
 
         _window.AlliesCountLabel.Text = state.NearbyAllies.Count.ToString();

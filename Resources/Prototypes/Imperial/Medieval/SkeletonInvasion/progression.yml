@@ -1,0 +1,50 @@
+- type: entity
+  id: ActionMorbiusSkeletonProgression
+  name: Gifts of Morbius
+  description: View your skill points and upgrade your skeleton.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    icon:
+      sprite: Imperial/Medieval/Mobs/Bosses/SkeletonSkull/runes.rsi
+      state: skull
+    checkConsciousness: false
+  - type: InstantAction
+    event: !type:OpenUiActionEvent
+      key: enum.SkeletonProgressionUiKey.Key
+
+- type: skeletonUpgrade
+  id: MorbiusSwiftBones
+  name: morbius-upgrade-swift-bones-name
+  description: morbius-upgrade-swift-bones-description
+  icon:
+    sprite: Imperial/Medieval/Interface/Werewolf/actions.rsi
+    state: hotblood
+  cost: 2
+  position: -200,0
+  speedModifier: 1.1
+
+- type: skeletonUpgrade
+  id: MorbiusEnduringBones
+  name: morbius-upgrade-enduring-bones-name
+  description: morbius-upgrade-enduring-bones-description
+  icon:
+    sprite: Imperial/Medieval/Mobs/Bosses/SkeletonSkull/runes.rsi
+    state: skull
+  cost: 3
+  position: 200,-140
+  required: [ MorbiusSwiftBones ]
+  staminaDamageModifier: 0.85
+
+- type: skeletonUpgrade
+  id: MorbiusRestlessBones
+  name: morbius-upgrade-restless-bones-name
+  description: morbius-upgrade-restless-bones-description
+  icon:
+    sprite: Imperial/Medieval/Interface/Werewolf/actions.rsi
+    state: dash
+  cost: 3
+  position: 200,140
+  required: [ MorbiusSwiftBones ]
+  dashStaminaModifier: 0.8

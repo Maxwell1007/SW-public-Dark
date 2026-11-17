@@ -1,5 +1,4 @@
 using Content.Shared.Imperial.Medieval.Factions.Prototypes;
-using Content.Shared.StatusEffect;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
@@ -41,7 +40,7 @@ public sealed partial class CapturePointComponent : Component
     [ViewVariables, AutoNetworkedField]
     public CapturePointState State = CapturePointState.Idle;
 
-    [ViewVariables, AutoNetworkedField]
+    [DataField, AutoNetworkedField]
     public ProtoId<MedievalFactionPrototype>? OwningFaction;
 
     [ViewVariables, AutoNetworkedField]
@@ -79,6 +78,9 @@ public sealed partial class CapturePointComponent : Component
 
     [DataField]
     public EntProtoId CaptureStatusEffect = "MedievalFarmerBoost";
+
+    [DataField]
+    public bool NotifyAllDefenders;
 
     [DataField]
     public string LinkId = string.Empty;

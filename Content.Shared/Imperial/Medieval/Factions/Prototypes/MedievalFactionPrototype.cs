@@ -20,6 +20,9 @@ public sealed class MedievalFactionPrototype : IPrototype
     public bool AllowHeadhunt = true;
 
     [DataField]
+    public bool CaptureOnly;
+
+    [DataField]
     public Color Color = Color.White;
 
     [DataField]

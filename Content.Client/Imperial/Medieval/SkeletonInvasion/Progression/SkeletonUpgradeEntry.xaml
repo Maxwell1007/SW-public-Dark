@@ -1,0 +1,24 @@
+<Control xmlns="https://spacestation14.io"
+         xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+         xmlns:fb="clr-namespace:Content.Client.Imperial.UI.Buttons.FancyButton"
+         SetSize="300 210">
+    <PanelContainer Name="Panel" Margin="4">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#000000FF" BorderColor="#e8e8e8FF" BorderThickness="2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
+            <BoxContainer Orientation="Horizontal">
+                <TextureRect Name="UpgradeIcon" SetSize="32 32" Margin="0 0 8 0" />
+                <RichTextLabel Name="UpgradeName" VerticalAlignment="Center" HorizontalExpand="True" />
+            </BoxContainer>
+            <RichTextLabel Name="UpgradeDescription" HorizontalExpand="True" VerticalExpand="True" />
+            <RichTextLabel Name="Requirements" HorizontalExpand="True" />
+            <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                <fb:FancyButton Name="BuyButton" SetSize="130 36">
+                    <Label Name="BuyText" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </fb:FancyButton>
+                <Label Name="Cost" VerticalAlignment="Center" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</Control>

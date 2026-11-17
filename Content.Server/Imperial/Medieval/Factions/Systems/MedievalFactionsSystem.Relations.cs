@@ -529,7 +529,7 @@ public sealed partial class MedievalFactionsSystem
 
     private void OnFactionDataContainerInit(EntityUid uid, FactionDataContainerComponent comp, MapInitEvent args)
     {
-        var factions = Proto.EnumeratePrototypes<MedievalFactionPrototype>();
+        var factions = Proto.EnumeratePrototypes<MedievalFactionPrototype>().Where(f => !f.CaptureOnly).ToList();
         foreach (var item in factions)
         {
             foreach (var item2 in factions)

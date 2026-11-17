@@ -7,19 +7,21 @@ public sealed class CalendarEventStartedEvent : EntityEventArgs
     public int DayNumber { get; }
     public ProtoId<CalendarEventPrototype> EventId { get; }
     public CalendarEventPrototype Prototype { get; }
+    public CalendarDayType DayType { get; }
 
-    public CalendarEventStartedEvent(int dayNumber, ProtoId<CalendarEventPrototype> eventId, CalendarEventPrototype prototype)
+    public CalendarEventStartedEvent(int dayNumber, ProtoId<CalendarEventPrototype> eventId, CalendarEventPrototype prototype, CalendarDayType dayType)
     {
         DayNumber = dayNumber;
         EventId = eventId;
         Prototype = prototype;
+        DayType = dayType;
     }
 }
 
-/// <summary>
-/// Вызывается сразу после того, как CalendarSystem сгенерировал базовые колоды дней и ночей на раунд.
-/// Идеальное место для игровых режимов, чтобы перезаписать нужные дни.
-/// </summary>
 public sealed class CalendarDecksGeneratedEvent : EntityEventArgs
+{
+}
+
+public sealed class CalendarUpdatedEvent : EntityEventArgs
 {
 }

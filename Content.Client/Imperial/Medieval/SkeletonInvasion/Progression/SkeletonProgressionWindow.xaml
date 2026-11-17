@@ -1,0 +1,23 @@
+<DefaultWindow xmlns="https://spacestation14.io"
+               xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+               xmlns:skeleton="clr-namespace:Content.Client.Imperial.Medieval.SkeletonInvasion.Progression"
+               Title="{Loc 'morbius-progression-title'}"
+               MinSize="1000 650"
+               SetSize="1000 650"
+               Resizable="False">
+    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Orientation="Horizontal" Margin="4">
+            <Button Name="Recenter" Text="{Loc 'morbius-progression-recenter'}" Margin="0 0 12 0" />
+            <Label Name="PointsCounter" VerticalAlignment="Center" />
+        </BoxContainer>
+        <Label Text="{Loc 'morbius-progression-refund'}" Margin="4 0 4 8" />
+        <PanelContainer Name="TreePanel" Margin="4" RectClipContent="True"
+                        HorizontalExpand="True" VerticalExpand="True" MouseFilter="Pass">
+            <PanelContainer.PanelOverride>
+                <gfx:StyleBoxFlat BackgroundColor="#141414FF" BorderColor="#e8e8e8FF" BorderThickness="2" />
+            </PanelContainer.PanelOverride>
+            <skeleton:SkeletonUpgradeLayout Name="Upgrades" InheritChildMeasure="False"
+                                            HorizontalExpand="True" VerticalExpand="True" />
+        </PanelContainer>
+    </BoxContainer>
+</DefaultWindow>

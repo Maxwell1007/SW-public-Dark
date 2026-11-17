@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
 using Content.Server.Administration.Managers;
-using Content.Server.Imperial.DayTime;
 using Content.Server.Imperial.Medieval.Factions;
 using Content.Shared.ActionBlocker;
 using Content.Shared.GameTicking;
 using Content.Shared.Imperial.Medieval.Calendar;
 using Content.Shared.Imperial.Medieval.Factions;
 using Robust.Server.GameObjects;
-using Robust.Shared.GameObjects;
-using Robust.Shared.IoC;
-using Robust.Shared.Localization;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 
@@ -34,8 +28,7 @@ public sealed class CalendarBoardSystem : EntitySystem
 
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestartCleanup);
         SubscribeLocalEvent<CalendarBoardComponent, BoundUIOpenedEvent>(OnUIOpened);
-        SubscribeLocalEvent<DayCycleFinishedEvent>(OnDayCycleFinished);
-        SubscribeLocalEvent<CalendarEventStartedEvent>(OnCalendarEventStarted);
+        SubscribeLocalEvent<CalendarUpdatedEvent>(OnCalendarUpdated);
 
         SubscribeLocalEvent<CalendarBoardComponent, CalendarBoardCreateAnnouncementMessage>(OnCreateAnnouncement);
         SubscribeLocalEvent<CalendarBoardComponent, CalendarBoardDeleteAnnouncementMessage>(OnDeleteAnnouncement);
@@ -46,7 +39,7 @@ public sealed class CalendarBoardSystem : EntitySystem
         Announcements.Clear();
     }
 
-    private void OnCalendarEventStarted(CalendarEventStartedEvent args)
+    private void OnCalendarUpdated(CalendarUpdatedEvent args)
     {
         UpdateAllBoards();
     }
@@ -113,7 +106,9 @@ public sealed class CalendarBoardSystem : EntitySystem
             AuthorId = actorNetEntity,
             AuthorUserId = authorUserId,
             Text = text,
-            CycleTime = Loc.GetString("calendar-board-day", ("day", _calendar.CurrentCycle + 1)),
+            CycleTime = Loc.GetString(
+                _calendar.CurrentDayType == CalendarDayType.Day ? "calendar-board-day" : "calendar-board-night",
+                ("day", _calendar.CurrentDayNumber)),
             AdminInfo = adminInfo
         };
 
@@ -145,11 +140,6 @@ public sealed class CalendarBoardSystem : EntitySystem
         UpdateUIState(uid);
     }
 
-    private void OnDayCycleFinished(ref DayCycleFinishedEvent args)
-    {
-        UpdateAllBoards();
-    }
-
     public void UpdateAllBoards()
     {
         var query = EntityQueryEnumerator<CalendarBoardComponent>();
@@ -179,7 +169,8 @@ public sealed class CalendarBoardSystem : EntitySystem
 
         var wantedData = new Dictionary<int, WantedData>(_factions.WantedList);
 
-        var state = new CalendarBoardBoundUserInterfaceState(wantedData, stringDayDeck, stringNightDeck, currentCycle, Announcements);
+        var state = new CalendarBoardBoundUserInterfaceState(
+            wantedData, stringDayDeck, stringNightDeck, currentCycle, _calendar.FirstDeckDay, _calendar.CurrentDayType, Announcements);
         _ui.SetUiState(uid, CalendarBoardUiKey.Key, state);
 
         int papersCount = Announcements.Count + wantedData.Count;

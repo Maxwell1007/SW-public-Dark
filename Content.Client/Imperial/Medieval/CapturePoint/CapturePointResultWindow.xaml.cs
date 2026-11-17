@@ -1,4 +1,3 @@
-using System.Globalization;
 using Content.Client.Imperial.Medieval.CapturePoint.UI.MedievalWindow;
 using Content.Shared.Imperial.Medieval.CapturePoint;
 using Content.Shared.Imperial.Medieval.CapturePoint.Components;
@@ -20,14 +19,13 @@ public sealed partial class CapturePointResultWindow : MedievalWindow
         var entMan = IoCManager.Resolve<IEntityManager>();
         var uid = entMan.GetEntity(ev.Point);
         var pointComp = entMan.GetComponentOrNull<CapturePointComponent>(uid);
-        var pointName = pointComp?.PointName ?? Loc.GetString("medieval-capture-point-default-name");
+        var pointName = ev.PointName ?? pointComp?.PointName ?? Loc.GetString("medieval-capture-point-default-name");
 
         if (ev.WinnerFaction != null)
         {
             var protoMan = IoCManager.Resolve<IPrototypeManager>();
             var factionProto = protoMan.Index(ev.WinnerFaction.Value);
-            var name = factionProto.Name;
-            var displayName = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name);
+            var displayName = entMan.System<CapturePointSystem>().GetFactionDisplayName(ev.WinnerFaction.Value);
 
             ResultLabel.Text = Loc.GetString("medieval-capture-point-result-captured", ("pointName", pointName), ("factionName", displayName));
             ResultLabel.FontColorOverride = factionProto.Color;

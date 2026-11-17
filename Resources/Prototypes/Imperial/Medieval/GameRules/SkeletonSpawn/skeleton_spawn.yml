@@ -1,0 +1,8 @@
+- type: entity
+  id: MedievalSkeletonSpawnRule
+  parent: BaseGameRule
+  components:
+  - type: SkeletonSpawnRule
+    skeletonPrototype: MedievalMobSkeletonNecroFighter
+    mindRole: MindRoleMorbiusSkeleton
+    antagPrototype: MorbiusSkeleton

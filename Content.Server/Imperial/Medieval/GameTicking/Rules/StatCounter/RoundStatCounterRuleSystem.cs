@@ -8,7 +8,7 @@ using System.Linq;
 using Content.Server.SpikeTrap.Components;
 using Content.Shared.Nocturn.Components;
 using Content.Server.MedievalFactionFlag.Components;
-using Content.Server.Imperial.DayTime;
+using Content.Server.Imperial.Medieval.DayNight;
 using Content.Shared.Damage;
 using Content.Shared.Speech;
 using Content.Shared.Imperial.Medieval.GameTicking.Rules;
@@ -18,7 +18,7 @@ namespace Content.Server.Imperial.Medieval.GameTicking.Rules;
 public sealed class RoundStatCounterRuleSystem : GameRuleSystem<RoundStatCounterRuleComponent>
 {
     [Dependency] private readonly MobStateSystem _mobState = default!;
-    [Dependency] private readonly DayTimeSystem _dayTime = default!;
+    [Dependency] private readonly MedievalDayNightSystem _dayNight = default!;
 
     public override void Initialize()
     {
@@ -141,7 +141,7 @@ public sealed class RoundStatCounterRuleSystem : GameRuleSystem<RoundStatCounter
             bestSmellName = Name(smell.MaxBy(x => x.Comp.BestSmell).Owner);
         }
 
-        _dayTime.ChangePreset("0", "bloody", true);
+        _dayNight.SetColorMultiplier(Color.Red);
 
         int legion = 0;
         int insurgency = 0;

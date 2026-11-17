@@ -1,5 +1,6 @@
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared.Imperial.Medieval.Calendar;
 
@@ -29,6 +30,21 @@ public sealed partial class CalendarEventPrototype : IPrototype
     /// </summary>
     [DataField("weight")]
     public float Weight { get; private set; } = 1.0f;
+
+    [DataField]
+    public int MinOccurrences { get; private set; }
+
+    [DataField]
+    public int MinPhaseGap { get; private set; }
+
+    [DataField]
+    public CalendarEventPhases? Phases { get; private set; }
+
+    [DataField]
+    public List<EntProtoId> RequiredGameRules { get; private set; } = new();
+
+    [DataField]
+    public List<ProtoId<CalendarEventPrototype>> Variants { get; private set; } = new();
 
     /// <summary>
     /// Кривая веса. Вычисляет вес для промежуточных дней пропорционально расстоянию между точками. Если не задано, то никак не влияет. Если запрашивается день больше существующих точек, то алгоритм вернет значение последней доступной точки
@@ -94,8 +110,19 @@ public sealed partial class CalendarEventPrototype : IPrototype
     }
 }
 
+[Serializable, NetSerializable]
 public enum CalendarDayType : byte
 {
     Day,
     Night
+}
+
+[Flags]
+[Serializable, NetSerializable]
+public enum CalendarEventPhases : byte
+{
+    None = 0,
+    Day = 1,
+    Night = 2,
+    Both = Day | Night,
 }

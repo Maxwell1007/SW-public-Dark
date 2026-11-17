@@ -6,6 +6,15 @@
   noSpawn: false
   description: A dummy skeleton meant to be used in character setup.
   components:
+  - type: SkeletonProgression
+    availableUpgrades:
+    - MorbiusSwiftBones
+    - MorbiusEnduringBones
+    - MorbiusRestlessBones
+  - type: UserInterface
+    interfaces:
+      enum.SkeletonProgressionUiKey.Key:
+        type: SkeletonProgressionBoundUserInterface
   - type: HumanoidAppearance
     species: Skeleton
   - type: NpcFactionMember
@@ -25,12 +34,8 @@
     regen: 1
     maxManaRaceModifier: 1.5
     regenRaceModifier: 1.5
-  - type: PointLight
-    color: red
-    energy: 1.8
-    radius: 2.5
-    netsync: true
-    enabled: true
+  - type: SkeletonGlow
+    prototype: MedievalSkeletonGlow
   - type: HealCurse
   - type: LanguageSpeaker
     languages:
@@ -76,6 +81,7 @@
   components:
     - type: GhostRole
       name: ertcall-cburn-security-eva-name
+      mindRoles: [ MindRoleMorbiusSkeleton ]
       description: ertcall-cburn-security-eva-desc
       rules: ertcall-cburn-security-eva-rules
       raffle:
@@ -97,6 +103,7 @@
   components:
     - type: GhostRole
       name: medieval-necro-sender-name
+      mindRoles: [ MindRoleMorbiusSkeleton ]
       description: medieval-necro-sender-desc
       rules: medieval-necro-sender-rules
       raffle:
@@ -150,6 +157,7 @@
   components:
     - type: GhostRole
       name: medieval-necro-fighter-name
+      mindRoles: [ MindRoleMorbiusSkeleton ]
       description: medieval-necro-fighter-desc
       rules: medieval-necro-fighter-rules
       raffle:
@@ -194,9 +202,6 @@
     jumpsuit: MedievalClothingUniformJumpsuitShitCloth13Necro
     back: ClothingBackpackSatchelNecro
     pocket2: MedievalCursedMarkNecro
-  storage:
-    back:
-    - BaseMagicNecroShop
 
 
 
@@ -210,6 +215,7 @@
   components:
     - type: GhostRole
       name: medieval-necro-leader-name
+      mindRoles: [ MindRoleMorbiusSkeleton ]
       description: medieval-necro-leader-desc
       rules: medieval-necro-leader-rules
       raffle:
@@ -249,9 +255,6 @@
     jumpsuit: MedievalClothingUniformJumpsuitShitCloth13Necro
     back: ClothingBackpackSatchelNecro
     pocket2: MedievalCursedMarkNecro
-  storage:
-    back:
-    - BaseMagicNecroShopLeader
 
 
 

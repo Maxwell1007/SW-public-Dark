@@ -1,17 +1,13 @@
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using Content.Client.Imperial.Medieval.Factions;
 using Content.Shared.Imperial.Medieval.Factions;
 using Content.Shared.Imperial.Medieval.Factions.Prototypes;
-using Microsoft.Extensions.Logging;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.Utility;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
-using Serilog;
 using Content.Shared.Imperial.Medieval.Factions.Components;
 
 namespace Content.Client.Imperial.Medieval.Factions.UI.Elements;
@@ -26,6 +22,7 @@ public sealed partial class FactionRelationsPanel : GridContainer
         IoCManager.InjectDependencies(this);
 
         var factions = _proto.EnumeratePrototypes<MedievalFactionPrototype>()
+            .Where(f => !f.CaptureOnly)
             .OrderBy(f => f.ID == data.Faction ? 0 : 1).ThenBy(f => f.Name);
 
         Rows = factions.Count() + 1;
@@ -46,6 +43,7 @@ public sealed partial class FactionRelationsPanel : GridContainer
     public void Add(ProtoId<MedievalFactionPrototype> userFaction, ProtoId<MedievalFactionPrototype> faction, Dictionary<ProtoId<MedievalFactionPrototype>, ProtoId<FactionRelationsPrototype>> relations, bool allowWar)
     {
         var factions = _proto.EnumeratePrototypes<MedievalFactionPrototype>()
+            .Where(f => !f.CaptureOnly)
             .OrderBy(f => f.ID == userFaction ? 0 : 1).ThenBy(f => f.Name);
 
         var label = new RichTextLabel()
@@ -116,6 +114,7 @@ public sealed partial class FactionRelationsPanel : GridContainer
     public void AddLabels(ProtoId<MedievalFactionPrototype> userFaction)
     {
         var factions = _proto.EnumeratePrototypes<MedievalFactionPrototype>()
+            .Where(f => !f.CaptureOnly)
             .OrderBy(f => f.ID == userFaction ? 0 : 1).ThenBy(f => f.Name);
 
         AddChild(new Control()

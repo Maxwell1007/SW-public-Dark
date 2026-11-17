@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
 using Content.Server.Administration;
 using Content.Server.Chat.Managers;
 using Content.Server.Chat.Systems;
 using Content.Server.GameTicking.Events;
+using Content.Server.Imperial.Medieval.GameTicking.Rules;
 using Content.Server.MagicBarrier.Components;
 using Content.Server.RoundEnd;
 using Content.Server.Voting;
@@ -166,6 +165,10 @@ public sealed partial class AutoRoundExtendSystem : EntitySystem
 
     private void ArmyAttack()
     {
+        var skeletonRules = EntityQueryEnumerator<SkeletonInvasionRuleComponent>();
+        if (skeletonRules.MoveNext(out _, out _))
+            return;
+
         _chat.DispatchGlobalAnnouncement(
             Loc.GetString("auto-round-end-army-attack"),
             playSound: true,
