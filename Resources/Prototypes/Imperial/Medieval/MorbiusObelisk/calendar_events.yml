@@ -1,0 +1,12 @@
+- type: calendarEvent
+  id: CalendarEventMorbiusObelisk
+  texture: /Textures/Imperial/Medieval/BlackSpire/black_spire.rsi/base.png
+  name: calendar-event-morbius-obelisk-name
+  text: calendar-event-morbius-obelisk-desc
+  sound:
+    path: /Audio/Imperial/Medieval/Werewolf/howl-far.ogg
+  weight: 5
+  minOccurrences: 0
+  maxOccurrences: 24
+  phases: Both
+  requiredGameRules: [MedievalMorbiusObeliskRule]

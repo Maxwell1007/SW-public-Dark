@@ -1,0 +1,90 @@
+- type: entity
+  id: MedievalMorbiusObelisk
+  parent: BaseStructure
+  name: Morbius obelisk
+  description: An obelisk of Morbius. Defend it until it yields a necromancer's grimoire.
+  components:
+  - type: SpriteFade
+  - type: Sprite
+    sprite: Imperial/Medieval/BlackSpire/black_spire.rsi
+    drawdepth: Overdoors
+    offset: 0,0.9
+    state: base
+  - type: InteractionOutline
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: StructuralMetallicStrong
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 5000
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [Destruction]
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        density: 1000
+        mask:
+        - FullTileMask
+        layer:
+        - Impassable
+        - HighImpassable
+        - MidImpassable
+        - LowImpassable
+        - BulletImpassable
+        - InteractImpassable
+  - type: MorbiusObelisk
+  - type: BoneCradleTeleport
+    actionPrototype: ActionMorbiusObeliskTeleport
+    gracePeriod: 360
+    noSpaceMessage: morbius-obelisk-teleport-no-space
+  - type: TimedDespawn
+    lifetime: 1440
+
+- type: entity
+  id: MedievalMorbiusObeliskSpawnMarker
+  parent: MarkerBase
+  name: Morbius obelisk spawn marker
+  description: A possible location for a Morbius obelisk.
+  components:
+  - type: Sprite
+    layers:
+    - sprite: Imperial/Medieval/Markers/cross.rsi
+      state: def
+  - type: MorbiusObeliskSpawnMarker
+
+- type: entity
+  id: MedievalMorbiusObeliskRule
+  parent: BaseGameRule
+  components:
+  - type: GameRule
+  - type: MorbiusObeliskRule
+    sectorLocations:
+      sector1: bone-cradle-location-sector-1
+      sector2: bone-cradle-location-sector-2
+      sector3: bone-cradle-location-sector-3
+      sector4: bone-cradle-location-sector-4
+      sector5: bone-cradle-location-sector-5
+      sector6: bone-cradle-location-sector-6
+      sector7: bone-cradle-location-sector-7
+      sector8: bone-cradle-location-sector-8
+      sector9: bone-cradle-location-sector-9
+
+- type: entity
+  id: ActionMorbiusObeliskTeleport
+  name: Return to the Morbius obelisk
+  description: Teleport to the Morbius obelisk. Movement or damage interrupts the ten-second ritual.
+  categories: [HideSpawnMenu]
+  components:
+  - type: Action
+    useDelay: 1
+    temporary: true
+    itemIconStyle: BigAction
+    icon:
+      sprite: Imperial/Medieval/BlackSpire/black_spire.rsi
+      state: base
+  - type: InstantAction
+    event: !type:BoneCradleTeleportActionEvent

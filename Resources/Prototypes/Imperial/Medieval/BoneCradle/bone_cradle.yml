@@ -9,6 +9,7 @@
     state: stand
   - type: InteractionOutline
   - type: BoneCradleTeleport
+  - type: BoneCradleResurrection
   - type: CapturePoint
     radius: 5.5
     allowedFactions:

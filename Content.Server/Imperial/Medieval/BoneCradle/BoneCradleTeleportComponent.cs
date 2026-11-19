@@ -10,6 +10,12 @@ public sealed partial class BoneCradleTeleportComponent : Component
     public EntProtoId ActionPrototype = "ActionBoneCradleTeleport";
 
     [DataField]
+    public TimeSpan GracePeriod = TimeSpan.FromMinutes(6);
+
+    [DataField]
+    public LocId NoSpaceMessage = "bone-cradle-teleport-no-space";
+
+    [DataField]
     public TimeSpan ChannelDuration = TimeSpan.FromSeconds(10);
 
     [DataField]

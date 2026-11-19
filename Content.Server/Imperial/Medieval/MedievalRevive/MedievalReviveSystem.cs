@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Server.Administration.Logs;
 using Content.Server.Ghost.Components;
+using Content.Server.Imperial.Medieval.SkeletonInvasion;
 using Content.Server.MagicBarrier.Components;
 using Content.Server.Mind;
 using Content.Shared.Database;
@@ -25,6 +26,7 @@ public sealed class MedievalReviveSystem : EntitySystem
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly IAdminLogManager _adminLog = default!;
+    [Dependency] private readonly SkeletonProgressionSystem _progression = default!;
 
     private const int MaxRevives = 2;
 
@@ -68,6 +70,8 @@ public sealed class MedievalReviveSystem : EntitySystem
 
         _transform.AttachToGridOrMap(mob);
         EnsureComp<MindContainerComponent>(mob);
+
+        _progression.UnregisterFollower(userId);
 
         if (!oldMind.IsVisitingEntity)
             _minds.WipeMind(session);

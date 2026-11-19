@@ -1,9 +1,13 @@
 using Content.Shared.Actions;
+using Content.Shared.Body.Organ;
+using Content.Shared.Body.Part;
 using Content.Shared.GameTicking;
+using Content.Shared.Ghost;
 using Content.Shared.Imperial.Medieval.SkeletonInvasion;
 using Content.Shared.Mind;
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Roles;
@@ -15,7 +19,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server.Imperial.Medieval.SkeletonInvasion;
 
-public sealed class SkeletonProgressionSystem : EntitySystem
+public sealed partial class SkeletonProgressionSystem : EntitySystem
 {
     [Dependency] private readonly SharedActionsSystem _actions = default!;
     [Dependency] private readonly SharedMindSystem _mind = default!;
@@ -36,10 +40,12 @@ public sealed class SkeletonProgressionSystem : EntitySystem
         SubscribeLocalEvent<SkeletonProgressionComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<SkeletonProgressionComponent, ComponentShutdown>(OnShutdown);
         SubscribeLocalEvent<SkeletonProgressionComponent, MindAddedMessage>(OnMindAdded);
+        SubscribeLocalEvent<BodyPartComponent, MindAddedMessage>(OnSkullMindAdded);
         SubscribeLocalEvent<SkeletonProgressionComponent, MindRemovedMessage>(OnMindRemoved);
         SubscribeLocalEvent<SkeletonProgressionComponent, MobStateChangedEvent>(OnMobStateChanged);
         SubscribeLocalEvent<SkeletonProgressionComponent, BoundUIOpenedEvent>(OnUiOpened);
         SubscribeLocalEvent<SkeletonProgressionComponent, SkeletonBuyUpgradeMessage>(OnBuyUpgrade);
+        InitializeRecruitment();
     }
 
     public override void Update(float frameTime)
@@ -72,6 +78,9 @@ public sealed class SkeletonProgressionSystem : EntitySystem
         state.Resetting = true;
         state.Accounts.Clear();
         state.PendingMinds.Clear();
+        state.PendingRecruitPoints.Clear();
+        state.SharedPoints = 0;
+        state.PurchasedSharedUpgrades.Clear();
     }
 
     private void OnRoleAdded(RoleAddedEvent args)
@@ -81,6 +90,12 @@ public sealed class SkeletonProgressionSystem : EntitySystem
             return;
 
         account.IsAntagonist = true;
+        account.Mind = args.MindId;
+        RefreshMindConnection(args.MindId);
+        if (args.Mind.OwnedEntity is { } skull &&
+            TryComp<BodyPartComponent>(skull, out var part) && part.PartType == BodyPartType.Head)
+            account.Skull = skull;
+
         if (args.Mind.OwnedEntity is { } body && TryComp<SkeletonProgressionComponent>(body, out var component))
             AttachMind((body, component), (args.MindId, args.Mind));
     }
@@ -131,6 +146,13 @@ public sealed class SkeletonProgressionSystem : EntitySystem
         AttachMind(ent, args.Mind);
     }
 
+    private void OnSkullMindAdded(Entity<BodyPartComponent> ent, ref MindAddedMessage args)
+    {
+        if (ent.Comp.PartType == BodyPartType.Head &&
+            TryGetAccount(args.Mind, false, out _, out var account) && account.IsAntagonist)
+            account.Skull = ent.Owner;
+    }
+
     private void AttachMind(Entity<SkeletonProgressionComponent> ent, Entity<MindComponent> mind)
     {
         if (!TryGetAccount(mind, true, out var user, out var account))
@@ -155,22 +177,25 @@ public sealed class SkeletonProgressionSystem : EntitySystem
             }
         }
 
-        if (!account.StartingPointsGranted)
-        {
-            account.Points = (int) Math.Min(int.MaxValue, (long) account.Points + Math.Max(0, ent.Comp.StartingPoints));
-            account.StartingPointsGranted = true;
-        }
-
         if (_roles.MindHasRole<MorbiusFollowerRoleComponent>(mind.Owner))
             account.IsAntagonist = true;
 
+        account.Mind = mind.Owner;
         account.Body = ent.Owner;
         ent.Comp.UserId = user;
+        if (account.IsAntagonist && !account.StartingPointsGranted)
+        {
+            account.StartingPointsGranted = true;
+            if (ent.Comp.StartingPoints > 0)
+                AddPoints(user, ent.Comp.StartingPoints);
+        }
+
         if (_mobState.IsDead(ent.Owner))
             RefundUpgrades(account);
 
         ent.Comp.Upgrades = new(account.PurchasedUpgrades.Keys);
         QueueRoleRestore(mind);
+        RefreshMindConnection(mind.Owner);
         RefreshBody(ent);
     }
 
@@ -213,10 +238,18 @@ public sealed class SkeletonProgressionSystem : EntitySystem
     {
         if (args.Actor != ent.Owner || _mobState.IsDead(ent.Owner) ||
             !TryGetProgression(ent, out var account) || !account.IsAntagonist ||
-            !ent.Comp.AvailableUpgrades.Contains(args.Upgrade) ||
-            account.PurchasedUpgrades.ContainsKey(args.Upgrade) ||
             !_prototypes.TryIndex(args.Upgrade, out var upgrade) ||
-            upgrade.Cost < 0 || account.Points < upgrade.Cost)
+            upgrade.Cost < 0)
+            return;
+
+        if (upgrade.SharedEffect != SkeletonSharedUpgradeEffect.None)
+        {
+            BuySharedUpgrade(args.Upgrade, upgrade);
+            return;
+        }
+
+        if (!ent.Comp.AvailableUpgrades.Contains(args.Upgrade) ||
+            account.PurchasedUpgrades.ContainsKey(args.Upgrade) || account.Points < upgrade.Cost)
             return;
 
         foreach (var required in upgrade.Required)
@@ -236,8 +269,66 @@ public sealed class SkeletonProgressionSystem : EntitySystem
         if (!_mind.TryGetMind(entity, out var mind, out var component))
             return false;
 
-        return TryGetAccount((mind, component), false, out _, out var account) && account.IsAntagonist ||
-            _roles.MindHasRole<MorbiusFollowerRoleComponent>(mind);
+        return TryGetAccount((mind, component), false, out _, out var account)
+            ? account.IsAntagonist
+            : _roles.MindHasRole<MorbiusFollowerRoleComponent>(mind);
+    }
+
+    public List<Entity<MindComponent>> GetDeadAntagonistMinds()
+    {
+        var minds = new List<Entity<MindComponent>>();
+        if (GetRoundState() is not { Resetting: false } state)
+            return minds;
+
+        foreach (var (user, account) in state.Accounts)
+        {
+            if (!account.IsAntagonist || !_mind.TryGetMind(user, out var mindId, out var mind))
+                continue;
+
+            var body = account.Body;
+            if (mind.OwnedEntity is { } owned && !TerminatingOrDeleted(owned) &&
+                !EntityManager.IsQueuedForDeletion(owned) && HasComp<MobStateComponent>(owned) &&
+                !HasComp<GhostComponent>(owned) && !HasComp<BodyPartComponent>(owned) && !HasComp<OrganComponent>(owned))
+                body = owned;
+
+            if (body is { } existing && !TerminatingOrDeleted(existing) &&
+                !EntityManager.IsQueuedForDeletion(existing) && !_mobState.IsDead(existing))
+                continue;
+
+            minds.Add((mindId.Value, mind));
+        }
+
+        return minds;
+    }
+
+    public bool TryResetUpgrades(Entity<MindComponent> mind)
+    {
+        if (!TryGetAccount(mind, false, out _, out var account) || !account.IsAntagonist)
+            return false;
+
+        RefundUpgrades(account);
+        if (account.Body is { } body && !TerminatingOrDeleted(body) &&
+            TryComp<SkeletonProgressionComponent>(body, out var component))
+        {
+            component.Upgrades.Clear();
+            RefreshBody((body, component));
+        }
+
+        return true;
+    }
+
+    public void DeleteSkullAfterRevival(Entity<MindComponent> mind, EntityUid body)
+    {
+        if (mind.Comp.OwnedEntity != body || !TryGetAccount(mind, false, out _, out var account) ||
+            !account.IsAntagonist || account.Skull is not { } skull)
+            return;
+
+        account.Skull = null;
+        if (TerminatingOrDeleted(skull) || EntityManager.IsQueuedForDeletion(skull) ||
+            !TryComp<BodyPartComponent>(skull, out var part) || part.PartType != BodyPartType.Head)
+            return;
+
+        QueueDel(skull);
     }
 
     public bool AddPoints(NetUserId user, int points)
@@ -251,12 +342,12 @@ public sealed class SkeletonProgressionSystem : EntitySystem
         foreach (var cost in account.PurchasedUpgrades.Values)
             total += cost;
 
-        if (total > int.MaxValue)
+        if (total > int.MaxValue || (long) state.SharedPoints + points > int.MaxValue)
             return false;
 
         account.Points += points;
-        if (account.Body is { } body && TryComp<SkeletonProgressionComponent>(body, out var component))
-            UpdateUi((body, component));
+        state.SharedPoints += points;
+        UpdateAllUis();
 
         return true;
     }
@@ -364,10 +455,21 @@ public sealed class SkeletonProgressionSystem : EntitySystem
     private void UpdateUi(Entity<SkeletonProgressionComponent> ent)
     {
         var hasAccount = TryGetProgression(ent, out var account);
+        var state = GetRoundState();
         _ui.SetUiState(ent.Owner, SkeletonProgressionUiKey.Key, new SkeletonProgressionBuiState(
             hasAccount ? account.Points : 0,
             new(ent.Comp.AvailableUpgrades),
             hasAccount ? new(account.PurchasedUpgrades.Keys) : new(),
+            state?.SharedPoints ?? 0,
+            state == null ? new() : new(state.AvailableSharedUpgrades),
+            state == null ? new() : new(state.PurchasedSharedUpgrades),
             hasAccount && account.IsAntagonist && !_mobState.IsDead(ent.Owner)));
+    }
+
+    private void UpdateAllUis()
+    {
+        var query = EntityQueryEnumerator<SkeletonProgressionComponent>();
+        while (query.MoveNext(out var uid, out var component))
+            UpdateUi((uid, component));
     }
 }

@@ -159,6 +159,8 @@
   description: Гримуар может быть только один у мага. Он привязан к своему владельцу и нужен для изучения заклинаний.
   suffix: Empty
   components:
+  - type: BindStoreOnEquip
+    morbiusFollowersOnly: true
   - type: ImperialStore
     foliantTheme: necro
     balance:

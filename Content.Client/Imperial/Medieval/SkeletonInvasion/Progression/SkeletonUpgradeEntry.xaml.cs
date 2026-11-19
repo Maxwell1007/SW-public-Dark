@@ -47,12 +47,15 @@ public sealed partial class SkeletonUpgradeEntry : Control
 
     public void UpdateAllowance(SkeletonProgressionBuiState state)
     {
-        var purchased = state.PurchasedUpgrades.Contains(Prototype.ID);
+        var shared = Prototype.SharedEffect != SkeletonSharedUpgradeEffect.None;
+        var purchasedUpgrades = shared ? state.PurchasedSharedUpgrades : state.PurchasedUpgrades;
+        var points = shared ? state.SharedPoints : state.Points;
+        var purchased = purchasedUpgrades.Contains(Prototype.ID);
         var requirementsMet = true;
         foreach (var required in Prototype.Required)
-            requirementsMet &= state.PurchasedUpgrades.Contains(required);
+            requirementsMet &= purchasedUpgrades.Contains(required);
 
-        var canBuy = state.CanBuy && !purchased && requirementsMet && state.Points >= Prototype.Cost;
+        var canBuy = state.CanBuy && !purchased && requirementsMet && points >= Prototype.Cost;
         BuyButton.Button.Disabled = !canBuy;
         BuyText.Text = Loc.GetString(purchased ? "morbius-progression-purchased" : "morbius-progression-buy");
         BuyButton.UpdateColor();

@@ -43,6 +43,7 @@
   - MedievalStatsCounter
   - MedievalSkeletonInvasionRule
   - MedievalBoneCradleRule
+  - MedievalMorbiusObeliskRule
   - MedievalFactionGoalsRule
 
 - type: gamePreset

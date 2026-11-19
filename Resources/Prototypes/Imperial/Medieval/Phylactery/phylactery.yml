@@ -1,0 +1,24 @@
+- type: entity
+  id: MedievalPhylacteryShard
+  parent: BaseItem
+  name: phylactery shard
+  description: A fragment of Morbius's phylactery. Offer it at his altar to gain power.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Mobs/Bosses/SkeletonSkull/crystal.rsi
+    state: crystal
+    scale: 0.5,0.5
+  - type: PhylacteryShard
+
+- type: entity
+  id: MedievalMorbiusAltar
+  parent: BaseStructure
+  name: Morbius altar
+  description: An altar that accepts phylactery shards from the followers of Morbius.
+  components:
+  - type: Sprite
+    sprite: Imperial/Medieval/Misc/cult.rsi
+    state: cutlaltar2
+  - type: InteractionOutline
+  - type: MorbiusAltar
+    pointsPerShard: 30

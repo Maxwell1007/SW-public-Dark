@@ -5,19 +5,36 @@
                MinSize="1000 650"
                SetSize="1000 650"
                Resizable="False">
-    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
-        <BoxContainer Orientation="Horizontal" Margin="4">
-            <Button Name="Recenter" Text="{Loc 'morbius-progression-recenter'}" Margin="0 0 12 0" />
-            <Label Name="PointsCounter" VerticalAlignment="Center" />
+    <TabContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="PersonalTab" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+            <BoxContainer Orientation="Horizontal" Margin="4">
+                <Button Name="Recenter" Text="{Loc 'morbius-progression-recenter'}" Margin="0 0 12 0" />
+                <Label Name="PointsCounter" VerticalAlignment="Center" />
+            </BoxContainer>
+            <Label Text="{Loc 'morbius-progression-refund'}" Margin="4 0 4 8" />
+            <PanelContainer Name="TreePanel" Margin="4" RectClipContent="True"
+                            HorizontalExpand="True" VerticalExpand="True" MouseFilter="Pass">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#141414FF" BorderColor="#e8e8e8FF" BorderThickness="2" />
+                </PanelContainer.PanelOverride>
+                <skeleton:SkeletonUpgradeLayout Name="Upgrades" InheritChildMeasure="False"
+                                                HorizontalExpand="True" VerticalExpand="True" />
+            </PanelContainer>
         </BoxContainer>
-        <Label Text="{Loc 'morbius-progression-refund'}" Margin="4 0 4 8" />
-        <PanelContainer Name="TreePanel" Margin="4" RectClipContent="True"
-                        HorizontalExpand="True" VerticalExpand="True" MouseFilter="Pass">
-            <PanelContainer.PanelOverride>
-                <gfx:StyleBoxFlat BackgroundColor="#141414FF" BorderColor="#e8e8e8FF" BorderThickness="2" />
-            </PanelContainer.PanelOverride>
-            <skeleton:SkeletonUpgradeLayout Name="Upgrades" InheritChildMeasure="False"
-                                            HorizontalExpand="True" VerticalExpand="True" />
-        </PanelContainer>
-    </BoxContainer>
+        <BoxContainer Name="SharedTab" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+            <BoxContainer Orientation="Horizontal" Margin="4">
+                <Button Name="SharedRecenter" Text="{Loc 'morbius-progression-recenter'}" Margin="0 0 12 0" />
+                <Label Name="SharedPointsCounter" VerticalAlignment="Center" />
+            </BoxContainer>
+            <Label Text="{Loc 'morbius-progression-shared-persistence'}" Margin="4 0 4 8" />
+            <PanelContainer Name="SharedTreePanel" Margin="4" RectClipContent="True"
+                            HorizontalExpand="True" VerticalExpand="True" MouseFilter="Pass">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#141414FF" BorderColor="#e8e8e8FF" BorderThickness="2" />
+                </PanelContainer.PanelOverride>
+                <skeleton:SkeletonUpgradeLayout Name="SharedUpgrades" InheritChildMeasure="False"
+                                                HorizontalExpand="True" VerticalExpand="True" />
+            </PanelContainer>
+        </BoxContainer>
+    </TabContainer>
 </DefaultWindow>

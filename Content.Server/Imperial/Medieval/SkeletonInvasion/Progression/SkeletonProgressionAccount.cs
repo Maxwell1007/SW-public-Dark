@@ -20,4 +20,10 @@ public sealed partial class SkeletonProgressionAccount
 
     [DataField]
     public EntityUid? Body;
+
+    [DataField]
+    public EntityUid? Skull;
+
+    [DataField]
+    public EntityUid? Mind;
 }

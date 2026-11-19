@@ -1,9 +1,11 @@
 using System.Linq;
 using Content.Server.Imperial.ImperialStore;
+using Content.Server.Imperial.Medieval.SkeletonInvasion;
 using Content.Shared.FixedPoint;
 using Content.Shared.GameTicking;
 using Content.Shared.Hands;
 using Content.Shared.Imperial.ImperialStore;
+using Content.Shared.UserInterface;
 using Robust.Server.Containers;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
@@ -14,6 +16,7 @@ public sealed partial class BindStoreOnEquipSystem : EntitySystem
 {
     [Dependency] private readonly ContainerSystem _containerSystem = default!;
     [Dependency] private readonly ImperialStoreSystem _storeSystem = default!;
+    [Dependency] private readonly SkeletonProgressionSystem _progression = default!;
 
     public override void Initialize()
     {
@@ -21,6 +24,7 @@ public sealed partial class BindStoreOnEquipSystem : EntitySystem
 
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawn);
         SubscribeLocalEvent<BindStoreOnEquipComponent, GotEquippedHandEvent>(OnGotEquipped);
+        SubscribeLocalEvent<BindStoreOnEquipComponent, ActivatableUIOpenAttemptEvent>(OnOpenAttempt);
         SubscribeLocalEvent<BindStoreOnEquipComponent, EntityTerminatingEvent>(OnGrimoireTerminating);
         SubscribeLocalEvent<BindStoreOnEquipComponent, ImperialStoreSlotsChangedEvent>(OnSlotsChanged); // imperial medieval - essence slots
     }
@@ -44,6 +48,12 @@ public sealed partial class BindStoreOnEquipSystem : EntitySystem
             return;
 
         TryBindGrimoire(uid, args.User, component);
+    }
+
+    private void OnOpenAttempt(Entity<BindStoreOnEquipComponent> ent, ref ActivatableUIOpenAttemptEvent args)
+    {
+        if (ent.Comp.MorbiusFollowersOnly && !_progression.IsAntagonist(args.User))
+            args.Cancel();
     }
 
     private void OnGrimoireTerminating(
@@ -98,6 +108,7 @@ public sealed partial class BindStoreOnEquipSystem : EntitySystem
         ImperialStoreComponent? store = null)
     {
         if (!Resolve(grimoireUid, ref grimoire, ref store) ||
+            grimoire.MorbiusFollowersOnly && !_progression.IsAntagonist(ownerUid) ||
             grimoire.OwnerUid != null ||
             HasComp<GrimoireOwnerComponent>(ownerUid) ||
             MetaData(grimoireUid).EntityPrototype?.ID is not { } prototype)
@@ -125,6 +136,7 @@ public sealed partial class BindStoreOnEquipSystem : EntitySystem
         if (!TryComp<GrimoireOwnerComponent>(ownerUid, out var currentOwner) ||
             currentOwner != owner ||
             !Resolve(grimoireUid, ref grimoire, ref store) ||
+            grimoire.MorbiusFollowersOnly && !_progression.IsAntagonist(ownerUid) ||
             grimoire.OwnerUid != null ||
             MetaData(grimoireUid).EntityPrototype?.ID is not { } prototype ||
             prototype != owner.GrimoirePrototype)

@@ -3,6 +3,8 @@ using System.Numerics;
 using Content.Server.Imperial.Medieval.SkeletonInvasion;
 using Content.Server.Popups;
 using Content.Shared.Actions;
+using Content.Shared.Body.Organ;
+using Content.Shared.Body.Part;
 using Content.Shared.DoAfter;
 using Content.Shared.Ghost;
 using Content.Shared.Imperial.Medieval.BoneCradle;
@@ -54,8 +56,7 @@ public sealed class BoneCradleTeleportSystem : EntitySystem
 
     private void OnCradleMapInit(Entity<BoneCradleTeleportComponent> ent, ref MapInitEvent args)
     {
-        if (TerminatingOrDeleted(ent.Owner) || EntityManager.IsQueuedForDeletion(ent.Owner) ||
-            !TryComp<BoneCradleComponent>(ent.Owner, out var cradle))
+        if (TerminatingOrDeleted(ent.Owner) || EntityManager.IsQueuedForDeletion(ent.Owner))
             return;
 
         var query = EntityManager.AllEntityQueryEnumerator<BoneCradleTeleportComponent>();
@@ -65,8 +66,11 @@ public sealed class BoneCradleTeleportSystem : EntitySystem
                 Deactivate((uid, component));
         }
 
-        ent.Comp.GraceEndsAt = _timing.CurTime + cradle.GracePeriod;
-        ent.Comp.Active = cradle.GracePeriod > TimeSpan.Zero;
+        var gracePeriod = TryComp<BoneCradleComponent>(ent.Owner, out var cradle)
+            ? cradle.GracePeriod
+            : ent.Comp.GracePeriod;
+        ent.Comp.GraceEndsAt = _timing.CurTime + gracePeriod;
+        ent.Comp.Active = gracePeriod > TimeSpan.Zero;
         if (ent.Comp.Active)
             RefreshRecipients(ent);
     }
@@ -128,7 +132,8 @@ public sealed class BoneCradleTeleportSystem : EntitySystem
     {
         user = default;
         if (TerminatingOrDeleted(uid) || !HasComp<MobStateComponent>(uid) || _mobState.IsDead(uid) ||
-            HasComp<GhostComponent>(uid) || !_progression.IsAntagonist(uid) ||
+            HasComp<GhostComponent>(uid) || HasComp<BodyPartComponent>(uid) || HasComp<OrganComponent>(uid) ||
+            !_progression.IsAntagonist(uid) ||
             !_mind.TryGetMind(uid, out _, out var mind) ||
             (mind.UserId ?? mind.OriginalOwnerUserId) is not { } owner)
             return false;
@@ -198,7 +203,7 @@ public sealed class BoneCradleTeleportSystem : EntitySystem
 
         if (!TryFindDestination(cradle, ent.Owner, out var destination))
         {
-            _popup.PopupEntity(Loc.GetString("bone-cradle-teleport-no-space"), ent.Owner, ent.Owner);
+            _popup.PopupEntity(Loc.GetString(cradle.Comp.NoSpaceMessage), ent.Owner, ent.Owner);
             return;
         }
 
@@ -215,7 +220,7 @@ public sealed class BoneCradleTeleportSystem : EntitySystem
             GetNetEntity(cradle) == args.Cradle && GetNetEntity(action) == args.Action;
     }
 
-    private bool TryFindDestination(Entity<BoneCradleTeleportComponent> cradle, EntityUid user, out MapCoordinates destination)
+    public bool TryFindDestination(Entity<BoneCradleTeleportComponent> cradle, EntityUid? user, out MapCoordinates destination)
     {
         destination = default;
         var origin = _transform.GetMapCoordinates(cradle.Owner);
@@ -238,7 +243,7 @@ public sealed class BoneCradleTeleportSystem : EntitySystem
         return false;
     }
 
-    private bool CanArriveAt(EntityUid cradle, EntityUid user, MapCoordinates origin, MapCoordinates destination, float clearance)
+    private bool CanArriveAt(EntityUid cradle, EntityUid? user, MapCoordinates origin, MapCoordinates destination, float clearance)
     {
         var direction = destination.Position - origin.Position;
         if (direction.LengthSquared() <= 0f)

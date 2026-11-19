@@ -29,6 +29,9 @@ public sealed partial class SkeletonUpgradePrototype : IPrototype
     public List<ProtoId<SkeletonUpgradePrototype>> Required = new();
 
     [DataField]
+    public SkeletonSharedUpgradeEffect SharedEffect;
+
+    [DataField]
     public float SpeedModifier = 1f;
 
     [DataField]
@@ -36,4 +39,11 @@ public sealed partial class SkeletonUpgradePrototype : IPrototype
 
     [DataField]
     public float DashStaminaModifier = 1f;
+}
+
+public enum SkeletonSharedUpgradeEffect : byte
+{
+    None,
+    RecruitFollower,
+    MindConnection,
 }

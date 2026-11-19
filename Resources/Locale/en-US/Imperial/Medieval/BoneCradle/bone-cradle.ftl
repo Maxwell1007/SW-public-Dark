@@ -11,6 +11,8 @@ ent-ActionBoneCradleTeleport = Return to the bone cradle
     .desc = Teleport to the bone cradle before it awakens. The ritual takes 10 seconds and is interrupted by movement or damage.
 bone-cradle-teleport-no-space = There is no free space near the bone cradle. Try again.
 
+bone-cradle-resurrection-notification = The bone cradle has restored your body. Press "Return to body" to return beside it. Your upgrades have been reset and all points spent on them refunded.
+
 calendar-event-bone-cradle-name = Bone cradle appearance
 calendar-event-bone-cradle-desc = A bone cradle will appear tonight. Its location will be announced when it appears.
 

@@ -48,3 +48,37 @@
   position: 200,140
   required: [ MorbiusSwiftBones ]
   dashStaminaModifier: 0.8
+
+- type: skeletonUpgrade
+  id: MorbiusRecruitFollower
+  name: morbius-upgrade-recruit-follower-name
+  description: morbius-upgrade-recruit-follower-description
+  icon:
+    sprite: Imperial/Medieval/Mobs/Bosses/SkeletonSkull/runes.rsi
+    state: skull
+  cost: 30
+  position: -200,0
+  sharedEffect: RecruitFollower
+
+- type: skeletonUpgrade
+  id: MorbiusMindConnection
+  name: morbius-upgrade-mind-connection-name
+  description: morbius-upgrade-mind-connection-description
+  icon:
+    sprite: Imperial/Medieval/Mobs/Bosses/SkeletonSkull/runes.rsi
+    state: key
+  cost: 30
+  position: 200,0
+  sharedEffect: MindConnection
+
+- type: entity
+  id: MedievalMorbiusRecruitSpawner
+  parent: MarkerBase
+  name: Morbius follower ghost role
+  components:
+  - type: GhostRole
+    name: morbius-recruit-role-name
+    description: morbius-recruit-role-description
+    rules: morbius-recruit-role-rules
+    mindRoles: [MindRoleMorbiusSkeleton]
+  - type: MorbiusRecruitRole
